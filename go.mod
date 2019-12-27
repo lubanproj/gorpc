@@ -1,4 +1,4 @@
-module github.com/diubrother/gorpc
+module github.com/luban_proj/gorpc
 
 replace github.com/diubrother/gorpc => ./gorpc
 

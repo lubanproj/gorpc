@@ -2,8 +2,8 @@ package transport
 
 import (
 	"context"
-	"github.com/diubrother/gorpc/codes"
-	"github.com/diubrother/gorpc/pool/connpool"
+	"github.com/luban_proj/gorpc/codes"
+	"github.com/luban_proj/gorpc/pool/connpool"
 )
 
 type clientTransport struct {

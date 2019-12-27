@@ -3,7 +3,6 @@ package connpool
 import (
 	"context"
 	"errors"
-	"github.com/diubrother/gorpc/codes"
 	"net"
 	"sync"
 )

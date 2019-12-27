@@ -2,7 +2,7 @@ package gorpc
 
 import (
 	"context"
-	"github.com/diubrother/gorpc/log"
+	"github.com/luban_proj/gorpc/log"
 )
 
 // Service 定义了某个具体服务的通用实现接口

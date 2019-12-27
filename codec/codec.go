@@ -1,7 +1,6 @@
 package codec
 
 import (
-	"github.com/diubrother/gorpc/codes"
 	"github.com/golang/protobuf/proto"
 	"golang.org/x/net/http2"
 	"io"
