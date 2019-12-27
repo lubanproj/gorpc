@@ -1,2 +1,2 @@
 # gorpc
-go rpc framework
+a rpc framework written by go
