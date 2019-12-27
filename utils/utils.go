@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/luban_proj/gorpc/codes"
+	"github.com/lubanproj/gorpc/codes"
 	"strings"
 )
 

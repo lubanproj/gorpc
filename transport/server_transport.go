@@ -3,8 +3,6 @@ package transport
 import (
 	"context"
 	"encoding/binary"
-	"github.com/luban_proj/gorpc/codes"
-	"github.com/luban_proj/gorpc/log"
 	"golang.org/x/net/http2"
 	"io"
 	"net"

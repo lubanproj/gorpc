@@ -1,8 +1,6 @@
 package transport
 
 import (
-	"github.com/diubrother/gorpc"
-	"github.com/diubrother/gorpc/codec"
 	"time"
 )
 

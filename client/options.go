@@ -1,8 +1,8 @@
 package client
 
 import (
-	"github.com/luban_proj/gorpc/interceptor"
-	"github.com/luban_proj/gorpc/transport"
+	"github.com/lubanproj/gorpc/interceptor"
+	"github.com/lubanproj/gorpc/transport"
 	"time"
 )
 
