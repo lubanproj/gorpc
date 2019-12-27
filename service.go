@@ -2,7 +2,7 @@ package gorpc
 
 import (
 	"context"
-	"github.com/luban_proj/gorpc/log"
+	"github.com/lubanproj/gorpc/log"
 )
 
 // Service 定义了某个具体服务的通用实现接口
@@ -22,10 +22,7 @@ type service struct{
 
 }
 
-type Handler interface {
-	Handle(context.Context, []byte) ([]byte, error)
-}
-
+type Handler func (context.Context, []byte) ([]byte, error)
 
 func (s *service) Register(handlerName string, handler Handler) {
 	s.handlers[handlerName] = handler

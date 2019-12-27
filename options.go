@@ -1,7 +1,7 @@
 package gorpc
 
 import (
-	"github.com/luban_proj/gorpc/transport"
+	"github.com/lubanproj/gorpc/transport"
 )
 
 type ServiceOptions struct {

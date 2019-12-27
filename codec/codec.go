@@ -2,6 +2,7 @@ package codec
 
 import (
 	"github.com/golang/protobuf/proto"
+	"github.com/lubanproj/gorpc/codes"
 	"golang.org/x/net/http2"
 	"io"
 	"math"

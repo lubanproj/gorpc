@@ -1,7 +1,5 @@
 module github.com/lubanproj/gorpc
 
-replace github.com/diubrother/gorpc => ./gorpc
-
 go 1.12
 
 require (
