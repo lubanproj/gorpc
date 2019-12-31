@@ -2,12 +2,13 @@ package gorpc
 
 import (
 	"context"
+	"github.com/lubanproj/gorpc/interceptor"
 	"github.com/lubanproj/gorpc/log"
 )
 
 // Service 定义了某个具体服务的通用实现接口
 type Service interface {
-	Register()
+	Register(string, Handler)
 	Serve()
 	Close()
 }
@@ -22,7 +23,7 @@ type service struct{
 
 }
 
-type Handler func (context.Context, []byte) ([]byte, error)
+type Handler func (Service, context.Context, interface{}, interceptor.Interceptor) (interface{}, error)
 
 func (s *service) Register(handlerName string, handler Handler) {
 	s.handlers[handlerName] = handler

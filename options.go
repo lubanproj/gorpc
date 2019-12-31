@@ -19,3 +19,9 @@ func WithTarget(target string) ServiceOption{
 	}
 }
 
+func WithNetwork(network string) ServiceOption {
+	return func(o *ServiceOptions) {
+		o.network = network
+	}
+}
+

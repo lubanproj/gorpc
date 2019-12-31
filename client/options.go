@@ -13,6 +13,8 @@ type Options struct {
 	// 超时时间
 	timeout time.Duration
 
+	network string
+
 	Transport transport.ClientTransport
 
 	interceptors []interceptor.Interceptor
@@ -29,5 +31,11 @@ func WithTarget(target string) Option {
 func WithTimeout(timeout time.Duration) Option {
 	return func(o *Options) {
 		o.timeout = timeout
+	}
+}
+
+func WithNetwork(network string) Option {
+	return func(o *Options) {
+		o.network = network
 	}
 }

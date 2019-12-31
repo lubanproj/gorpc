@@ -8,9 +8,20 @@ import (
 
 // gorpc Server, 一个 Server 可以拥有一个或者多个 service
 type Server struct {
+	opts *ServiceOptions
 	services map[string]Service
 }
 
+func NewServer(opt ...ServiceOption) *Server{
+
+	s := &Server {}
+
+	for _, o := range opt {
+		o(s.opts)
+	}
+
+	return s
+}
 
 func (s *Server) Register(serviceName string, service Service) {
 	if serviceName == "" {
