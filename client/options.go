@@ -1,6 +1,7 @@
 package client
 
 import (
+	"github.com/lubanproj/gorpc/codec"
 	"github.com/lubanproj/gorpc/interceptor"
 	"github.com/lubanproj/gorpc/transport"
 	"time"
@@ -8,16 +9,12 @@ import (
 
 // Options 定义了客户端调用参数
 type Options struct {
-	// 调用地址
-	target string
-	// 超时时间
-	timeout time.Duration
-
-	network string
-
-	Transport transport.ClientTransport
-
-	interceptors []interceptor.Interceptor
+	target string 	// 调用地址，格式为 ip:port 127.0.0.1:8000
+	timeout time.Duration 	// 超时时间
+	network string  // 网络类型 tcp/udp
+	codec codec.Codec
+	transport transport.ClientTransport
+	interceptors []interceptor.ClientInterceptor
 }
 
 type Option func(*Options)
@@ -37,5 +34,11 @@ func WithTimeout(timeout time.Duration) Option {
 func WithNetwork(network string) Option {
 	return func(o *Options) {
 		o.network = network
+	}
+}
+
+func WithClientCodec(codec codec.Codec) Option {
+	return func(o *Options) {
+		o.codec = codec
 	}
 }

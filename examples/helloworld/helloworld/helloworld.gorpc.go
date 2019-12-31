@@ -30,17 +30,17 @@ type GreeterService interface {
 	SayHello(ctx context.Context, req *HelloRequest) (*HelloReply, error)
 }
 
-func GreeterService_SayHello_Handler(svr gorpc.Service,ctx context.Context, req interface{}, cep interceptor.Interceptor) (interface{}, error) {
+func GreeterService_SayHello_Handler(svr gorpc.Service,ctx context.Context, req interface{}, cep interceptor.ServerInterceptor) (interface{}, error) {
 
 	if cep == nil {
 		return svr.(GreeterService).SayHello(ctx, req.(*HelloRequest))
 	}
 
-	ivk := func(ctx context.Context, reqbody interface{}) (interface{}, error) {
+	handler := func(ctx context.Context, reqbody interface{}) (interface{}, error) {
 		return svr.(GreeterService).SayHello(ctx, reqbody.(*HelloRequest))
 	}
 
-	return cep(ctx, req, ivk)
+	return cep(ctx, req, handler)
 }
 
 func RegisterService(s gorpc.Server, service gorpc.Service) {

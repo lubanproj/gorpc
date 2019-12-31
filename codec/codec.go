@@ -27,6 +27,9 @@ func init() {
 }
 
 func register(name string, codec Codec) {
+	if codecMap == nil {
+		codecMap = make(map[string]Codec)
+	}
 	codecMap[name] = codec
 }
 

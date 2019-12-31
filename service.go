@@ -23,7 +23,7 @@ type service struct{
 
 }
 
-type Handler func (Service, context.Context, interface{}, interceptor.Interceptor) (interface{}, error)
+type Handler func (Service, context.Context, interface{}, interceptor.ServerInterceptor) (interface{}, error)
 
 func (s *service) Register(handlerName string, handler Handler) {
 	s.handlers[handlerName] = handler

@@ -14,7 +14,9 @@ type Server struct {
 
 func NewServer(opt ...ServiceOption) *Server{
 
-	s := &Server {}
+	s := &Server {
+		opts : &ServiceOptions{},
+	}
 
 	for _, o := range opt {
 		o(s.opts)
