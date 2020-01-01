@@ -99,12 +99,21 @@ func (s *serverTransport) read(ctx context.Context, conn *tcpConn) ([]byte, erro
 func (s *serverTransport) handle(ctx context.Context, conn *tcpConn, req []byte) ([]byte, error) {
 
 	rsp , err := s.opts.Handler(ctx, req)
-
 	if err != nil {
 		return nil, err
 	}
 
-	return rsp, nil
+	rspbuf, err := s.opts.Serialization.Marshal(rsp)
+	if err != nil {
+		return nil, err
+	}
+
+	rspbody, err := s.opts.Codec.Encode(rspbuf)
+	if err != nil {
+		return nil, err
+	}
+
+	return rspbody, nil
 }
 
 func (s *serverTransport) write(ctx context.Context, conn *tcpConn, rsp []byte) error {

@@ -23,6 +23,7 @@ const (
 	ConnectionPoolInitErrorCode = 301
 	ConnectionErrorCode = 302
 
+	SerializationErrorCode = 401
 )
 
 type ErrorCode uint8
@@ -53,6 +54,8 @@ var (
 	ConnectionError = NewFrameworkError(ConnectionErrorCode, "connection closed")
 	ClientTimeoutError = NewFrameworkError(ClientNetworkErrorCode, "connection network error")
 	ClientContextCanceledError  = NewFrameworkError(ClientContextCanceledErrorCode, "context canceled")
+
+	SerializationError = NewFrameworkError(SerializationErrorCode, "serialization error")
 )
 
 

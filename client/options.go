@@ -13,6 +13,7 @@ type Options struct {
 	timeout time.Duration 	// 超时时间
 	network string  // 网络类型 tcp/udp
 	codec codec.Codec
+	serialization codec.Serialization // 序列化类型
 	transport transport.ClientTransport
 	interceptors []interceptor.ClientInterceptor
 }

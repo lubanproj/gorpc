@@ -1,6 +1,7 @@
 package codec
 
 import (
+	"bytes"
 	"github.com/golang/protobuf/proto"
 	"github.com/lubanproj/gorpc/codes"
 	"golang.org/x/net/http2"
@@ -10,8 +11,8 @@ import (
 )
 
 type Codec interface {
-	Encode(v interface{}) ([]byte, error)
-	Decode(io io.Reader, v interface{}) error
+	Encode([]byte) ([]byte, error)
+	Decode([]byte, interface{}) error
 }
 
 const FrameHeadLen = 9
@@ -33,24 +34,22 @@ func register(name string, codec Codec) {
 	codecMap[name] = codec
 }
 
-func (c *defaultCodec) Encode(v interface{}) ([]byte, error) {
-	body, err := marshal(v)
-	if err != nil {
-		return nil, codes.ServerDecodeError
-	}
+func (c *defaultCodec) Encode(data []byte) ([]byte, error) {
 
 	header := http2.FrameHeader{
-		Length : uint32(len(body)),
+		Length : uint32(len(data)),
 	}
-	head, err := marshal(header)
+
+	head, err := DefaultSerialization.Marshal(header)
 	if err != nil {
 		return nil, codes.ServerDecodeError
 	}
-	return append(head, body ...), nil
+	return append(head, data ...), nil
 }
 
 
-func (c *defaultCodec) Decode(reader io.Reader, v interface{}) error {
+func (c *defaultCodec) Decode(data []byte, v interface{}) error {
+	reader := bytes.NewReader(data)
 	header, err := http2.ReadFrameHeader(reader)
 	if err != nil {
 		return codes.ServerDecodeError
@@ -60,47 +59,10 @@ func (c *defaultCodec) Decode(reader io.Reader, v interface{}) error {
 	if err != nil || n != int(header.Length - FrameHeadLen) {
 		return codes.ServerDecodeError
 	}
-	return unmarshal(msg[FrameHeadLen:header.Length], v)
+	return DefaultSerialization.Unmarshal(msg[FrameHeadLen:header.Length], v)
 }
 
 type defaultCodec struct{}
-
-func marshal(v interface{}) ([]byte, error) {
-	if pm, ok := v.(proto.Marshaler); ok {
-		// 可以 marshal 自身，无需 buffer
-		return pm.Marshal()
-	}
-	buffer := bufferPool.Get().(*cachedBuffer)
-	protoMsg := v.(proto.Message)
-	lastMarshaledSize := make([]byte, 0, buffer.lastMarshaledSize)
-	buffer.SetBuf(lastMarshaledSize)
-	buffer.Reset()
-
-	if err := buffer.Marshal(protoMsg); err != nil {
-		return nil, err
-	}
-	data := buffer.Bytes()
-	buffer.lastMarshaledSize = upperLimit(len(data))
-
-	return data, nil
-}
-
-func unmarshal(data []byte, v interface{}) error {
-	protoMsg := v.(proto.Message)
-	protoMsg.Reset()
-
-	if pu, ok := protoMsg.(proto.Unmarshaler); ok {
-		// 可以 unmarshal 自身，无需 buffer
-		return pu.Unmarshal(data)
-	}
-
-	buffer := bufferPool.Get().(*cachedBuffer)
-	buffer.SetBuf(data)
-	err := buffer.Unmarshal(protoMsg)
-	buffer.SetBuf(nil)
-	bufferPool.Put(buffer)
-	return err
-}
 
 func upperLimit(val int) uint32 {
 	if val > math.MaxInt32 {

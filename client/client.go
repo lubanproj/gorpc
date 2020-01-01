@@ -37,18 +37,20 @@ func (c *defaultClient) Invoke(ctx context.Context, req interface{}, rsp interfa
 
 func (c *defaultClient) invoke(ctx context.Context, req,rsp interface{}) error {
 
-	reqBytes, ok := req.([]byte)
-	if !ok {
+	reqbuf, err := c.opts.serialization.Marshal(req)
+	if err != nil {
 		return codes.ClientMsgError
 	}
 
-	rsp, err := c.opts.transport.Send(ctx, reqBytes)
-
+	reqbody, err := c.opts.codec.Encode(reqbuf)
 	if err != nil {
-		return codes.ClientNetworkError
+		return err
 	}
 
-	return nil
+	rspbody, err := c.opts.transport.Send(ctx, reqbody)
+
+	return c.opts.codec.Decode(rspbody, rsp)
+
 }
 
 
