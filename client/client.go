@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"github.com/lubanproj/gorpc/codec"
 	"github.com/lubanproj/gorpc/codes"
 	"github.com/lubanproj/gorpc/interceptor"
 )
@@ -11,7 +12,10 @@ var DefaultClient = New()
 
 var New = func() Client {
 	return &defaultClient{
-		opts : &Options{},
+		opts : &Options{
+			codec : codec.DefaultCodec,
+			serialization: codec.DefaultSerialization,
+		},
 	}
 }
 

@@ -7,10 +7,27 @@ type Serialization interface {
 	Unmarshal([]byte, interface{}) error
 }
 
-var DefaultSerialization = New()
+var serializationMap = make(map[string]Serialization)
 
-var New =  func() Serialization {
+var DefaultSerialization = NewSerialization()
+
+var NewSerialization = func () Serialization {
 	return &defaultSerialization{}
+}
+
+func init() {
+	registerSerialization("proto", DefaultSerialization)
+}
+
+func registerSerialization(name string, serialization Serialization) {
+	if serializationMap == nil {
+		serializationMap = make(map[string]Serialization)
+	}
+	serializationMap[name] = serialization
+}
+
+func GetSerialization(name string) Serialization {
+	return serializationMap[name]
 }
 
 type defaultSerialization struct {}

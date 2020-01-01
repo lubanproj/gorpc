@@ -21,13 +21,19 @@ func GetCodec(name string) Codec {
 	return codecMap[name]
 }
 
-var codecMap map[string]Codec
+var codecMap = make(map[string]Codec)
 
-func init() {
-	register("proto",&defaultCodec{})
+var DefaultCodec = NewCodec()
+
+var NewCodec = 	func () Codec {
+	return &defaultCodec{}
 }
 
-func register(name string, codec Codec) {
+func init() {
+	registerCodec("proto", DefaultCodec)
+}
+
+func registerCodec(name string, codec Codec) {
 	if codecMap == nil {
 		codecMap = make(map[string]Codec)
 	}
