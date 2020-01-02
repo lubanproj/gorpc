@@ -53,7 +53,7 @@ func (c *defaultClient) invoke(ctx context.Context, req,rsp interface{}) error {
 
 	rspbody, err := c.opts.transport.Send(ctx, reqbody)
 
-	return c.opts.codec.Decode(rspbody, rsp)
+	return c.opts.serialization.Unmarshal(rspbody, rsp)
 
 }
 

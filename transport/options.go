@@ -22,6 +22,8 @@ type ServerTransportOption func(*ServerTransportOptions)
 type ClientTransportOptions struct {
 	Target string
 	NetworkType string
+	Codec codec.Codec
+	Serialization codec.Serialization
 }
 
 type ClientTransportOption func(*ClientTransportOptions)

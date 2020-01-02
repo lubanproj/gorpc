@@ -2,12 +2,25 @@ package transport
 
 import (
 	"context"
+	"github.com/lubanproj/gorpc/codec"
 	"github.com/lubanproj/gorpc/codes"
 	"github.com/lubanproj/gorpc/pool/connpool"
 )
 
 type clientTransport struct {
 	opts *ClientTransportOptions
+}
+
+var DefaultClientTransport = New()
+
+var New = func() ClientTransport {
+	return &clientTransport{
+		opts : &ClientTransportOptions{
+			NetworkType: "tcp",
+			Codec : codec.DefaultCodec,
+			Serialization: codec.DefaultSerialization,
+		},
+	}
 }
 
 func (c *clientTransport) Send(ctx context.Context, req []byte, opts ...ClientTransportOption) ([]byte, error) {
@@ -36,7 +49,7 @@ func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, e
 	for sendNum < len(req) {
 		num , err = conn.Write(req)
 		if err != nil {
-			return nil, codes.NewFrameworkError(codes.ClientNetworkErrorCode,"conn send error")
+			return nil, codes.NewFrameworkError(codes.ClientNetworkErrorCode,err.Error())
 		}
 		sendNum += num
 
@@ -45,9 +58,15 @@ func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, e
 		}
 	}
 
-	// 解包
+	// 解析帧
+	rspbuf, err := codec.ReadFrame(conn)
+	if err != nil {
+		return nil, codes.NewFrameworkError(codes.ClientNetworkErrorCode, err.Error())
+	}
 
-	return nil, nil
+	rspbody, err := c.opts.Codec.Decode(rspbuf)
+
+	return rspbody, err
 }
 
 func (c *clientTransport) SendUdpReq(ctx context.Context, req []byte) ([]byte, error) {
