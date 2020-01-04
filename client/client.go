@@ -5,7 +5,14 @@ import (
 	"github.com/lubanproj/gorpc/codec"
 	"github.com/lubanproj/gorpc/codes"
 	"github.com/lubanproj/gorpc/interceptor"
+	"github.com/lubanproj/gorpc/pool/connpool"
+	"github.com/lubanproj/gorpc/transport"
 )
+
+// Client 定义了客户端通用接口
+type Client interface {
+	Invoke(ctx context.Context, req interface{}, rsp interface{}, opts ...Option) error
+}
 
 // 全局使用一个 client
 var DefaultClient = New()
@@ -13,17 +20,10 @@ var DefaultClient = New()
 var New = func() Client {
 	return &defaultClient{
 		opts : &Options{
-			codec : codec.DefaultCodec,
-			serialization: codec.DefaultSerialization,
+			protocol : "proto",
 		},
 	}
 }
-
-// Client 定义了客户端通用接口
-type Client interface {
-	Invoke(ctx context.Context, req interface{}, rsp interface{}, opts ...Option) error
-}
-
 
 type defaultClient struct {
 	opts *Options
@@ -41,21 +41,40 @@ func (c *defaultClient) Invoke(ctx context.Context, req interface{}, rsp interfa
 
 func (c *defaultClient) invoke(ctx context.Context, req,rsp interface{}) error {
 
-	reqbuf, err := c.opts.serialization.Marshal(req)
+	serialization := codec.GetSerialization(c.opts.protocol)
+	reqbuf, err := serialization.Marshal(req)
 	if err != nil {
 		return codes.ClientMsgError
 	}
 
-	reqbody, err := c.opts.codec.Encode(reqbuf)
+	clientCodec := codec.GetCodec(c.opts.protocol)
+	reqbody, err := clientCodec.Encode(reqbuf)
 	if err != nil {
 		return err
 	}
 
-	rspbody, err := c.opts.transport.Send(ctx, reqbody)
+	clientTransport := c.NewClientTransport()
+	clientTransportOpts := []transport.ClientTransportOption {
+		transport.WithClientTarget(c.opts.target),
+		transport.WithClientNetwork(c.opts.network),
+		transport.WithClientCodec(clientCodec),
+		transport.WithClientSerialization(serialization),
+		transport.WithClientPool(connpool.GetPool("default")),
+	}
+	rspbody, err := clientTransport.Send(ctx, reqbody, clientTransportOpts ...)
+	if err != nil {
+		return err
+	}
 
-	return c.opts.serialization.Unmarshal(rspbody, rsp)
+	return serialization.Unmarshal(rspbody, rsp)
 
 }
+
+func (c *defaultClient) NewClientTransport() transport.ClientTransport {
+	return transport.GetClientTransport(c.opts.protocol)
+}
+
+
 
 
 

@@ -11,24 +11,40 @@ type clientTransport struct {
 	opts *ClientTransportOptions
 }
 
+var clientTransportMap = make(map[string]ClientTransport)
+
+func init() {
+	clientTransportMap["default"] = DefaultClientTransport
+}
+
+func GetClientTransport(transport string) ClientTransport {
+
+	if v, ok := clientTransportMap[transport]; ok {
+		return v
+	}
+
+	return DefaultClientTransport
+}
+
 var DefaultClientTransport = New()
 
 var New = func() ClientTransport {
 	return &clientTransport{
-		opts : &ClientTransportOptions{
-			NetworkType: "tcp",
-			Codec : codec.DefaultCodec,
-			Serialization: codec.DefaultSerialization,
-		},
+		opts : &ClientTransportOptions{},
 	}
 }
 
 func (c *clientTransport) Send(ctx context.Context, req []byte, opts ...ClientTransportOption) ([]byte, error) {
-	if c.opts.NetworkType == "tcp" {
+
+	for _, o := range opts {
+		o(c.opts)
+	}
+
+	if c.opts.Network == "tcp" {
 		return c.SendTcpReq(ctx, req)
 	}
 
-	if c.opts.NetworkType == "udp" {
+	if c.opts.Network == "udp" {
 		return c.SendUdpReq(ctx, req)
 	}
 
@@ -38,7 +54,9 @@ func (c *clientTransport) Send(ctx context.Context, req []byte, opts ...ClientTr
 func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, error) {
 
 	// 从连接池里面获取一个连接
-	conn, err := connpool.DefaultPool.Get(ctx, "tcp", c.opts.Target)
+	defaultPool := connpool.GetPool("default")
+
+	conn, err := defaultPool.Get(ctx, "tcp", c.opts.Target)
 	if err != nil {
 		return nil, codes.ConnectionError
 	}

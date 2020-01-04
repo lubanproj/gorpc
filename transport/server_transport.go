@@ -17,7 +17,35 @@ type serverTransport struct {
 	opts *ServerTransportOptions
 }
 
+var serverTransportMap = make(map[string]ServerTransport)
+
+func init() {
+	serverTransportMap["default"] = DefaultServerTransport
+}
+
+func GetServerTransport(transport string) ServerTransport {
+
+	if v, ok := serverTransportMap[transport]; ok {
+		return v
+	}
+
+	return DefaultServerTransport
+}
+
+var DefaultServerTransport = NewServerTransport()
+
+var NewServerTransport = func() ServerTransport {
+	return &serverTransport{
+		opts : &ServerTransportOptions{},
+	}
+}
+
 func (s *serverTransport) ListenAndServe(ctx context.Context, opts ...ServerTransportOption) error {
+
+	for _, o := range opts {
+		o(s.opts)
+	}
+
 	switch s.opts.Network {
 		case "tcp","tcp4","tcp6":
 			return s.ListenAndServeTcp(ctx, opts ...)
@@ -29,9 +57,6 @@ func (s *serverTransport) ListenAndServe(ctx context.Context, opts ...ServerTran
 }
 
 func (s *serverTransport) ListenAndServeTcp(ctx context.Context, opts ...ServerTransportOption) error {
-	for _, opt := range opts {
-		opt(s.opts)
-	}
 
 	lis, err := net.Listen(s.opts.Network, s.opts.Address)
 	if err != nil {

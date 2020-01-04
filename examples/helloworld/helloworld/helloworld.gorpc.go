@@ -30,7 +30,18 @@ type GreeterService interface {
 	SayHello(ctx context.Context, req *HelloRequest) (*HelloReply, error)
 }
 
-func GreeterService_SayHello_Handler(svr gorpc.Service,ctx context.Context, req interface{}, cep interceptor.ServerInterceptor) (interface{}, error) {
+var _Greeter_serviceDesc = &gorpc.ServiceDesc{
+	ServiceName: "helloworld.Greeter",
+	HandlerType: (*GreeterService)(nil),
+	Methods : []*gorpc.MethodDesc{
+		{
+			MethodName: "SayHello",
+			Handler:    GreeterService_SayHello_Handler,
+		},
+	},
+}
+
+func GreeterService_SayHello_Handler(svr interface{},ctx context.Context, req interface{}, cep interceptor.ServerInterceptor) (interface{}, error) {
 
 	if cep == nil {
 		return svr.(GreeterService).SayHello(ctx, req.(*HelloRequest))
@@ -43,9 +54,8 @@ func GreeterService_SayHello_Handler(svr gorpc.Service,ctx context.Context, req 
 	return cep(ctx, req, handler)
 }
 
-func RegisterService(s gorpc.Server, service gorpc.Service) {
-	service.Register("/helloworld.Greeter/SayHello", GreeterService_SayHello_Handler)
-	s.Register("helloworld.Greeter", service)
+func RegisterService(s *gorpc.Server, svr interface{}) {
+	s.Register(_Greeter_serviceDesc, svr)
 }
 
 /* ************************************ Client Definition ************************************ */
@@ -62,7 +72,8 @@ func NewGreeterClientProxy(opts ...client.Option) GreeterClientProxy {
 	return &GreeterClientProxyImpl{client: client.DefaultClient, opts: opts}
 }
 
-func (c *GreeterClientProxyImpl) SayHello(ctx context.Context, req *HelloRequest, opts ...client.Option) (*HelloReply, error) {
+func (c *GreeterClientProxyImpl) SayHello(ctx context.Context, req *HelloRequest,
+	opts ...client.Option) (*HelloReply, error) {
 
 	callopts := make([]client.Option, 0, len(c.opts)+len(opts))
 	callopts = append(callopts, c.opts...)

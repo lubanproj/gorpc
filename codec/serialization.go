@@ -27,7 +27,10 @@ func registerSerialization(name string, serialization Serialization) {
 }
 
 func GetSerialization(name string) Serialization {
-	return serializationMap[name]
+	if v, ok := serializationMap[name]; ok {
+		return v
+	}
+	return DefaultSerialization
 }
 
 type defaultSerialization struct {}

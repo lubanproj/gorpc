@@ -1,7 +1,6 @@
 package client
 
 import (
-	"github.com/lubanproj/gorpc/codec"
 	"github.com/lubanproj/gorpc/interceptor"
 	"github.com/lubanproj/gorpc/transport"
 	"time"
@@ -12,9 +11,9 @@ type Options struct {
 	target string 	// 调用地址，格式为 ip:port 127.0.0.1:8000
 	timeout time.Duration 	// 超时时间
 	network string  // 网络类型 tcp/udp
-	codec codec.Codec
-	serialization codec.Serialization // 序列化类型
-	transport transport.ClientTransport
+	protocol   string  // 协议类型 proto/json
+	serializedType string // 序列化类型
+	transportOpts transport.ClientTransportOptions
 	interceptors []interceptor.ClientInterceptor
 }
 
@@ -38,8 +37,14 @@ func WithNetwork(network string) Option {
 	}
 }
 
-func WithClientCodec(codec codec.Codec) Option {
+func WithProtocol(protocol string) Option {
 	return func(o *Options) {
-		o.codec = codec
+		o.protocol = protocol
+	}
+}
+
+func WithSerializedType(serializedType string) Option {
+	return func(o *Options) {
+		o.serializedType = serializedType
 	}
 }

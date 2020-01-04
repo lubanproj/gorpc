@@ -17,6 +17,23 @@ type pool struct {
 	conns sync.Map
 }
 
+var poolMap = make(map[string]Pool)
+
+func init() {
+	registorPool("default", DefaultPool)
+}
+
+func registorPool(poolName string, pool Pool) {
+	poolMap[poolName] = pool
+}
+
+func GetPool(poolName string) Pool {
+	if v, ok := poolMap[poolName]; ok {
+		return v
+	}
+	return DefaultPool
+}
+
 // TODO 暴露 ConnPool 属性
 var DefaultPool = NewConnPool()
 
@@ -41,7 +58,7 @@ func NewConnPool(opt ...Option) *pool {
 
 func (p *pool) Get(ctx context.Context, network string, address string) (net.Conn, error) {
 
-	if value ,ok := p.conns.Load(address); ok {
+	if value, ok := p.conns.Load(address); ok {
 		if cp, ok := value.(*channelPool); ok {
 			conn, err := cp.Get(ctx)
 			return cp.wrapConn(conn), err

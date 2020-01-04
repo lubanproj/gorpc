@@ -4,11 +4,11 @@ import "context"
 
 type ServerInterceptor func(ctx context.Context, req interface{}, handler Handler) (interface{}, error)
 
+type Handler func(ctx context.Context, req interface{}) (interface{}, error)
+
 type ClientInterceptor func(ctx context.Context, req, rsp interface{}, ivk Invoker) error
 
 type Invoker func(ctx context.Context, req, rsp interface{}) error
-
-type Handler func(ctx context.Context, req interface{}) (interface{}, error)
 
 func Intercept(ctx context.Context, req, rsp interface{}, ceps []ClientInterceptor, ivk Invoker ) error {
 
