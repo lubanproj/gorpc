@@ -63,10 +63,14 @@ func (s *serverTransport) ListenAndServeTcp(ctx context.Context, opts ...ServerT
 		return codes.NewFrameworkError(codes.ServerNetworkErrorCode, err.Error())
 	}
 	for {
-		if conn , err := lis.Accept(); err != nil {
+		conn , err := lis.Accept()
+
+		if err != nil {
 			return codes.NewFrameworkError(codes.ServerNetworkErrorCode, err.Error())
-			go s.handleConn(ctx , conn)
 		}
+
+		go s.handleConn(ctx , conn)
+
 
 	}
 	return nil
