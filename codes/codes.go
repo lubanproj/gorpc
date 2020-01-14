@@ -11,6 +11,7 @@ const (
 	ServerEncodeErrorCode = 104
 	ServerDecodeErrorCode = 105
 	ServerNetworkErrorCode = 106
+	ServerNoResponseErrorCode = 107
 
 	NetworkNotSupportedErrorCode = 201
 	ClientMsgErrorCode = 202

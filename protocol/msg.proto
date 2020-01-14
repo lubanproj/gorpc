@@ -3,16 +3,16 @@ package protocol;
 option go_package = "github.com/lubanproj/gorpc/protocol";
 
 message Request {
-    bytes  content_type = 1;        // 数据类型 application/goprc + proto/json
-    uint32 compressing_mode = 2;    // 压缩类型 0-不压缩 1-压缩
-    uint32  length = 3;             // 请求体长度
-    bytes  target = 4;              // 请求目标
-    bytes  service_name = 5;        // 请求服务名
-    bytes  func   = 6;              // 请求方法名
+    bytes  content_type = 2;        // 数据类型 application/goprc + proto/json
+    uint32 compressing_mode = 3;    // 压缩类型 0-不压缩 1-压缩
+    uint32 length = 4;             // 请求体长度
+    bytes  target = 5;              // 请求目标
+    bytes  service_name = 6;        // 请求服务名
+    bytes  method   = 7;              // 请求方法名
 }
 
 message Response {
-    bytes content_type = 1;         // 数据类型
+    bytes  content_type = 1;         // 数据类型
     uint32 compressing_mode = 2;    // 压缩类型 0-不压缩 1-压缩
     bytes  length = 3;              // 响应体长度
 }

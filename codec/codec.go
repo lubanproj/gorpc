@@ -61,7 +61,7 @@ func (c *defaultCodec) Encode(data []byte) ([]byte, error) {
 		Magic : Magic,
 		Version : Version,
 		Type : 0x1,
-		Length: uint32(totalLen),
+		Length: uint32(len(reqHeadBuf) + len(data)),
 		HeaderLength: uint32(len(reqHeadBuf)),
 	}
 
@@ -103,10 +103,9 @@ func (c *defaultCodec) Encode(data []byte) ([]byte, error) {
 
 func (c *defaultCodec) Decode(data []byte) ([]byte,error) {
 
-	totalLen := binary.BigEndian.Uint32(data[4:8])
 	headerLen := binary.BigEndian.Uint32(data[8:12])
 
-	return data[totalLen + headerLen :], nil
+	return data[FrameHeadLen + headerLen :], nil
 }
 
 type defaultCodec struct{}

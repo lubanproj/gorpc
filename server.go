@@ -1,7 +1,7 @@
 package gorpc
 
 import (
-	"log"
+	"github.com/lubanproj/gorpc/log"
 	"os"
 	"os/signal"
 	"reflect"
@@ -35,7 +35,7 @@ func (s *Server) Register(sd *ServiceDesc, svr interface{}) {
 	ht := reflect.TypeOf(sd.HandlerType).Elem()
 	st := reflect.TypeOf(svr)
 	if !st.Implements(ht) {
-		log.Fatalf("handlerType %v not match service : %v ", ht, st)
+		log.Fatal("handlerType %v not match service : %v ", ht, st)
 	}
 
 	ser := &service {

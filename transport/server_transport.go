@@ -2,13 +2,10 @@ package transport
 
 import (
 	"context"
-	"encoding/binary"
+	"github.com/lubanproj/gorpc/codec"
 	"github.com/lubanproj/gorpc/codes"
 	"github.com/lubanproj/gorpc/log"
-	"golang.org/x/net/http2"
-	"io"
 	"net"
-	"time"
 )
 
 const GORPCHeaderLength = 5
@@ -59,6 +56,7 @@ func (s *serverTransport) ListenAndServe(ctx context.Context, opts ...ServerTran
 func (s *serverTransport) ListenAndServeTcp(ctx context.Context, opts ...ServerTransportOption) error {
 
 	lis, err := net.Listen(s.opts.Network, s.opts.Address)
+
 	if err != nil {
 		return codes.NewFrameworkError(codes.ServerNetworkErrorCode, err.Error())
 	}
@@ -69,8 +67,12 @@ func (s *serverTransport) ListenAndServeTcp(ctx context.Context, opts ...ServerT
 			return codes.NewFrameworkError(codes.ServerNetworkErrorCode, err.Error())
 		}
 
-		go s.handleConn(ctx , conn)
-
+		go func() {
+			log.Error("sssssssssssssssss")
+			if err := s.handleConn(ctx, conn); err != nil {
+				log.Error("gorpc handle conn error, %v", err)
+			}
+		}()
 
 	}
 	return nil
@@ -83,70 +85,46 @@ func (s *serverTransport) ListenAndServeUdp(ctx context.Context, opts ...ServerT
 
 func (s *serverTransport) handleConn(ctx context.Context, rawConn net.Conn) error {
 
-	rawConn.SetDeadline(time.Now().Add(s.opts.Timeout))
-	tcpConn := newTcpConn(rawConn)
-	req , err := s.read(ctx,tcpConn)
+	// rawConn.SetDeadline(time.Now().Add(s.opts.Timeout))
+	// tcpConn := newTcpConn(rawConn)
+	req , err := s.read(ctx,rawConn)
 
 	if err != nil {
 		return err
 	}
 
-	rsp , err := s.handle(ctx,tcpConn, req)
+	rsp , err := s.handle(ctx, req)
 	if err != nil {
 		return err
 	}
 
-	err = s.write(ctx,tcpConn,rsp)
+	err = s.write(ctx, rawConn,rsp)
 	return err
 }
 
-func (s *serverTransport) read(ctx context.Context, conn *tcpConn) ([]byte, error) {
-	// 先读出 http包头
-	http2.ReadFrameHeader(conn.conn)
+func (s *serverTransport) read(ctx context.Context, conn net.Conn) ([]byte, error) {
 
-	// 再读出协议包头
-	header := make([]byte, GORPCHeaderLength)
-	io.ReadFull(conn.conn, header)
-
-	compressingType := header[0]
-
-	if compressingType == 1 {
-		// TODO 压缩模式，需要解压缩
-	}
-
-	length := binary.BigEndian.Uint32(header[1:])
-	msg := make([]byte, length)
-	_, err := io.ReadFull(conn.conn, msg)
-
+	frame, err := codec.ReadFrame(conn)
 	if err != nil {
-		log.Error("read data from conn error, %v", err)
-		return nil, codes.ServerDecodeError
+		return nil, err
 	}
-	return msg, nil
+
+	return frame, nil
 }
 
-func (s *serverTransport) handle(ctx context.Context, conn *tcpConn, req []byte) ([]byte, error) {
 
-	rsp , err := s.opts.Handler(ctx, req)
+func (s *serverTransport) handle(ctx context.Context, req []byte) ([]byte, error) {
+
+	rsp , err := s.opts.Handler.Handle(ctx, req)
 	if err != nil {
-		return nil, err
+		return nil, codes.NewFrameworkError(codes.ServerNoResponseErrorCode, err.Error())
 	}
 
-	rspbuf, err := s.opts.Serialization.Marshal(rsp)
-	if err != nil {
-		return nil, err
-	}
-
-	rspbody, err := s.opts.Codec.Encode(rspbuf)
-	if err != nil {
-		return nil, err
-	}
-
-	return rspbody, nil
+	return rsp, nil
 }
 
-func (s *serverTransport) write(ctx context.Context, conn *tcpConn, rsp []byte) error {
-	_, err := conn.conn.Write(rsp)
+func (s *serverTransport) write(ctx context.Context, conn net.Conn, rsp []byte) error {
+	_, err := conn.Write(rsp)
 
 	return err
 }

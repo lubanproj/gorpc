@@ -57,11 +57,14 @@ func (c *defaultClient) invoke(ctx context.Context, req,rsp interface{}) error {
 	clientTransportOpts := []transport.ClientTransportOption {
 		transport.WithClientTarget(c.opts.target),
 		transport.WithClientNetwork(c.opts.network),
-		transport.WithClientCodec(clientCodec),
-		transport.WithClientSerialization(serialization),
 		transport.WithClientPool(connpool.GetPool("default")),
 	}
-	rspbody, err := clientTransport.Send(ctx, reqbody, clientTransportOpts ...)
+	rspbuf, err := clientTransport.Send(ctx, reqbody, clientTransportOpts ...)
+	if err != nil {
+		return err
+	}
+
+	rspbody, err := clientCodec.Decode(rspbuf)
 	if err != nil {
 		return err
 	}

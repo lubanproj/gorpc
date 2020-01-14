@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/lubanproj/gorpc"
 	"github.com/lubanproj/gorpc/examples/helloworld/helloworld"
+	"time"
 )
 
 type greeterService struct{}
@@ -20,9 +21,10 @@ func (g *greeterService) SayHello(ctx context.Context, req *helloworld.HelloRequ
 
 func main() {
 	opts := []gorpc.ServerOption{
-		gorpc.WithTarget("127.0.0.1:8000"),
+		gorpc.WithAddress("127.0.0.1:8000"),
 		gorpc.WithNetwork("tcp"),
 		gorpc.WithProtocol("proto"),
+		gorpc.WithTimeout(time.Minute * 60),
 	}
 	s := gorpc.NewServer(opts ...)
 	helloworld.RegisterService(s, &greeterService{})

@@ -92,17 +92,14 @@ func (p *pool) NewChannelPool(ctx context.Context, network string, address strin
 		Dial : func(ctx context.Context) (net.Conn, error) {
 			return net.Dial(network, address)
 		},
+		conns : make(chan net.Conn, p.opts.maxCap),
 	}
-	for i := 0; i < c.initialCap; i++ {
-		conn , err := c.Dial(ctx);
-		if err != nil {
-			c.Close()
-			return nil, codes.ConnectionPoolInitError
-		}
-
-		c.conns <- conn
+	conn , err := c.Dial(ctx);
+	if err != nil {
+		c.Close()
+		return nil, codes.ConnectionPoolInitError
 	}
-
+	c.conns <- conn
 	return c, nil
 }
 

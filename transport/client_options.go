@@ -1,15 +1,12 @@
 package transport
 
 import (
-	"github.com/lubanproj/gorpc/codec"
 	"github.com/lubanproj/gorpc/pool/connpool"
 )
 
 type ClientTransportOptions struct {
 	Target string
 	Network string
-	Codec codec.Codec
-	Serialization codec.Serialization
 	Pool connpool.Pool
 }
 
@@ -24,18 +21,6 @@ func WithClientTarget(target string) ClientTransportOption {
 func WithClientNetwork(network string) ClientTransportOption {
 	return func(o *ClientTransportOptions) {
 		o.Network = network
-	}
-}
-
-func WithClientCodec(codec codec.Codec) ClientTransportOption {
-	return func(o *ClientTransportOptions) {
-		o.Codec = codec
-	}
-}
-
-func WithClientSerialization(serialization codec.Serialization) ClientTransportOption {
-	return func(o *ClientTransportOptions) {
-		o.Serialization = serialization
 	}
 }
 

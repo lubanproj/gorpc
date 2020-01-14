@@ -82,9 +82,7 @@ func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, e
 		return nil, codes.NewFrameworkError(codes.ClientNetworkErrorCode, err.Error())
 	}
 
-	rspbody, err := c.opts.Codec.Decode(rspbuf)
-
-	return rspbody, err
+	return rspbuf, err
 }
 
 func (c *clientTransport) SendUdpReq(ctx context.Context, req []byte) ([]byte, error) {
