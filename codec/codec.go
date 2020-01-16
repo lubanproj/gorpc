@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/binary"
 	"github.com/golang/protobuf/proto"
-	"github.com/lubanproj/gorpc/protocol"
 	"math"
 	"sync"
 )
@@ -46,14 +45,7 @@ func registerCodec(name string, codec Codec) {
 
 func (c *defaultCodec) Encode(data []byte) ([]byte, error) {
 
-	request := &protocol.Request{}
-	request.Payload = data
-	reqBuf , err := proto.Marshal(request)
-	if err != nil {
-		return nil, err
-	}
-
-	totalLen := FrameHeadLen + len(reqBuf)
+	totalLen := FrameHeadLen + len(data)
 	buffer := bytes.NewBuffer(make([]byte, 0, totalLen))
 
 	frame := FrameHeader{
@@ -62,7 +54,7 @@ func (c *defaultCodec) Encode(data []byte) ([]byte, error) {
 		MsgType : 0x0,
 		ReqType : 0x0,
 		CompressType: 0x0,
-		Length: uint32(len(reqBuf)),
+		Length: uint32(len(data)),
 	}
 
 	if err := binary.Write(buffer, binary.BigEndian, frame.Magic); err != nil {
@@ -97,7 +89,7 @@ func (c *defaultCodec) Encode(data []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	if err := binary.Write(buffer, binary.BigEndian, reqBuf); err != nil {
+	if err := binary.Write(buffer, binary.BigEndian, data); err != nil {
 		return nil, err
 	}
 
@@ -105,11 +97,8 @@ func (c *defaultCodec) Encode(data []byte) ([]byte, error) {
 }
 
 
-func (c *defaultCodec) Decode(data []byte) ([]byte,error) {
-
-	headerLen := binary.BigEndian.Uint32(data[7:11])
-
-	return data[FrameHeadLen + headerLen :], nil
+func (c *defaultCodec) Decode(frame []byte) ([]byte,error) {
+	return frame[FrameHeadLen:], nil
 }
 
 type defaultCodec struct{}

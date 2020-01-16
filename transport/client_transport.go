@@ -77,12 +77,12 @@ func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, e
 	}
 
 	// 解析帧
-	rspbuf, err := codec.ReadFrame(conn)
+	frame, err := codec.ReadFrame(conn)
 	if err != nil {
 		return nil, codes.NewFrameworkError(codes.ClientNetworkErrorCode, err.Error())
 	}
 
-	return rspbuf, err
+	return frame, err
 }
 
 func (c *clientTransport) SendUdpReq(ctx context.Context, req []byte) ([]byte, error) {

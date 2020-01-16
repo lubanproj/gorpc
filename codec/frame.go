@@ -26,12 +26,12 @@ func ReadFrame(conn net.Conn) ([]byte, error) {
 	}
 
 	// 校验魔数
-	if magic := binary.BigEndian.Uint16(frameHeader[0:2]); magic != Magic {
+	if magic := uint8(frameHeader[0]); magic != Magic {
 		return nil, codes.ClientMsgError
 	}
 
 
-	length := binary.BigEndian.Uint32(frameHeader[8:12])
+	length := binary.BigEndian.Uint32(frameHeader[7:11])
 
 	data := make([]byte, length)
 	if num, err := io.ReadFull(conn, data); uint32(num) != length || err != nil {

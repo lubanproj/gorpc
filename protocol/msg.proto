@@ -3,14 +3,14 @@ package protocol;
 option go_package = "github.com/lubanproj/gorpc/protocol";
 
 message Request {
-    bytes  service_path = 2;          // 请求服务路径
+    string  service_path = 2;          // 请求服务路径
     map<string, bytes> metadata = 3;  // 透传的数据
     bytes  payload = 4;               // 请求体
 }
 
 message Response {
     uint32 ret_code = 1;               // 返回码 0-正常 非0-错误
-    bytes ret_msg = 2;                 // 返回消息，OK-正常，错误会提示详情
+    string ret_msg = 2;                 // 返回消息，OK-正常，错误会提示详情
     map<string, bytes> metadata = 3;   // 透传的数据
     bytes payload = 4;                 // 返回体
 }

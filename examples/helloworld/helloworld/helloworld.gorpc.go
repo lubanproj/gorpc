@@ -7,7 +7,6 @@ import (
 	"github.com/lubanproj/gorpc"
 	"github.com/lubanproj/gorpc/client"
 	"github.com/lubanproj/gorpc/interceptor"
-	"github.com/lubanproj/gorpc/stream"
 	math "math"
 )
 

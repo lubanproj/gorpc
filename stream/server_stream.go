@@ -5,6 +5,8 @@ import "context"
 type ServerStream struct {
 	ctx context.Context
 	Method string // 方法名
+	RetCode uint32 // 返回码 0—成功 非0-失败
+	RetMsg  string  // 返回信息 OK-成功，失败返回具体信息
 }
 
 const ServerStreamKey = StreamContextKey("GORPC_SERVER_STREAM")
@@ -18,8 +20,9 @@ func GetServerStream(ctx context.Context) *ServerStream {
 	return v.(*ServerStream)
 }
 
-func (ss *ServerStream) WithMethod(method string) {
+func (ss *ServerStream) WithMethod(method string) *ServerStream {
 	ss.Method = method
+	return ss
 }
 
 func (ss *ServerStream) Clone() *ServerStream {

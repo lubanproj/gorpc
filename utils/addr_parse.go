@@ -1,6 +1,8 @@
 package utils
 
 import (
+	"errors"
+	"fmt"
 	"github.com/lubanproj/gorpc/codes"
 	"strings"
 )
@@ -19,4 +21,14 @@ func ParseAddress(target string) (string, string, error){
 		return "","",codes.ConfigError
 	}
 	return ipAndPort[0], ipAndPort[1],nil
+}
+
+// 解析 service path
+func ParseServicePath(path string) (string, string, error) {
+	index := strings.LastIndex(path, "/")
+	fmt.Println(index)
+	if index == 0 || index == -1 {
+		return "", "" , errors.New("invalid path")
+	}
+	return path[1:index], path[index+1:], nil
 }

@@ -5,6 +5,9 @@ import (
 	"github.com/lubanproj/gorpc/codec"
 	"github.com/lubanproj/gorpc/codes"
 	"github.com/lubanproj/gorpc/log"
+	"github.com/lubanproj/gorpc/protocol"
+	"github.com/lubanproj/gorpc/stream"
+	"github.com/lubanproj/gorpc/utils"
 	"net"
 )
 
@@ -68,8 +71,10 @@ func (s *serverTransport) ListenAndServeTcp(ctx context.Context, opts ...ServerT
 		}
 
 		go func() {
-			log.Error("sssssssssssssssss")
-			if err := s.handleConn(ctx, conn); err != nil {
+			// 构造 stream
+			newCtx, _ := stream.NewServerStream(ctx)
+
+			if err := s.handleConn(newCtx, conn); err != nil {
 				log.Error("gorpc handle conn error, %v", err)
 			}
 		}()
@@ -87,13 +92,26 @@ func (s *serverTransport) handleConn(ctx context.Context, rawConn net.Conn) erro
 
 	// rawConn.SetDeadline(time.Now().Add(s.opts.Timeout))
 	// tcpConn := newTcpConn(rawConn)
-	req , err := s.read(ctx,rawConn)
-
+	frame , err := s.read(ctx,rawConn)
 	if err != nil {
 		return err
 	}
 
-	rsp , err := s.handle(ctx, req)
+	// 解析协议头
+	ser := codec.GetSerialization(s.opts.Serialization)
+	request := &protocol.Request{}
+
+	if err = ser.Unmarshal(frame[codec.FrameHeadLen:], request); err != nil {
+		return err
+	}
+
+	// 构造 serverStream
+	_, err = s.buildServerStream(ctx, request)
+	if err != nil {
+		return err
+	}
+
+	rsp , err := s.handle(ctx, frame)
 	if err != nil {
 		return err
 	}
@@ -105,6 +123,7 @@ func (s *serverTransport) handleConn(ctx context.Context, rawConn net.Conn) erro
 func (s *serverTransport) read(ctx context.Context, conn net.Conn) ([]byte, error) {
 
 	frame, err := codec.ReadFrame(conn)
+
 	if err != nil {
 		return nil, err
 	}
@@ -113,9 +132,9 @@ func (s *serverTransport) read(ctx context.Context, conn net.Conn) ([]byte, erro
 }
 
 
-func (s *serverTransport) handle(ctx context.Context, req []byte) ([]byte, error) {
+func (s *serverTransport) handle(ctx context.Context, frame []byte) ([]byte, error) {
 
-	rsp , err := s.opts.Handler.Handle(ctx, req)
+	rsp , err := s.opts.Handler.Handle(ctx, frame)
 	if err != nil {
 		return nil, codes.NewFrameworkError(codes.ServerNoResponseErrorCode, err.Error())
 	}
@@ -141,5 +160,18 @@ func newTcpConn(rawConn net.Conn) *tcpConn {
 	}
 }
 
+
+func (s *serverTransport) buildServerStream(ctx context.Context, request *protocol.Request) (*stream.ServerStream, error) {
+	serverStream := stream.GetServerStream(ctx)
+
+	_, method , err := utils.ParseServicePath(string(request.ServicePath))
+	if err != nil {
+		return nil, codes.New(codes.ClientMsgErrorCode, "method is invalid")
+	}
+
+	serverStream.WithMethod(method)
+
+	return serverStream, nil
+}
 
 

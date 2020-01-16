@@ -3,9 +3,12 @@ package gorpc
 import (
 	"context"
 	"errors"
+	"github.com/golang/protobuf/proto"
 	"github.com/lubanproj/gorpc/codec"
 	"github.com/lubanproj/gorpc/interceptor"
 	"github.com/lubanproj/gorpc/log"
+	"github.com/lubanproj/gorpc/protocol"
+	"github.com/lubanproj/gorpc/stream"
 	"github.com/lubanproj/gorpc/transport"
 )
 
@@ -56,10 +59,15 @@ func (s *service) Serve(opts *ServerOptions) {
 		transport.WithServerNetwork(s.opts.network),
 		transport.WithHandler(s),
 		transport.WithServerTimeout(s.opts.timeout),
+		transport.WithSerialization(s.opts.serialization),
 	}
 
 	serverTransport := transport.GetServerTransport("default")
 
+	newCtx, cancel := context.WithTimeout(context.Background(), s.opts.timeout)
+	defer cancel()
+
+	s.ctx = newCtx
 	if err := serverTransport.ListenAndServe(s.ctx, transportOpts ...); err != nil {
 		log.Error("%s serve error, %v", s.serviceName, err)
 		return
@@ -73,13 +81,14 @@ func (s *service) Close() {
 }
 
 
-func (s *service) Handle (ctx context.Context, reqbuf []byte) ([]byte, error) {
+func (s *service) Handle (ctx context.Context, frame []byte) ([]byte, error) {
 
-	if len(reqbuf) == 0 {
+	if len(frame) == 0 {
 		return nil, errors.New("req is nil")
 	}
 
-	handler := s.handlers[s.opts.method]
+	serverStream := stream.GetServerStream(ctx)
+	handler := s.handlers[serverStream.Method]
 	if handler == nil {
 		return nil, errors.New("handlers is nil")
 	}
@@ -89,7 +98,7 @@ func (s *service) Handle (ctx context.Context, reqbuf []byte) ([]byte, error) {
 	serverSerialization := codec.GetSerialization(s.opts.protocol)
 
 	dec := func(req interface {}) error {
-		reqbody, err := serverCodec.Decode(reqbuf)
+		reqbody, err := serverCodec.Decode(frame)
 		if err != nil {
 			return err
 		}
@@ -100,13 +109,18 @@ func (s *service) Handle (ctx context.Context, reqbuf []byte) ([]byte, error) {
 	}
 
 	rsp, err := handler(s.svr, ctx, dec, s.ceps)
-
-	rspbuf, err := serverSerialization.Marshal(rsp)
+	payload, err := serverSerialization.Marshal(rsp)
 	if err != nil {
 		return nil, err
 	}
 
-	rspbody, err := serverCodec.Encode(rspbuf)
+	response := addRspHeader(ctx, payload)
+	rspBuf, err := proto.Marshal(response)
+	if err != nil {
+		return nil, err
+	}
+
+	rspbody, err := serverCodec.Encode(rspBuf)
 	if err != nil {
 		return nil, err
 	}
@@ -114,3 +128,14 @@ func (s *service) Handle (ctx context.Context, reqbuf []byte) ([]byte, error) {
 	return rspbody, nil
 }
 
+
+func addRspHeader(ctx context.Context, payload []byte) *protocol.Response {
+	serverStream := stream.GetServerStream(ctx)
+	response := &protocol.Response{
+		Payload: payload,
+		RetCode: serverStream.RetCode,
+		RetMsg: serverStream.RetMsg,
+	}
+
+	return response
+}
