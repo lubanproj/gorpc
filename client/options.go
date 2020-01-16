@@ -8,6 +8,8 @@ import (
 
 // Options 定义了客户端调用参数
 type Options struct {
+	serviceName string // 服务名
+	method string // 方法名
 	target string 	// 调用地址，格式为 ip:port 127.0.0.1:8000
 	timeout time.Duration 	// 超时时间
 	network string  // 网络类型 tcp/udp
@@ -18,6 +20,18 @@ type Options struct {
 }
 
 type Option func(*Options)
+
+func WithServiceName(serviceName string) Option {
+	return func(o *Options) {
+		o.serviceName = serviceName
+	}
+}
+
+func WithMethod(method string) Option {
+	return func(o *Options) {
+		o.method = method
+	}
+}
 
 func WithTarget(target string) Option {
 	return func(o *Options) {
@@ -48,3 +62,4 @@ func WithSerializedType(serializedType string) Option {
 		o.serializedType = serializedType
 	}
 }
+

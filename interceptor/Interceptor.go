@@ -10,7 +10,7 @@ type ClientInterceptor func(ctx context.Context, req, rsp interface{}, ivk Invok
 
 type Invoker func(ctx context.Context, req, rsp interface{}) error
 
-func Intercept(ctx context.Context, req, rsp interface{}, ceps []ClientInterceptor, ivk Invoker ) error {
+func Intercept(ctx context.Context, req, rsp interface{}, ceps []ClientInterceptor, ivk Invoker) error {
 
 	if len(ceps) == 0 {
 		return ivk(ctx, req, rsp)

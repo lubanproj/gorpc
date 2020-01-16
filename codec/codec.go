@@ -14,8 +14,8 @@ type Codec interface {
 	Decode([]byte) ([]byte, error)
 }
 
-const FrameHeadLen = 16
-const Magic = 0x1111
+const FrameHeadLen = 15
+const Magic = 0x11
 const Version = 0
 
 func GetCodec(name string) Codec {
@@ -46,23 +46,23 @@ func registerCodec(name string, codec Codec) {
 
 func (c *defaultCodec) Encode(data []byte) ([]byte, error) {
 
-	requestHeader := &protocol.Request{}
-	requestHeader.Length = uint32(len(data))
-
-	reqHeadBuf, err := proto.Marshal(requestHeader)
+	request := &protocol.Request{}
+	request.Payload = data
+	reqBuf , err := proto.Marshal(request)
 	if err != nil {
 		return nil, err
 	}
 
-	totalLen := FrameHeadLen + len(reqHeadBuf) + len(data)
+	totalLen := FrameHeadLen + len(reqBuf)
 	buffer := bytes.NewBuffer(make([]byte, 0, totalLen))
 
 	frame := FrameHeader{
 		Magic : Magic,
 		Version : Version,
-		Type : 0x1,
-		Length: uint32(len(reqHeadBuf) + len(data)),
-		HeaderLength: uint32(len(reqHeadBuf)),
+		MsgType : 0x0,
+		ReqType : 0x0,
+		CompressType: 0x0,
+		Length: uint32(len(reqBuf)),
 	}
 
 	if err := binary.Write(buffer, binary.BigEndian, frame.Magic); err != nil {
@@ -73,7 +73,19 @@ func (c *defaultCodec) Encode(data []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	if err := binary.Write(buffer, binary.BigEndian, frame.Type); err != nil {
+	if err := binary.Write(buffer, binary.BigEndian, frame.MsgType); err != nil {
+		return nil, err
+	}
+
+	if err := binary.Write(buffer, binary.BigEndian, frame.ReqType); err != nil {
+		return nil, err
+	}
+
+	if err := binary.Write(buffer, binary.BigEndian, frame.CompressType); err != nil {
+		return nil, err
+	}
+
+	if err := binary.Write(buffer, binary.BigEndian, frame.StreamID); err != nil {
 		return nil, err
 	}
 
@@ -81,19 +93,11 @@ func (c *defaultCodec) Encode(data []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	if err := binary.Write(buffer, binary.BigEndian, frame.HeaderLength); err != nil {
-		return nil, err
-	}
-
 	if err := binary.Write(buffer, binary.BigEndian, frame.Reserved); err != nil {
 		return nil, err
 	}
 
-	if err := binary.Write(buffer, binary.BigEndian, reqHeadBuf); err != nil {
-		return nil, err
-	}
-
-	if err := binary.Write(buffer, binary.BigEndian, data); err != nil {
+	if err := binary.Write(buffer, binary.BigEndian, reqBuf); err != nil {
 		return nil, err
 	}
 
@@ -103,7 +107,7 @@ func (c *defaultCodec) Encode(data []byte) ([]byte, error) {
 
 func (c *defaultCodec) Decode(data []byte) ([]byte,error) {
 
-	headerLen := binary.BigEndian.Uint32(data[8:12])
+	headerLen := binary.BigEndian.Uint32(data[7:11])
 
 	return data[FrameHeadLen + headerLen :], nil
 }

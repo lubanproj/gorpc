@@ -6,12 +6,14 @@ import (
 	"github.com/lubanproj/gorpc/codes"
 	"github.com/lubanproj/gorpc/interceptor"
 	"github.com/lubanproj/gorpc/pool/connpool"
+	"github.com/lubanproj/gorpc/stream"
 	"github.com/lubanproj/gorpc/transport"
+	"strings"
 )
 
 // Client 定义了客户端通用接口
 type Client interface {
-	Invoke(ctx context.Context, req interface{}, rsp interface{}, opts ...Option) error
+	Invoke(ctx context.Context, req , rsp interface{}, path string, opts ...Option) error
 }
 
 // 全局使用一个 client
@@ -29,17 +31,31 @@ type defaultClient struct {
 	opts *Options
 }
 
-func (c *defaultClient) Invoke(ctx context.Context, req interface{}, rsp interface{}, opts ...Option) error {
+func (c *defaultClient) Invoke(ctx context.Context, req , rsp interface{}, path string, opts ...Option) error {
 
 	for _, opt := range opts {
 		opt(c.opts)
 	}
 
+	// 设置服务名、方法名
+	newCtx, clientStream := stream.NewClientStream(ctx)
+
+	index := strings.LastIndex(path, "/")
+	if index == 0 {
+		return codes.NewFrameworkError(codes.ClientDialErrorCode, "invalid path")
+	}
+	c.opts.serviceName = path[1:index]
+	c.opts.method = path[index+1:]
+
+	// 这里先保留看看，需不需要去掉
+	clientStream.WithServiceName(path[1:index])
+	clientStream.WithMethod(path[index+1:])
+
 	// 先执行拦截器
-	return interceptor.Intercept(ctx, req, rsp, c.opts.interceptors, c.invoke)
+	return interceptor.Intercept(newCtx, req, rsp, c.opts.interceptors, c.invoke)
 }
 
-func (c *defaultClient) invoke(ctx context.Context, req,rsp interface{}) error {
+func (c *defaultClient) invoke(ctx context.Context, req, rsp interface{}) error {
 
 	serialization := codec.GetSerialization(c.opts.protocol)
 	reqbuf, err := serialization.Marshal(req)
@@ -76,6 +92,8 @@ func (c *defaultClient) invoke(ctx context.Context, req,rsp interface{}) error {
 func (c *defaultClient) NewClientTransport() transport.ClientTransport {
 	return transport.GetClientTransport(c.opts.protocol)
 }
+
+
 
 
 

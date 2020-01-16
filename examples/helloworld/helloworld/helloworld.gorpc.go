@@ -7,6 +7,7 @@ import (
 	"github.com/lubanproj/gorpc"
 	"github.com/lubanproj/gorpc/client"
 	"github.com/lubanproj/gorpc/interceptor"
+	"github.com/lubanproj/gorpc/stream"
 	math "math"
 )
 
@@ -86,7 +87,7 @@ func (c *GreeterClientProxyImpl) SayHello(ctx context.Context, req *HelloRequest
 	callopts = append(callopts, opts...)
 
 	rsp := &HelloReply{}
-	err := c.client.Invoke(ctx, req, rsp, callopts...)
+	err := c.client.Invoke(ctx, req, rsp, "/helloworld.Greeter/SayHello", callopts...)
 	if err != nil {
 		return nil, err
 	}
