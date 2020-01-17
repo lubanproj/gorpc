@@ -113,6 +113,10 @@ func (s *service) Handle (ctx context.Context, frame []byte) ([]byte, error) {
 	}
 
 	rsp, err := handler(s.svr, ctx, dec, s.ceps)
+	if err != nil {
+		return nil, err
+	}
+
 	payload, err := serverSerialization.Marshal(rsp)
 	if err != nil {
 		return nil, err

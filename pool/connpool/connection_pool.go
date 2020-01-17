@@ -14,7 +14,7 @@ type Pool interface {
 
 type pool struct {
 	opts *Options
-	conns sync.Map
+	conns *sync.Map
 }
 
 var poolMap = make(map[string]Pool)
@@ -43,7 +43,7 @@ func NewConnPool(opt ...Option) *pool {
 		initialCap: 5,
 		maxCap: 1000,
 	}
-	m := sync.Map{}
+	m := &sync.Map{}
 
 	p := &pool {
 		conns : m,

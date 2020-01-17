@@ -63,6 +63,7 @@ func (s *serverTransport) ListenAndServeTcp(ctx context.Context, opts ...ServerT
 	if err != nil {
 		return codes.NewFrameworkError(codes.ServerNetworkErrorCode, err.Error())
 	}
+
 	for {
 		conn , err := lis.Accept()
 
@@ -80,7 +81,7 @@ func (s *serverTransport) ListenAndServeTcp(ctx context.Context, opts ...ServerT
 		}()
 
 	}
-	return nil
+
 }
 
 func (s *serverTransport) ListenAndServeUdp(ctx context.Context, opts ...ServerTransportOption) error {

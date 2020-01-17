@@ -57,7 +57,7 @@ func (s *Server) Serve() {
 		go service.Serve(s.opts)
 	}
 
-	ch := make(chan os.Signal)
+	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGSEGV)
 	<-ch
 
