@@ -11,7 +11,7 @@ import (
 type greeterService struct{}
 
 func (g *greeterService) SayHello(ctx context.Context, req *helloworld.HelloRequest) (*helloworld.HelloReply, error) {
-	fmt.Println("recv req : %v", req)
+	fmt.Println("recv Msg : ", req.Msg)
 	rsp := &helloworld.HelloReply{
 		Msg: "hello, " + req.Msg ,
 	}

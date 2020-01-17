@@ -98,11 +98,15 @@ func (s *service) Handle (ctx context.Context, frame []byte) ([]byte, error) {
 	serverSerialization := codec.GetSerialization(s.opts.protocol)
 
 	dec := func(req interface {}) error {
-		reqbody, err := serverCodec.Decode(frame)
+		reqbuf, err := serverCodec.Decode(frame)
 		if err != nil {
 			return err
 		}
-		if err = serverSerialization.Unmarshal(reqbody, req); err != nil {
+		request := &protocol.Request{}
+		if err = proto.Unmarshal(reqbuf, request); err != nil {
+			return err
+		}
+		if err = serverSerialization.Unmarshal(request.Payload, req); err != nil {
 			return err
 		}
 		return nil

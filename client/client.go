@@ -92,12 +92,18 @@ func (c *defaultClient) invoke(ctx context.Context, req, rsp interface{}) error 
 		return err
 	}
 
-	rspbody, err := clientCodec.Decode(frame)
+	rspbuf, err := clientCodec.Decode(frame)
 	if err != nil {
 		return err
 	}
 
-	return serialization.Unmarshal(rspbody, rsp)
+	// 解析包头
+	response := &protocol.Response{}
+	if err = proto.Unmarshal(rspbuf, response); err != nil {
+		return err
+	}
+
+	return serialization.Unmarshal(response.Payload, rsp)
 
 }
 
