@@ -1,4 +1,19 @@
 language: go
 
 go:
-- master
+  - 1.11.x
+  - 1.12.x
+  - 1.13.x
+  - master
+
+env:
+  - GO111MODULE=on
+  global:
+    - GITHUB_REF:github.com/lubanproj/gorpc.git
+
+before_install:
+  - go get -v golang.org/x/lint/golint
+
+script:
+  - go test -v ./...
+  - git push --force --quiet "https://${GITHUB_TOKEN}@${GITHUB_REF}" master:master

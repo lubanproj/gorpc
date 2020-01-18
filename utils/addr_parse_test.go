@@ -7,5 +7,5 @@ import (
 
 func TestParseServicePath(t *testing.T) {
 	_, _, err := ParseServicePath("Greeter.Hello")
-	assert.Nil(t,err)
+	assert.NotNil(t,err)
 }
