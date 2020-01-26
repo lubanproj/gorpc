@@ -10,6 +10,8 @@ type ServerOptions struct {
 	protocol string  // 协议类型，如 proto/json 等
 	timeout time.Duration       // 超时时间
 	serialization string 	// 序列化方式，默认是 proto
+
+	consulAddr string       // consul server 地址，当服务发现方式为 consul 时需要填写
 }
 
 type ServerOption func(*ServerOptions)
@@ -44,4 +46,9 @@ func WithSerialization(serialization string) ServerOption {
 	}
 }
 
+func WithConsulAddr(consulAddr string) ServerOption {
+	return func(o *ServerOptions) {
+		o.consulAddr = consulAddr
+	}
+}
 

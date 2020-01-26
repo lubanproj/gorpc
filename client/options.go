@@ -17,6 +17,7 @@ type Options struct {
 	serializedType string // 序列化类型
 	transportOpts transport.ClientTransportOptions
 	interceptors []interceptor.ClientInterceptor
+	consulAddr string   // consul server 地址
 }
 
 type Option func(*Options)
@@ -60,6 +61,12 @@ func WithProtocol(protocol string) Option {
 func WithSerializedType(serializedType string) Option {
 	return func(o *Options) {
 		o.serializedType = serializedType
+	}
+}
+
+func WithServerAddr(consulAddr string) Option {
+	return func(o *Options) {
+		o.consulAddr = consulAddr
 	}
 }
 

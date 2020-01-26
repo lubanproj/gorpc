@@ -21,10 +21,10 @@ const (
 )
 
 func init() {
-	Register(Random, &randomBalancer{})
+	RegisterBalancer(Random, &randomBalancer{})
 }
 
-func Register(name string, balancer Balancer) {
+func RegisterBalancer(name string, balancer Balancer) {
 	if balancerMap == nil {
 		balancerMap = make(map[string]Balancer)
 	}

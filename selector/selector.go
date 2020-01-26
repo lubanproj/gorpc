@@ -1,14 +1,33 @@
 package selector
 
 type Selector interface {
-	Select() string
+	Select(string) (string, error)
 }
 
 type defaultSelector struct {
 
 }
 
-func (d *defaultSelector) Select(serviceName string) string {
+type Options struct {
 
-	return serviceName
+}
+
+type Option func(*Options)
+
+func init() {
+	RegisterSelector("default", &defaultSelector{})
+}
+
+var selectorMap = make(map[string]Selector)
+
+func RegisterSelector(name string, selector Selector) {
+	if selectorMap == nil {
+		selectorMap = make(map[string]Selector)
+	}
+	selectorMap[name] = selector
+}
+
+func (d *defaultSelector) Select(serviceName string) (string, error) {
+
+	return serviceName, nil
 }

@@ -2,6 +2,7 @@ package gorpc
 
 import (
 	"github.com/lubanproj/gorpc/log"
+	"github.com/lubanproj/gorpc/selector/consul"
 	"os"
 	"os/signal"
 	"reflect"
@@ -52,6 +53,14 @@ func (s *Server) Register(sd *ServiceDesc, svr interface{}) {
 }
 
 func (s *Server) Serve() {
+
+	if s.opts.consulAddr != "" {
+		consulSvr , err := consul.New(s.opts.consulAddr)
+		if err != nil {
+			log.Fatal("new consul server error, %v", err)
+		}
+		consulSvr.Start()
+	}
 
 	for _, service := range s.services {
 		go service.Serve(s.opts)
