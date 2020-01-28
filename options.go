@@ -12,7 +12,7 @@ type ServerOptions struct {
 	serialization string 	// 序列化方式，默认是 proto
 
 	selectorSvrAddr string       // consul server 地址，当服务发现方式为 consul 时需要填写
-
+	pluginNames []string         // 插件名字
 }
 
 type ServerOption func(*ServerOptions)
@@ -47,9 +47,14 @@ func WithSerialization(serialization string) ServerOption {
 	}
 }
 
-func WithConsulAddr(consulAddr string) ServerOption {
+func WithSelectorSvrAddr(addr string) ServerOption {
 	return func(o *ServerOptions) {
-		o.consulAddr = consulAddr
+		o.selectorSvrAddr = addr
 	}
 }
 
+func WithPlugin(pluginName ... string) ServerOption {
+	return func(o *ServerOptions) {
+		o.pluginNames = append(o.pluginNames, pluginName ...)
+	}
+}

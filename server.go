@@ -22,7 +22,11 @@ func NewServer(opt ...ServerOption) *Server{
 		opts : &ServerOptions{},
 		services: make(map[string]Service),
 	}
-	for _, plugin := range s.plugins {
+
+	for pluginName, plugin := range plugin.PluginMap {
+		if !containPlugin(pluginName, s.opts.pluginNames) {
+			continue
+		}
 		s.plugins = append(s.plugins, plugin)
 	}
 
@@ -31,6 +35,15 @@ func NewServer(opt ...ServerOption) *Server{
 	}
 
 	return s
+}
+
+func containPlugin(pluginName string, plugins []string) bool {
+	for _, plugin := range plugins {
+		if pluginName == plugin {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *Server) Register(sd *ServiceDesc, svr interface{}) {
@@ -60,6 +73,7 @@ func (s *Server) Serve() {
 
 	// 加载所有插件
 	for _, p := range s.plugins {
+
 		if rp, ok := p.(plugin.ResolverPlugin); ok {
 
 			var services []string

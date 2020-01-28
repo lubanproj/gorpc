@@ -93,8 +93,6 @@ func (c *Consul) Init(opts ...plugin.Option) error {
 			len(c.opts.Services), c.opts.SvrAddr, c.opts.SelectorSvrAddr)
 	}
 
-
-
 	if err := c.InitConfig(); err != nil {
 		return err
 	}
