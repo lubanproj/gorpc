@@ -88,24 +88,31 @@ func (c *Consul) Init(opts ...plugin.Option) error {
 		o(c.opts)
 	}
 
-	if c.opts.ServiceName == "" || c.opts.SvrAddr == "" || c.opts.SelectorSvrAddr == "" {
-		return fmt.Errorf("consul init error, serviceName : %s, svrAddr : %s, selectorSvrAddr : %s",
-			c.opts.ServiceName, c.opts.SvrAddr, c.opts.SelectorSvrAddr)
+	if len(c.opts.Services) == 0 || c.opts.SvrAddr == "" || c.opts.SelectorSvrAddr == "" {
+		return fmt.Errorf("consul init error, len(services) : %s, svrAddr : %s, selectorSvrAddr : %s",
+			len(c.opts.Services), c.opts.SvrAddr, c.opts.SelectorSvrAddr)
 	}
+
+
 
 	if err := c.InitConfig(); err != nil {
 		return err
 	}
 
-	nodeName := fmt.Sprintf("%s/%s", c.opts.ServiceName, c.opts.SvrAddr)
+	for _, serviceName := range c.opts.Services {
+		nodeName := fmt.Sprintf("%s/%s", serviceName, c.opts.SvrAddr)
 
-	kvPair := &api.KVPair{
-		Key : nodeName,
-		Value : []byte(c.opts.SvrAddr),
-		Flags: api.LockFlagValue,
+		kvPair := &api.KVPair{
+			Key : nodeName,
+			Value : []byte(c.opts.SvrAddr),
+			Flags: api.LockFlagValue,
+		}
+
+		if _, err := c.client.KV().Put(kvPair, c.writeOptions); err != nil {
+			return err
+		}
 	}
 
-	_, err := c.client.KV().Put(kvPair, c.writeOptions)
 
-	return err
+	return nil
 }

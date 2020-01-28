@@ -72,7 +72,9 @@ func (s *Server) Serve() {
 				plugin.WithSvrAddr(s.opts.address),
 				plugin.WithServices(services),
 			}
-			rp.Init(pluginOptions ...)
+			if err := rp.Init(pluginOptions ...); err != nil {
+				log.Fatal("plugin init error, %v", err)
+			}
 		}
 	}
 

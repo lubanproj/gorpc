@@ -22,7 +22,7 @@ func Register(name string, plugin Plugin) {
 type Options struct {
 	SelectorSvrAddr string  // 服务发现集群地址 ，例如 consul server 地址
 	SvrAddr string     // server 地址
-	services []string   // 服务名数组
+	Services []string   // 服务名数组
 }
 
 type Option func(*Options)
@@ -41,7 +41,7 @@ func WithSvrAddr(addr string) Option {
 
 func WithServices(services []string) Option {
 	return func(o *Options) {
-		o.services = services
+		o.Services = services
 	}
 }
 
