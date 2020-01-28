@@ -3,48 +3,43 @@ package consul
 import (
 	"fmt"
 	"github.com/hashicorp/consul/api"
+	"github.com/lubanproj/gorpc/plugin"
 	"github.com/lubanproj/gorpc/selector"
 	"net/http"
 )
 
 type Consul struct {
-	opts *selector.Options
+	opts *plugin.Options
 	client *api.Client
 	config *api.Config
 	balancerName string  // 负载均衡模式，包括随机、轮询、加权轮询、一致性hash 等
-}
-
-type KVPair struct {
-
+	writeOptions *api.WriteOptions
+	queryOptions *api.QueryOptions
 }
 
 const Name = "consul"
 
-func New(consulAddr string, opts ...selector.Option) (*Consul, error) {
+func init() {
+	plugin.Register(Name, &Consul{opts : &plugin.Options{}})
+}
 
-	c := &Consul{
-		opts : &selector.Options{},
-	}
-
-	for _, o := range opts {
-		o(c.opts)
-	}
+func (c *Consul) InitConfig() error {
 
 	config := api.DefaultConfig()
 	c.config = config
 
 	config.HttpClient = http.DefaultClient
-	config.Address = consulAddr
+	config.Address = c.opts.SelectorSvrAddr
 	config.Scheme = "http"
 
 	client, err := api.NewClient(config)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	c.client = client
 
-	return nil, nil
+	return nil
 }
 
 
@@ -68,6 +63,7 @@ func (c *Consul) Resolve(serviceName string) ([]*selector.Node, error) {
 	return nodes, nil
 }
 
+// 实现 selector 服务发现
 func (c *Consul) Select(serviceName string) (string, error) {
 
 	nodes, err := c.Resolve(serviceName)
@@ -86,10 +82,30 @@ func (c *Consul) Select(serviceName string) (string, error) {
 	return "", nil
 }
 
-func (c *Consul) Start() {
-	c.Register()
-}
+func (c *Consul) Init(opts ...plugin.Option) error {
 
-func (c *Consul) Register() {
+	for _, o := range opts {
+		o(c.opts)
+	}
 
+	if c.opts.ServiceName == "" || c.opts.SvrAddr == "" || c.opts.SelectorSvrAddr == "" {
+		return fmt.Errorf("consul init error, serviceName : %s, svrAddr : %s, selectorSvrAddr : %s",
+			c.opts.ServiceName, c.opts.SvrAddr, c.opts.SelectorSvrAddr)
+	}
+
+	if err := c.InitConfig(); err != nil {
+		return err
+	}
+
+	nodeName := fmt.Sprintf("%s/%s", c.opts.ServiceName, c.opts.SvrAddr)
+
+	kvPair := &api.KVPair{
+		Key : nodeName,
+		Value : []byte(c.opts.SvrAddr),
+		Flags: api.LockFlagValue,
+	}
+
+	_, err := c.client.KV().Put(kvPair, c.writeOptions)
+
+	return err
 }

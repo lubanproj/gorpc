@@ -2,7 +2,7 @@ package gorpc
 
 import (
 	"github.com/lubanproj/gorpc/log"
-	"github.com/lubanproj/gorpc/selector/consul"
+	"github.com/lubanproj/gorpc/plugin"
 	"os"
 	"os/signal"
 	"reflect"
@@ -13,6 +13,7 @@ import (
 type Server struct {
 	opts *ServerOptions
 	services map[string]Service
+	plugins []plugin.Plugin
 }
 
 func NewServer(opt ...ServerOption) *Server{
@@ -20,6 +21,9 @@ func NewServer(opt ...ServerOption) *Server{
 	s := &Server {
 		opts : &ServerOptions{},
 		services: make(map[string]Service),
+	}
+	for _, plugin := range s.plugins {
+		s.plugins = append(s.plugins, plugin)
 	}
 
 	for _, o := range opt {
@@ -54,12 +58,22 @@ func (s *Server) Register(sd *ServiceDesc, svr interface{}) {
 
 func (s *Server) Serve() {
 
-	if s.opts.consulAddr != "" {
-		consulSvr , err := consul.New(s.opts.consulAddr)
-		if err != nil {
-			log.Fatal("new consul server error, %v", err)
+	// 加载所有插件
+	for _, p := range s.plugins {
+		if rp, ok := p.(plugin.ResolverPlugin); ok {
+
+			var services []string
+			for serviceName, _ := range s.services {
+				services = append(services, serviceName)
+			}
+
+			pluginOptions := []plugin.Option {
+				plugin.WithSelectorSvrAddr(s.opts.selectorSvrAddr),
+				plugin.WithSvrAddr(s.opts.address),
+				plugin.WithServices(services),
+			}
+			rp.Init(pluginOptions ...)
 		}
-		consulSvr.Start()
 	}
 
 	for _, service := range s.services {

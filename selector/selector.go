@@ -31,3 +31,4 @@ func (d *defaultSelector) Select(serviceName string) (string, error) {
 
 	return serviceName, nil
 }
+

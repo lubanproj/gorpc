@@ -51,6 +51,7 @@ func (s *service) Register(handlerName string, handler Handler) {
 }
 
 func (s *service) Serve(opts *ServerOptions) {
+
 	// TODO 思考下除了 Server 和 Service 的 Options 如何处理
 	s.opts = opts
 

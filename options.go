@@ -11,7 +11,8 @@ type ServerOptions struct {
 	timeout time.Duration       // 超时时间
 	serialization string 	// 序列化方式，默认是 proto
 
-	consulAddr string       // consul server 地址，当服务发现方式为 consul 时需要填写
+	selectorSvrAddr string       // consul server 地址，当服务发现方式为 consul 时需要填写
+
 }
 
 type ServerOption func(*ServerOptions)
