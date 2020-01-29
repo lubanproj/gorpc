@@ -46,6 +46,20 @@ func containPlugin(pluginName string, plugins []string) bool {
 	return false
 }
 
+func (s *Server) RegisterService(serviceName string, svr interface{}) {
+	sd := &ServiceDesc{
+		ServiceName: serviceName,
+		Svr : svr,
+	}
+	svrType := reflect.TypeOf(svr)
+	sd.Methods = getServiceMethods(svrType)
+}
+
+func getServiceMethods(rt reflect.Type) []*MethodDesc {
+	
+	return nil
+}
+
 func (s *Server) Register(sd *ServiceDesc, svr interface{}) {
 	if sd == nil || svr == nil {
 		return
