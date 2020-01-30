@@ -1,6 +1,9 @@
 package gorpc
 
 import (
+	"context"
+	"fmt"
+	"github.com/lubanproj/gorpc/interceptor"
 	"github.com/lubanproj/gorpc/log"
 	"github.com/lubanproj/gorpc/plugin"
 	"os"
@@ -46,19 +49,114 @@ func containPlugin(pluginName string, plugins []string) bool {
 	return false
 }
 
-func (s *Server) RegisterService(serviceName string, svr interface{}) {
+func (s *Server) RegisterService(serviceName string, svr interface{}) error {
 	sd := &ServiceDesc{
 		ServiceName: serviceName,
 		Svr : svr,
 	}
 	svrType := reflect.TypeOf(svr)
-	sd.Methods = getServiceMethods(svrType)
-}
 
-func getServiceMethods(rt reflect.Type) []*MethodDesc {
-	
+	methods, err := getServiceMethods(svrType)
+	if err != nil {
+		return err
+	}
+
+	sd.Methods = methods
 	return nil
 }
+
+func getServiceMethods(serviceType reflect.Type) ([]*MethodDesc, error) {
+
+	var methods []*MethodDesc
+
+	serviceValue := reflect.New(serviceType)
+
+	for i := 0; i < serviceType.NumMethod(); i++ {
+		method := serviceType.Method(i)
+
+		if err := checkMethod(method.Type); err != nil {
+			return nil, err
+		}
+
+		methodHandler := func (svr interface{},ctx context.Context, dec func(interface{}) error, cep interceptor.ServerInterceptor) (interface{}, error) {
+
+			reqType := method.Type.In(2)
+			reqValue := reflect.New(reqType)
+			// 判断类型
+			req := reflect.New(reqType.Elem()).Interface()
+
+			if err := dec(req); err != nil {
+				return nil, err
+			}
+
+			if cep == nil {
+				values := method.Func.Call([]reflect.Value{serviceValue,reflect.ValueOf(ctx),reqValue})
+				// 判断错误
+				return values[0].Interface(), nil
+			}
+
+			handler := func(ctx context.Context, reqbody interface{}) (interface{}, error) {
+
+				// 执行反射
+				values := method.Func.Call([]reflect.Value{serviceValue,reflect.ValueOf(ctx),reqValue})
+
+				// 判断错误
+				return values[0].Interface(), nil
+			}
+
+			return cep(ctx, req, handler)
+		}
+
+		methods = append(methods, &MethodDesc{
+			MethodName: method.Name,
+			Handler: methodHandler,
+		})
+	}
+
+	return methods , nil
+}
+
+func checkMethod(method reflect.Type) error {
+
+	// 参数个数 >= 2 , 这里需要加上自身
+	if method.NumIn() < 3 {
+		return fmt.Errorf("method %s invalid, the number of params < 2", method.Name())
+	}
+
+	// 返回值个数为 2
+	if method.NumOut() != 2 {
+		return fmt.Errorf("method %s invalid, the number of return values != 2", method.Name())
+	}
+
+	// 第一个参数必须是 context
+	ctxType := method.In(1)
+	var contextType = reflect.TypeOf((*context.Context)(nil)).Elem()
+	if !ctxType.Implements(contextType) {
+		return fmt.Errorf("method %s invalid, first param is not context", method.Name())
+	}
+
+	// 第二个参数必须是指针
+	argType := method.In(1)
+	if argType.Kind() != reflect.Ptr {
+		return fmt.Errorf("method %s invalid, req type is not a pointer", method.Name())
+	}
+
+	// 第一个返回值必须是指针
+	replyType := method.Out(0)
+	if replyType.Kind() != reflect.Ptr {
+		return fmt.Errorf("method %s invalid, reply type is not a pointer", method.Name())
+	}
+
+	// 第二个返回值必须是 error
+	errType := method.Out(1)
+	var errorType = reflect.TypeOf((*error)(nil)).Elem()
+	if !errType.Implements(errorType) {
+		return fmt.Errorf("method %s invalid, returns %s , not error", method.Name(), errType.Name())
+	}
+
+	return nil
+}
+
 
 func (s *Server) Register(sd *ServiceDesc, svr interface{}) {
 	if sd == nil || svr == nil {

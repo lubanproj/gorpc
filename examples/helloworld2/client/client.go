@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"github.com/lubanproj/gorpc/client"
-	"github.com/lubanproj/gorpc/examples/helloworld/helloworld"
+	pb "github.com/lubanproj/gorpc/examples/helloworld2/helloworld"
 	"time"
 )
 
@@ -14,11 +14,10 @@ func main() {
 		client.WithNetwork("tcp"),
 		client.WithTimeout(2000 * time.Millisecond),
 	}
-	c := client.DefaultClient
-	req := helloworld.HelloRequest{
-		Msg: "hello",
+	proxy := pb.NewGreeterClientProxy(opts ...)
+	req := &pb.HelloRequest{
+		Msg : "hello",
 	}
-	rsp := helloworld.HelloReply{}
-	err := c.Call(context.Background(), "/helloworld.Greeter/SayHello", req, rsp, opts ...)
+	rsp, err := proxy.SayHello(context.Background(), req, opts ...)
 	fmt.Println(rsp, err)
 }

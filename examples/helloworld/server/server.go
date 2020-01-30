@@ -1,22 +1,11 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"github.com/lubanproj/gorpc"
 	"github.com/lubanproj/gorpc/examples/helloworld/helloworld"
+	"github.com/lubanproj/gorpc/log"
 	"time"
 )
-
-type greeterService struct{}
-
-func (g *greeterService) SayHello(ctx context.Context, req *helloworld.HelloRequest) (*helloworld.HelloReply, error) {
-	fmt.Println("recv Msg : ", req.Msg)
-	rsp := &helloworld.HelloReply{
-		Msg: "hello, " + req.Msg ,
-	}
-	return rsp, nil
-}
 
 
 func main() {
@@ -27,6 +16,8 @@ func main() {
 		gorpc.WithTimeout(time.Minute * 60),
 	}
 	s := gorpc.NewServer(opts ...)
-	helloworld.RegisterService(s, &greeterService{})
+	if err := s.RegisterService("/helloworld.Greeter", new(helloworld.Service)); err != nil {
+		log.Fatal("register service error, %v", err)
+	}
 	s.Serve()
 }

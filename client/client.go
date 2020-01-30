@@ -22,7 +22,7 @@ type Client interface {
 // 全局使用一个 client
 var DefaultClient = New()
 
-var New = func() Client {
+var New = func() *defaultClient {
 	return &defaultClient{
 		opts : &Options{
 			protocol : "proto",
@@ -33,6 +33,20 @@ var New = func() Client {
 type defaultClient struct {
 	opts *Options
 }
+
+// 通过反射调用
+func (c *defaultClient) Call(ctx context.Context, servicePath string, req interface{}, rsp interface{},
+	opts ...Option) error {
+
+	// servicePath example : /helloworld.Greeter/SayHello
+	err := c.Invoke(ctx, req, rsp, servicePath, opts ...)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 
 func (c *defaultClient) Invoke(ctx context.Context, req , rsp interface{}, path string, opts ...Option) error {
 
