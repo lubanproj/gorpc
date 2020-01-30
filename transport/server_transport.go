@@ -2,6 +2,7 @@ package transport
 
 import (
 	"context"
+	"github.com/golang/protobuf/proto"
 	"github.com/lubanproj/gorpc/codec"
 	"github.com/lubanproj/gorpc/codes"
 	"github.com/lubanproj/gorpc/log"
@@ -99,10 +100,8 @@ func (s *serverTransport) handleConn(ctx context.Context, rawConn net.Conn) erro
 	}
 
 	// 解析协议头
-	ser := codec.GetSerialization(s.opts.Serialization)
 	request := &protocol.Request{}
-
-	if err = ser.Unmarshal(frame[codec.FrameHeadLen:], request); err != nil {
+	if err = proto.Unmarshal(frame[codec.FrameHeadLen:], request); err != nil {
 		return err
 	}
 
@@ -112,7 +111,7 @@ func (s *serverTransport) handleConn(ctx context.Context, rawConn net.Conn) erro
 		return err
 	}
 
-	rsp , err := s.handle(ctx, frame)
+	rsp , err := s.handle(ctx, request.Payload)
 	if err != nil {
 		return err
 	}
@@ -133,9 +132,9 @@ func (s *serverTransport) read(ctx context.Context, conn net.Conn) ([]byte, erro
 }
 
 
-func (s *serverTransport) handle(ctx context.Context, frame []byte) ([]byte, error) {
+func (s *serverTransport) handle(ctx context.Context, payload []byte) ([]byte, error) {
 
-	rsp , err := s.opts.Handler.Handle(ctx, frame)
+	rsp , err := s.opts.Handler.Handle(ctx, payload)
 	if err != nil {
 		return nil, codes.NewFrameworkError(codes.ServerNoResponseErrorCode, err.Error())
 	}

@@ -82,9 +82,9 @@ func (s *service) Close() {
 }
 
 
-func (s *service) Handle (ctx context.Context, frame []byte) ([]byte, error) {
+func (s *service) Handle (ctx context.Context, payload []byte) ([]byte, error) {
 
-	if len(frame) == 0 {
+	if len(payload) == 0 {
 		return nil, errors.New("req is nil")
 	}
 
@@ -99,15 +99,8 @@ func (s *service) Handle (ctx context.Context, frame []byte) ([]byte, error) {
 	serverSerialization := codec.GetSerialization(s.opts.serializationType)
 
 	dec := func(req interface {}) error {
-		reqbuf, err := serverCodec.Decode(frame)
-		if err != nil {
-			return err
-		}
-		request := &protocol.Request{}
-		if err = proto.Unmarshal(reqbuf, request); err != nil {
-			return err
-		}
-		if err = serverSerialization.Unmarshal(request.Payload, req); err != nil {
+
+		if err := serverSerialization.Unmarshal(payload, req); err != nil {
 			return err
 		}
 		return nil
@@ -118,18 +111,18 @@ func (s *service) Handle (ctx context.Context, frame []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	payload, err := serverSerialization.Marshal(rsp)
+	rspbuf, err := serverSerialization.Marshal(rsp)
 	if err != nil {
 		return nil, err
 	}
 
-	response := addRspHeader(ctx, payload)
-	rspBuf, err := proto.Marshal(response)
+	response := addRspHeader(ctx, rspbuf)
+	rspPb, err := proto.Marshal(response)
 	if err != nil {
 		return nil, err
 	}
 
-	rspbody, err := serverCodec.Encode(rspBuf)
+	rspbody, err := serverCodec.Encode(rspPb)
 	if err != nil {
 		return nil, err
 	}

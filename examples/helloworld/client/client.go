@@ -15,10 +15,10 @@ func main() {
 		client.WithTimeout(2000 * time.Millisecond),
 	}
 	c := client.DefaultClient
-	req := helloworld.HelloRequest{
+	req := &helloworld.HelloRequest{
 		Msg: "hello",
 	}
-	rsp := helloworld.HelloReply{}
+	rsp := &helloworld.HelloReply{}
 	err := c.Call(context.Background(), "/helloworld.Greeter/SayHello", req, rsp, opts ...)
-	fmt.Println(rsp, err)
+	fmt.Println(rsp.Msg, err)
 }

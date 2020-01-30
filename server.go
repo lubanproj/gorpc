@@ -54,6 +54,7 @@ type emptyInterface interface{}
 func (s *Server) RegisterService(serviceName string, svr interface{}) error {
 
 	svrType := reflect.TypeOf(svr)
+	svrValue := reflect.ValueOf(svr)
 
 	sd := &ServiceDesc{
 		ServiceName: serviceName,
@@ -62,7 +63,7 @@ func (s *Server) RegisterService(serviceName string, svr interface{}) error {
 		Svr : svr,
 	}
 
-	methods, err := getServiceMethods(svrType)
+	methods, err := getServiceMethods(svrType, svrValue)
 	if err != nil {
 		return err
 	}
@@ -74,11 +75,9 @@ func (s *Server) RegisterService(serviceName string, svr interface{}) error {
 	return nil
 }
 
-func getServiceMethods(serviceType reflect.Type) ([]*MethodDesc, error) {
+func getServiceMethods(serviceType reflect.Type, serviceValue reflect.Value) ([]*MethodDesc, error) {
 
 	var methods []*MethodDesc
-
-	serviceValue := reflect.New(serviceType)
 
 	for i := 0; i < serviceType.NumMethod(); i++ {
 		method := serviceType.Method(i)
@@ -90,7 +89,7 @@ func getServiceMethods(serviceType reflect.Type) ([]*MethodDesc, error) {
 		methodHandler := func (svr interface{},ctx context.Context, dec func(interface{}) error, cep interceptor.ServerInterceptor) (interface{}, error) {
 
 			reqType := method.Type.In(2)
-			reqValue := reflect.New(reqType)
+
 			// 判断类型
 			req := reflect.New(reqType.Elem()).Interface()
 
@@ -99,7 +98,7 @@ func getServiceMethods(serviceType reflect.Type) ([]*MethodDesc, error) {
 			}
 
 			if cep == nil {
-				values := method.Func.Call([]reflect.Value{serviceValue,reflect.ValueOf(ctx),reqValue})
+				values := method.Func.Call([]reflect.Value{serviceValue,reflect.ValueOf(ctx),reflect.ValueOf(req)})
 				// 判断错误
 				return values[0].Interface(), nil
 			}
@@ -107,7 +106,7 @@ func getServiceMethods(serviceType reflect.Type) ([]*MethodDesc, error) {
 			handler := func(ctx context.Context, reqbody interface{}) (interface{}, error) {
 
 				// 执行反射
-				values := method.Func.Call([]reflect.Value{serviceValue,reflect.ValueOf(ctx),reqValue})
+				values := method.Func.Call([]reflect.Value{serviceValue,reflect.ValueOf(ctx),reflect.ValueOf(req)})
 
 				// 判断错误
 				return values[0].Interface(), nil

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"log"
+	"os"
 )
 
 const (
@@ -31,8 +32,9 @@ type logger struct{
 }
 
 var defaultLog = &logger {
+	Logger : log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile),
 	options : &Options {
-
+		level : 2,
 	},
 }
 
@@ -60,7 +62,7 @@ func (level Level) String() string {
 type Options struct {
 	path string `default:"../log/gorpc"`   // 日志文件路径前缀，文件名为 gorpc.2019-09-26.log
 	frame string `default:"../log/frame"`  // 框架日志打印路径，默认 ../log/frame.log
-	level Level `default:"debug"`          // 日志级别，默认为 debug
+	level Level `default:"2"`          // 日志级别，默认为 debug
 }
 
 type Option func(*Options)
@@ -88,7 +90,7 @@ func Trace(format string, v ...interface{}) {
 }
 
 func (log *logger) Trace(format string, v ...interface{}) {
-	if log.options.level < TRACE {
+	if log.options.level > TRACE {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
@@ -103,7 +105,7 @@ func Debug(format string, v ...interface{}) {
 }
 
 func (log *logger) Debug(format string, v ...interface{}) {
-	if log.options.level < DEBUG {
+	if log.options.level > DEBUG {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
@@ -118,7 +120,7 @@ func Info(format string, v ...interface{}) {
 }
 
 func (log *logger) Info(format string, v ...interface{}) {
-	if log.options.level < INFO {
+	if log.options.level > INFO {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
@@ -133,7 +135,7 @@ func Warning(format string, v ...interface{}) {
 }
 
 func (log *logger) Warning(format string, v ...interface{}) {
-	if log.options.level < WARNGING {
+	if log.options.level > WARNGING {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
@@ -148,7 +150,7 @@ func Error(format string, v ...interface{}) {
 }
 
 func (log *logger) Error(format string, v ...interface{}) {
-	if log.options.level < ERROR {
+	if log.options.level > ERROR {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
@@ -163,7 +165,7 @@ func Fatal(format string, v ...interface{}) {
 }
 
 func (log *logger) Fatal(format string, v ...interface{}) {
-	if log.options.level < FATAL {
+	if log.options.level > FATAL {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
