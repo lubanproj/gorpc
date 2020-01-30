@@ -60,7 +60,7 @@ func (s *service) Serve(opts *ServerOptions) {
 		transport.WithServerNetwork(s.opts.network),
 		transport.WithHandler(s),
 		transport.WithServerTimeout(s.opts.timeout),
-		transport.WithSerialization(s.opts.serialization),
+		transport.WithSerialization(s.opts.serializationType),
 	}
 
 	serverTransport := transport.GetServerTransport("default")
@@ -96,7 +96,7 @@ func (s *service) Handle (ctx context.Context, frame []byte) ([]byte, error) {
 
 	// 将 reqbuf 解析成 req interface {}
 	serverCodec := codec.GetCodec(s.opts.protocol)
-	serverSerialization := codec.GetSerialization(s.opts.protocol)
+	serverSerialization := codec.GetSerialization(s.opts.serializationType)
 
 	dec := func(req interface {}) error {
 		reqbuf, err := serverCodec.Decode(frame)

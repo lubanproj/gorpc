@@ -38,8 +38,13 @@ type defaultClient struct {
 func (c *defaultClient) Call(ctx context.Context, servicePath string, req interface{}, rsp interface{},
 	opts ...Option) error {
 
+	// 反射调用需要使用 MsgPack 序列化方式
+	callOpts := make([]Option, 0, len(opts)+1)
+	callOpts = append(callOpts, opts ...)
+	callOpts = append(callOpts, WithSerializationType(codec.MsgPack))
+
 	// servicePath example : /helloworld.Greeter/SayHello
-	err := c.Invoke(ctx, req, rsp, servicePath, opts ...)
+	err := c.Invoke(ctx, req, rsp, servicePath, callOpts ...)
 	if err != nil {
 		return err
 	}
@@ -50,8 +55,8 @@ func (c *defaultClient) Call(ctx context.Context, servicePath string, req interf
 
 func (c *defaultClient) Invoke(ctx context.Context, req , rsp interface{}, path string, opts ...Option) error {
 
-	for _, opt := range opts {
-		opt(c.opts)
+	for _, o := range opts {
+		o(c.opts)
 	}
 
 	// 设置服务名、方法名
@@ -75,7 +80,7 @@ func (c *defaultClient) Invoke(ctx context.Context, req , rsp interface{}, path 
 
 func (c *defaultClient) invoke(ctx context.Context, req, rsp interface{}) error {
 
-	serialization := codec.GetSerialization(c.opts.protocol)
+	serialization := codec.GetSerialization(c.opts.serializationType)
 	payload, err := serialization.Marshal(req)
 	if err != nil {
 		return codes.ClientMsgError

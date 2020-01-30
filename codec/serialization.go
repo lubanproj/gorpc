@@ -7,12 +7,18 @@ type Serialization interface {
 	Unmarshal([]byte, interface{}) error
 }
 
+const (
+	Proto         =  "proto" 	// protobuf
+	MsgPack 	  =  "msgpack"   // msgpack
+	Json      	  =  "json" 	// json
+)
+
 var serializationMap = make(map[string]Serialization)
 
 var DefaultSerialization = NewSerialization()
 
 var NewSerialization = func () Serialization {
-	return &defaultSerialization{}
+	return &pbSerialization{}
 }
 
 func init() {
@@ -33,9 +39,9 @@ func GetSerialization(name string) Serialization {
 	return DefaultSerialization
 }
 
-type defaultSerialization struct {}
+type pbSerialization struct {}
 
-func (d *defaultSerialization) Marshal(v interface{}) ([]byte, error) {
+func (d *pbSerialization) Marshal(v interface{}) ([]byte, error) {
 	if pm, ok := v.(proto.Marshaler); ok {
 		// 可以 marshal 自身，无需 buffer
 		return pm.Marshal()
@@ -55,7 +61,7 @@ func (d *defaultSerialization) Marshal(v interface{}) ([]byte, error) {
 	return data, nil
 }
 
-func (d *defaultSerialization) Unmarshal(data []byte, v interface{}) error {
+func (d *pbSerialization) Unmarshal(data []byte, v interface{}) error {
 	protoMsg := v.(proto.Message)
 	protoMsg.Reset()
 

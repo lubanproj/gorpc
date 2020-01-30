@@ -9,7 +9,7 @@ type ServerOptions struct {
 	network string  // 网络类型，如 tcp、udp
 	protocol string  // 协议类型，如 proto/json 等
 	timeout time.Duration       // 超时时间
-	serialization string 	// 序列化方式，默认是 proto
+	serializationType string 	// 序列化方式，默认是 proto
 
 	selectorSvrAddr string       // consul server 地址，当服务发现方式为 consul 时需要填写
 	pluginNames []string         // 插件名字
@@ -41,9 +41,9 @@ func WithTimeout(timeout time.Duration) ServerOption {
 	}
 }
 
-func WithSerialization(serialization string) ServerOption {
+func WithSerializationType(serializationType string) ServerOption {
 	return func(o *ServerOptions) {
-		o.serialization = serialization
+		o.serializationType = serializationType
 	}
 }
 

@@ -14,7 +14,7 @@ type Options struct {
 	timeout time.Duration 	// 超时时间
 	network string  // 网络类型 tcp/udp
 	protocol   string  // 协议类型 proto/json
-	serializedType string // 序列化类型
+	serializationType string // 序列化类型
 	transportOpts transport.ClientTransportOptions
 	interceptors []interceptor.ClientInterceptor
 	consulAddr string   // consul server 地址
@@ -58,9 +58,9 @@ func WithProtocol(protocol string) Option {
 	}
 }
 
-func WithSerializedType(serializedType string) Option {
+func WithSerializationType(serializationType string) Option {
 	return func(o *Options) {
-		o.serializedType = serializedType
+		o.serializationType = serializationType
 	}
 }
 

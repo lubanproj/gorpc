@@ -49,12 +49,18 @@ func containPlugin(pluginName string, plugins []string) bool {
 	return false
 }
 
+type emptyInterface interface{}
+
 func (s *Server) RegisterService(serviceName string, svr interface{}) error {
+
+	svrType := reflect.TypeOf(svr)
+
 	sd := &ServiceDesc{
 		ServiceName: serviceName,
+		// 这里为了和代码生成兼容
+		HandlerType : (*emptyInterface)(nil),
 		Svr : svr,
 	}
-	svrType := reflect.TypeOf(svr)
 
 	methods, err := getServiceMethods(svrType)
 	if err != nil {
@@ -62,6 +68,9 @@ func (s *Server) RegisterService(serviceName string, svr interface{}) error {
 	}
 
 	sd.Methods = methods
+
+	s.Register(sd, svr)
+
 	return nil
 }
 
@@ -136,7 +145,7 @@ func checkMethod(method reflect.Type) error {
 	}
 
 	// 第二个参数必须是指针
-	argType := method.In(1)
+	argType := method.In(2)
 	if argType.Kind() != reflect.Ptr {
 		return fmt.Errorf("method %s invalid, req type is not a pointer", method.Name())
 	}
