@@ -18,8 +18,8 @@ const Magic = 0x11
 const Version = 0
 
 func GetCodec(name string) Codec {
-	if v, ok := codecMap[name]; ok {
-		return v
+	if codec, ok := codecMap[name]; ok {
+		return codec
 	}
 	return DefaultCodec
 }

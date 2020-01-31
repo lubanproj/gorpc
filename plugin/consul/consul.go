@@ -20,7 +20,12 @@ type Consul struct {
 const Name = "consul"
 
 func init() {
-	plugin.Register(Name, &Consul{opts : &plugin.Options{}})
+	plugin.Register(Name, ConsulSvr)
+	selector.RegisterSelector(Name, ConsulSvr)
+}
+
+var ConsulSvr = &Consul {
+	opts : &plugin.Options{},
 }
 
 func (c *Consul) InitConfig() error {

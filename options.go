@@ -11,7 +11,7 @@ type ServerOptions struct {
 	timeout time.Duration       // 超时时间
 	serializationType string 	// 序列化方式，默认是 proto
 
-	selectorSvrAddr string       // consul server 地址，当服务发现方式为 consul 时需要填写
+	selectorSvrAddr string       // 服务发现 server 地址，当使用第三方服务发现方式时需要填写
 	pluginNames []string         // 插件名字
 }
 

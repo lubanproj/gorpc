@@ -4,7 +4,6 @@ import (
 	"context"
 	"github.com/lubanproj/gorpc/codec"
 	"github.com/lubanproj/gorpc/codes"
-	"github.com/lubanproj/gorpc/pool/connpool"
 )
 
 type clientTransport struct {
@@ -53,10 +52,13 @@ func (c *clientTransport) Send(ctx context.Context, req []byte, opts ...ClientTr
 
 func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, error) {
 
-	// 从连接池里面获取一个连接
-	defaultPool := connpool.GetPool("default")
+	// 服务发现
+	addr, err := c.opts.Selector.Select(c.opts.ServiceName)
+	if err != nil {
+		return nil, err
+	}
 
-	conn, err := defaultPool.Get(ctx, "tcp", c.opts.Target)
+	conn, err := c.opts.Pool.Get(ctx, "tcp", addr)
 	if err != nil {
 		return nil, codes.ConnectionError
 	}

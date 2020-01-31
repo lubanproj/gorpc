@@ -15,8 +15,10 @@ type Options struct {
 type Option func(*Options)
 
 func init() {
-	RegisterSelector("default", &defaultSelector{})
+	RegisterSelector("default", DefaultSelector)
 }
+
+var DefaultSelector = &defaultSelector{}
 
 var selectorMap = make(map[string]Selector)
 
@@ -30,5 +32,12 @@ func RegisterSelector(name string, selector Selector) {
 func (d *defaultSelector) Select(serviceName string) (string, error) {
 
 	return serviceName, nil
+}
+
+func GetSelector(name string) Selector {
+	if selector ,ok := selectorMap[name]; ok {
+		return selector
+	}
+	return DefaultSelector
 }
 

@@ -9,6 +9,7 @@ import (
 	"github.com/lubanproj/gorpc/interceptor"
 	"github.com/lubanproj/gorpc/pool/connpool"
 	"github.com/lubanproj/gorpc/protocol"
+	"github.com/lubanproj/gorpc/selector"
 	"github.com/lubanproj/gorpc/stream"
 	"github.com/lubanproj/gorpc/transport"
 	"github.com/lubanproj/gorpc/utils"
@@ -102,9 +103,11 @@ func (c *defaultClient) invoke(ctx context.Context, req, rsp interface{}) error 
 
 	clientTransport := c.NewClientTransport()
 	clientTransportOpts := []transport.ClientTransportOption {
+		transport.WithServiceName(c.opts.serviceName),
 		transport.WithClientTarget(c.opts.target),
 		transport.WithClientNetwork(c.opts.network),
 		transport.WithClientPool(connpool.GetPool("default")),
+		transport.WithSelector(selector.GetSelector(c.opts.selectorName)),
 	}
 	frame, err := clientTransport.Send(ctx, reqbody, clientTransportOpts ...)
 	if err != nil {

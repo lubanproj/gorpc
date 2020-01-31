@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/lubanproj/gorpc"
 	"github.com/lubanproj/gorpc/examples/helloworld/helloworld"
+	"github.com/lubanproj/gorpc/plugin/consul"
 	"time"
 )
 
@@ -13,6 +14,8 @@ func main() {
 		gorpc.WithNetwork("tcp"),
 		gorpc.WithSerializationType("msgpack"),
 		gorpc.WithTimeout(time.Millisecond * 2000),
+		gorpc.WithSelectorSvrAddr("localhost:5000"),
+		gorpc.WithPlugin(consul.Name),
 	}
 	s := gorpc.NewServer(opts ...)
 	if err := s.RegisterService("/helloworld.Greeter", new(helloworld.Service)); err != nil {

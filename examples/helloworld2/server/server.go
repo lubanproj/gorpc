@@ -24,7 +24,7 @@ func main() {
 		gorpc.WithAddress("127.0.0.1:8000"),
 		gorpc.WithNetwork("tcp"),
 		gorpc.WithProtocol("proto"),
-		gorpc.WithTimeout(time.Minute * 60),
+		gorpc.WithTimeout(time.Millisecond * 2000),
 	}
 	s := gorpc.NewServer(opts ...)
 	helloworld.RegisterService(s, &greeterService{})
