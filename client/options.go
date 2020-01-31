@@ -17,7 +17,6 @@ type Options struct {
 	serializationType string // 序列化类型
 	transportOpts transport.ClientTransportOptions
 	interceptors []interceptor.ClientInterceptor
-	selectorSvrAddr string   // 第三方服务发现 server 地址
 	selectorName string      // 第三方服务发现名称
 }
 
@@ -62,12 +61,6 @@ func WithProtocol(protocol string) Option {
 func WithSerializationType(serializationType string) Option {
 	return func(o *Options) {
 		o.serializationType = serializationType
-	}
-}
-
-func WithSelectorSvrAddr(selectorSvrAddr string) Option {
-	return func(o *Options) {
-		o.selectorSvrAddr = selectorSvrAddr
 	}
 }
 

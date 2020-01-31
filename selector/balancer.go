@@ -24,6 +24,8 @@ func init() {
 	RegisterBalancer(Random, &randomBalancer{})
 }
 
+var DefaultBalancer = &randomBalancer{}
+
 func RegisterBalancer(name string, balancer Balancer) {
 	if balancerMap == nil {
 		balancerMap = make(map[string]Balancer)
@@ -32,7 +34,10 @@ func RegisterBalancer(name string, balancer Balancer) {
 }
 
 func GetBalancer(name string) Balancer {
-	return balancerMap[name]
+	if balancer, ok := balancerMap[name]; ok {
+		return balancer
+	}
+	return DefaultBalancer
 }
 
 type randomBalancer struct {

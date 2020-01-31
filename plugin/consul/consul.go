@@ -1,11 +1,13 @@
 package consul
 
 import (
+	"errors"
 	"fmt"
 	"github.com/hashicorp/consul/api"
 	"github.com/lubanproj/gorpc/plugin"
 	"github.com/lubanproj/gorpc/selector"
 	"net/http"
+	"strings"
 )
 
 type Consul struct {
@@ -84,7 +86,17 @@ func (c *Consul) Select(serviceName string) (string, error) {
 		return "", fmt.Errorf("no services find in %s", serviceName)
 	}
 
-	return "", nil
+	return parseAddrFromNode(node)
+}
+
+func parseAddrFromNode(node *selector.Node) (string, error){
+	if node.Key == "" {
+		return "", errors.New("addr is empty")
+	}
+
+	strs := strings.Split(node.Key, "/")
+
+	return strs[len(strs)-1], nil
 }
 
 func (c *Consul) Init(opts ...plugin.Option) error {
@@ -118,4 +130,14 @@ func (c *Consul) Init(opts ...plugin.Option) error {
 
 
 	return nil
+}
+
+func Init(consulSvrAddr string, opts ... plugin.Option) error {
+	for _, o := range opts {
+		o(ConsulSvr.opts)
+	}
+
+	ConsulSvr.opts.SelectorSvrAddr = consulSvrAddr
+	err := ConsulSvr.InitConfig()
+	return err
 }

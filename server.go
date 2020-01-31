@@ -26,15 +26,15 @@ func NewServer(opt ...ServerOption) *Server{
 		services: make(map[string]Service),
 	}
 
+	for _, o := range opt {
+		o(s.opts)
+	}
+
 	for pluginName, plugin := range plugin.PluginMap {
 		if !containPlugin(pluginName, s.opts.pluginNames) {
 			continue
 		}
 		s.plugins = append(s.plugins, plugin)
-	}
-
-	for _, o := range opt {
-		o(s.opts)
 	}
 
 	return s
