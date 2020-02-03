@@ -13,6 +13,7 @@ type ServerOptions struct {
 	serializationType string 	// 序列化方式，默认是 proto
 
 	selectorSvrAddr string       // 服务发现 server 地址，当使用第三方服务发现方式时需要填写
+	tracingSvrAddr  string 		 // tracing 类插件 server 地址，当使用第三方 tracing 类插件时需要填写
 	pluginNames []string         // 插件名字
 	interceptors []interceptor.ServerInterceptor
 }
@@ -64,5 +65,11 @@ func WithPlugin(pluginName ... string) ServerOption {
 func WithInterceptor(interceptors ...interceptor.ServerInterceptor) ServerOption {
 	return func(o *ServerOptions) {
 		o.interceptors = append(o.interceptors, interceptors...)
+	}
+}
+
+func WithTracingSvrAddr(addr string) ServerOption {
+	return func(o *ServerOptions) {
+		o.tracingSvrAddr = addr
 	}
 }

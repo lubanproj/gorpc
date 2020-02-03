@@ -10,6 +10,11 @@ type ResolverPlugin interface {
 	Init(...Option) error
 }
 
+// Tracing 类插件
+type TracingPlugin interface {
+	Init(...Option) error
+}
+
 var PluginMap = make(map[string]Plugin)
 
 func Register(name string, plugin Plugin) {
@@ -20,18 +25,13 @@ func Register(name string, plugin Plugin) {
 }
 
 type Options struct {
-	SelectorSvrAddr string  // 服务发现集群地址 ，例如 consul server 地址
 	SvrAddr string     // server 地址
 	Services []string   // 服务名数组
+	SelectorSvrAddr string  // 服务发现集群地址 ，例如 consul server 地址
+	TracingSvrAddr string   // tracing server 地址，例如 jaeger server 地址
 }
 
 type Option func(*Options)
-
-func WithSelectorSvrAddr(addr string) Option {
-	return func(o *Options) {
-		o.SelectorSvrAddr = addr
-	}
-}
 
 func WithSvrAddr(addr string) Option {
 	return func(o *Options) {
@@ -42,6 +42,18 @@ func WithSvrAddr(addr string) Option {
 func WithServices(services []string) Option {
 	return func(o *Options) {
 		o.Services = services
+	}
+}
+
+func WithSelectorSvrAddr(addr string) Option {
+	return func(o *Options) {
+		o.SelectorSvrAddr = addr
+	}
+}
+
+func WithTracingSvrAddr(addr string) Option {
+	return func(o *Options) {
+		o.TracingSvrAddr = addr
 	}
 }
 

@@ -191,26 +191,7 @@ func (s *Server) Register(sd *ServiceDesc, svr interface{}) {
 
 func (s *Server) Serve() {
 
-	// 加载所有插件
-	for _, p := range s.plugins {
-
-		if rp, ok := p.(plugin.ResolverPlugin); ok {
-
-			var services []string
-			for serviceName, _ := range s.services {
-				services = append(services, serviceName)
-			}
-
-			pluginOptions := []plugin.Option {
-				plugin.WithSelectorSvrAddr(s.opts.selectorSvrAddr),
-				plugin.WithSvrAddr(s.opts.address),
-				plugin.WithServices(services),
-			}
-			if err := rp.Init(pluginOptions ...); err != nil {
-				log.Fatal("plugin init error, %v", err)
-			}
-		}
-	}
+	s.InitPlugins()
 
 	for _, service := range s.services {
 		go service.Serve(s.opts)
@@ -225,4 +206,40 @@ func (s *Server) Serve() {
 
 func (s *Server) Close() {
 
+}
+
+
+func (s *Server) InitPlugins() {
+	// 加载所有插件
+	for _, p := range s.plugins {
+
+		switch val := p.(type) {
+
+		case plugin.ResolverPlugin :
+			var services []string
+			for serviceName, _ := range s.services {
+				services = append(services, serviceName)
+			}
+
+			pluginOpts := []plugin.Option {
+				plugin.WithSelectorSvrAddr(s.opts.selectorSvrAddr),
+				plugin.WithSvrAddr(s.opts.address),
+				plugin.WithServices(services),
+			}
+			if err := val.Init(pluginOpts ...); err != nil {
+				log.Fatal("resolver init error, %v", err)
+			}
+
+		case plugin.TracingPlugin :
+
+			pluginOpts := []plugin.Option {
+				plugin.WithTracingSvrAddr(s.opts.tracingSvrAddr),
+			}
+
+			if err := val.Init(pluginOpts ...); err != nil {
+				log.Fatal("tracing init error, %v", err)
+			}
+
+		}
+	}
 }

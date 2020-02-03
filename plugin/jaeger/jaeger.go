@@ -2,14 +2,31 @@ package jaeger
 
 import (
 	"context"
+	"errors"
 	"github.com/lubanproj/gorpc/interceptor"
 	gorpclog "github.com/lubanproj/gorpc/log"
+	"github.com/lubanproj/gorpc/plugin"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/opentracing/opentracing-go/log"
+	"github.com/uber/jaeger-client-go/config"
 	"strings"
 )
 
+
+type Jaeger struct {
+	opts *plugin.Options
+}
+
+const Name = "jaeger"
+
+func init() {
+	plugin.Register(Name, JaegerSvr)
+}
+
+var JaegerSvr = &Jaeger {
+	opts : &plugin.Options{},
+}
 
 type jaegerCarrier map[string][]byte
 
@@ -67,5 +84,41 @@ func OpenTracingServerInterceptor(tracer opentracing.Tracer, servicePath string)
 
 		return handler(ctx, req)
 	}
+
+}
+
+
+func Init(tracingSvrAddr string, opts ... plugin.Option) error {
+	cfg := &config.Configuration{}
+
+	tracer, _, err := cfg.NewTracer()
+	if err != nil {
+		return err
+	}
+
+	opentracing.SetGlobalTracer(tracer)
+	return err
+}
+
+func (c *Jaeger) Init(opts ...plugin.Option) error {
+
+	for _, o := range opts {
+		o(c.opts)
+	}
+
+	if c.opts.TracingSvrAddr == "" {
+		return errors.New("jaeger init error, traingSvrAddr is empty")
+	}
+
+	cfg := &config.Configuration{}
+
+	tracer, _, err := cfg.NewTracer()
+	if err != nil {
+		return err
+	}
+
+	opentracing.SetGlobalTracer(tracer)
+
+	return nil
 
 }
