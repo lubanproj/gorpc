@@ -1,6 +1,7 @@
 package gorpc
 
 import (
+	"github.com/lubanproj/gorpc/interceptor"
 	"time"
 )
 
@@ -13,6 +14,7 @@ type ServerOptions struct {
 
 	selectorSvrAddr string       // 服务发现 server 地址，当使用第三方服务发现方式时需要填写
 	pluginNames []string         // 插件名字
+	interceptors []interceptor.ServerInterceptor
 }
 
 type ServerOption func(*ServerOptions)
@@ -56,5 +58,11 @@ func WithSelectorSvrAddr(addr string) ServerOption {
 func WithPlugin(pluginName ... string) ServerOption {
 	return func(o *ServerOptions) {
 		o.pluginNames = append(o.pluginNames, pluginName ...)
+	}
+}
+
+func WithInterceptor(interceptors ...interceptor.ServerInterceptor) ServerOption {
+	return func(o *ServerOptions) {
+		o.interceptors = append(o.interceptors, interceptors...)
 	}
 }

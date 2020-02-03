@@ -70,4 +70,9 @@ func WithSelectorName(selectorName string) Option {
 	}
 }
 
+func WithInterceptor(interceptors ...interceptor.ClientInterceptor) Option {
+	return func(o *Options) {
+		o.interceptors = append(o.interceptors, interceptors...)
+	}
+}
 
