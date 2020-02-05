@@ -26,7 +26,6 @@ type service struct{
 	serviceName string   		// 服务名
 	handlers map[string]Handler
 	opts *ServerOptions  		// 参数选项
-	ceps interceptor.ServerInterceptor
 }
 
 type ServiceDesc struct {
@@ -41,7 +40,7 @@ type MethodDesc struct {
 	Handler Handler
 }
 
-type Handler func (interface{}, context.Context, func(interface{}) error, interceptor.ServerInterceptor) (interface{}, error)
+type Handler func (interface{}, context.Context, func(interface{}) error, []interceptor.ServerInterceptor) (interface{}, error)
 
 func (s *service) Register(handlerName string, handler Handler) {
 	if s.handlers == nil {
@@ -106,7 +105,7 @@ func (s *service) Handle (ctx context.Context, payload []byte) ([]byte, error) {
 		return nil
 	}
 
-	rsp, err := handler(s.svr, ctx, dec, s.ceps)
+	rsp, err := handler(s.svr, ctx, dec, s.opts.interceptors)
 	if err != nil {
 		return nil, err
 	}

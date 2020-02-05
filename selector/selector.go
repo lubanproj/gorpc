@@ -31,7 +31,7 @@ func RegisterSelector(name string, selector Selector) {
 
 func (d *defaultSelector) Select(serviceName string) (string, error) {
 
-	return serviceName, nil
+	return "", nil
 }
 
 func GetSelector(name string) Selector {

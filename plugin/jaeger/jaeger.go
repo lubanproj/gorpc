@@ -19,6 +19,8 @@ type Jaeger struct {
 }
 
 const Name = "jaeger"
+const JaegerClientName = "gorpc-client-jaeger"
+const JaegerServerName = "gorpc-server-jaeger"
 
 func init() {
 	plugin.Register(Name, JaegerSvr)
@@ -43,17 +45,18 @@ func (m jaegerCarrier) ForeachKey(handler func(key, val string) error) error {
 }
 
 
-func OpenTracingClientInterceptor(tracer opentracing.Tracer, servicePath string) interceptor.ClientInterceptor {
+func OpenTracingClientInterceptor(tracer opentracing.Tracer, spanName string) interceptor.ClientInterceptor {
 
 	return func (ctx context.Context, req, rsp interface{}, ivk interceptor.Invoker) error {
 
-		var parentCtx opentracing.SpanContext
+		//var parentCtx opentracing.SpanContext
+		//
+		//if parent := opentracing.SpanFromContext(ctx); parent != nil {
+		//	parentCtx = parent.Context()
+		//}
 
-		if parent := opentracing.SpanFromContext(ctx); parent != nil {
-			parentCtx = parent.Context()
-		}
-
-		clientSpan := tracer.StartSpan(servicePath, ext.SpanKindRPCClient, opentracing.ChildOf(parentCtx))
+		//clientSpan := tracer.StartSpan(spanName, ext.SpanKindRPCClient, opentracing.ChildOf(parentCtx))
+		clientSpan := tracer.StartSpan(spanName, ext.SpanKindRPCClient)
 		defer clientSpan.Finish()
 
 		mdCarrier := &jaegerCarrier{}
@@ -62,12 +65,14 @@ func OpenTracingClientInterceptor(tracer opentracing.Tracer, servicePath string)
 			clientSpan.LogFields(log.String("event", "Tracer.Inject() failed"), log.Error(err))
 		}
 
+		clientSpan.LogFields(log.String("spanName", spanName))
+
 		return ivk(ctx, req, rsp)
 
 	}
 }
 
-func OpenTracingServerInterceptor(tracer opentracing.Tracer, servicePath string) interceptor.ServerInterceptor {
+func OpenTracingServerInterceptor(tracer opentracing.Tracer, spanName string) interceptor.ServerInterceptor {
 
 	return func(ctx context.Context, req interface{}, handler interceptor.Handler) (interface{}, error) {
 
@@ -77,48 +82,55 @@ func OpenTracingServerInterceptor(tracer opentracing.Tracer, servicePath string)
 		if err != nil && err != opentracing.ErrSpanContextNotFound {
 			gorpclog.Error("Tracer.Extract() failed, %v", err)
 		}
-		serverSpan := tracer.StartSpan(servicePath, ext.RPCServerOption(spanContext),ext.SpanKindRPCServer)
+		serverSpan := tracer.StartSpan(spanName, ext.RPCServerOption(spanContext),ext.SpanKindRPCServer)
 		defer serverSpan.Finish()
 
 		ctx = opentracing.ContextWithSpan(ctx, serverSpan)
+
+		serverSpan.LogFields(log.String("spanName", spanName))
 
 		return handler(ctx, req)
 	}
 
 }
 
-
-func Init(tracingSvrAddr string, opts ... plugin.Option) error {
-	cfg := &config.Configuration{}
-
-	tracer, _, err := cfg.NewTracer()
-	if err != nil {
-		return err
-	}
-
-	opentracing.SetGlobalTracer(tracer)
-	return err
+func Init(tracingSvrAddr string, opts ... plugin.Option) (opentracing.Tracer, error) {
+	return initJaeger(tracingSvrAddr, JaegerClientName, opts ...)
 }
 
-func (c *Jaeger) Init(opts ...plugin.Option) error {
+func (j *Jaeger) Init(opts ...plugin.Option) (opentracing.Tracer, error) {
 
 	for _, o := range opts {
-		o(c.opts)
+		o(j.opts)
 	}
 
-	if c.opts.TracingSvrAddr == "" {
-		return errors.New("jaeger init error, traingSvrAddr is empty")
+	if j.opts.TracingSvrAddr == "" {
+		return nil, errors.New("jaeger init error, traingSvrAddr is empty")
 	}
 
-	cfg := &config.Configuration{}
+	return initJaeger(j.opts.TracingSvrAddr, JaegerServerName, opts ...)
+
+}
+
+func initJaeger(tracingSvrAddr string, jaegerServiceName string, opts ... plugin.Option) (opentracing.Tracer, error) {
+	cfg := &config.Configuration{
+		Sampler : &config.SamplerConfig{
+			Type : "const",  // 固定采样
+			Param : 1,       // 1= 全采样，0=不采样
+		},
+		Reporter : &config.ReporterConfig{
+			LogSpans: true,
+			LocalAgentHostPort: tracingSvrAddr,
+		},
+		ServiceName : jaegerServiceName,
+	}
 
 	tracer, _, err := cfg.NewTracer()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	opentracing.SetGlobalTracer(tracer)
 
-	return nil
-
+	return tracer, err
 }

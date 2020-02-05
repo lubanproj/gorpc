@@ -76,7 +76,7 @@ func (c *defaultClient) Invoke(ctx context.Context, req , rsp interface{}, path 
 	clientStream.WithMethod(method)
 
 	// 先执行拦截器
-	return interceptor.Intercept(newCtx, req, rsp, c.opts.interceptors, c.invoke)
+	return interceptor.ClientIntercept(newCtx, req, rsp, c.opts.interceptors, c.invoke)
 }
 
 func (c *defaultClient) invoke(ctx context.Context, req, rsp interface{}) error {

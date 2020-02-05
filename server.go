@@ -6,6 +6,7 @@ import (
 	"github.com/lubanproj/gorpc/interceptor"
 	"github.com/lubanproj/gorpc/log"
 	"github.com/lubanproj/gorpc/plugin"
+	"github.com/lubanproj/gorpc/plugin/jaeger"
 	"os"
 	"os/signal"
 	"reflect"
@@ -86,7 +87,7 @@ func getServiceMethods(serviceType reflect.Type, serviceValue reflect.Value) ([]
 			return nil, err
 		}
 
-		methodHandler := func (svr interface{},ctx context.Context, dec func(interface{}) error, cep interceptor.ServerInterceptor) (interface{}, error) {
+		methodHandler := func (svr interface{},ctx context.Context, dec func(interface{}) error, ceps []interceptor.ServerInterceptor) (interface{}, error) {
 
 			reqType := method.Type.In(2)
 
@@ -97,7 +98,7 @@ func getServiceMethods(serviceType reflect.Type, serviceValue reflect.Value) ([]
 				return nil, err
 			}
 
-			if cep == nil {
+			if len(ceps) == 0 {
 				values := method.Func.Call([]reflect.Value{serviceValue,reflect.ValueOf(ctx),reflect.ValueOf(req)})
 				// 判断错误
 				return values[0].Interface(), nil
@@ -112,7 +113,7 @@ func getServiceMethods(serviceType reflect.Type, serviceValue reflect.Value) ([]
 				return values[0].Interface(), nil
 			}
 
-			return cep(ctx, req, handler)
+			return interceptor.ServerIntercept(ctx, req, ceps, handler)
 		}
 
 		methods = append(methods, &MethodDesc{
@@ -191,7 +192,10 @@ func (s *Server) Register(sd *ServiceDesc, svr interface{}) {
 
 func (s *Server) Serve() {
 
-	s.InitPlugins()
+	err := s.InitPlugins()
+	if err != nil {
+		panic(err)
+	}
 
 	for _, service := range s.services {
 		go service.Serve(s.opts)
@@ -209,7 +213,7 @@ func (s *Server) Close() {
 }
 
 
-func (s *Server) InitPlugins() {
+func (s *Server) InitPlugins() error {
 	// 加载所有插件
 	for _, p := range s.plugins {
 
@@ -227,7 +231,8 @@ func (s *Server) InitPlugins() {
 				plugin.WithServices(services),
 			}
 			if err := val.Init(pluginOpts ...); err != nil {
-				log.Fatal("resolver init error, %v", err)
+				log.Error("resolver init error, %v", err)
+				return err
 			}
 
 		case plugin.TracingPlugin :
@@ -236,10 +241,20 @@ func (s *Server) InitPlugins() {
 				plugin.WithTracingSvrAddr(s.opts.tracingSvrAddr),
 			}
 
-			if err := val.Init(pluginOpts ...); err != nil {
-				log.Fatal("tracing init error, %v", err)
+			tracer, err := val.Init(pluginOpts ...)
+			if err != nil {
+				log.Error("tracing init error, %v", err)
+				return err
 			}
 
+			s.opts.interceptors = append(s.opts.interceptors, jaeger.OpenTracingServerInterceptor(tracer, s.opts.tracingSpanName))
+
+		default :
+
 		}
+
+
 	}
+
+	return nil
 }

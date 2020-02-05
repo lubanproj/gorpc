@@ -1,5 +1,7 @@
 package plugin
 
+import "github.com/opentracing/opentracing-go"
+
 // 插件
 type Plugin interface {
 
@@ -12,7 +14,7 @@ type ResolverPlugin interface {
 
 // Tracing 类插件
 type TracingPlugin interface {
-	Init(...Option) error
+	Init(...Option) (opentracing.Tracer, error)
 }
 
 var PluginMap = make(map[string]Plugin)

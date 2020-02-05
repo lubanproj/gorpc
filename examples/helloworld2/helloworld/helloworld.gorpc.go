@@ -41,7 +41,7 @@ var _Greeter_serviceDesc = &gorpc.ServiceDesc{
 	},
 }
 
-func GreeterService_SayHello_Handler(svr interface{},ctx context.Context, dec func(interface{}) error, cep interceptor.ServerInterceptor) (interface{}, error) {
+func GreeterService_SayHello_Handler(svr interface{},ctx context.Context, dec func(interface{}) error, ceps []interceptor.ServerInterceptor) (interface{}, error) {
 
 	req := new(HelloRequest)
 
@@ -49,7 +49,7 @@ func GreeterService_SayHello_Handler(svr interface{},ctx context.Context, dec fu
 		return nil, err
 	}
 
-	if cep == nil {
+	if len(ceps) == 0 {
 		return svr.(GreeterService).SayHello(ctx, req)
 	}
 
@@ -57,7 +57,7 @@ func GreeterService_SayHello_Handler(svr interface{},ctx context.Context, dec fu
 		return svr.(GreeterService).SayHello(ctx, reqbody.(*HelloRequest))
 	}
 
-	return cep(ctx, req, handler)
+	return interceptor.ServerIntercept(ctx, req, ceps, handler)
 }
 
 func RegisterService(s *gorpc.Server, svr interface{}) {

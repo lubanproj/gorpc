@@ -58,6 +58,11 @@ func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, e
 		return nil, err
 	}
 
+	// defaultSelector 返回 "", 失败兜底
+	if addr == "" {
+		addr = c.opts.Target
+	}
+
 	conn, err := c.opts.Pool.Get(ctx, "tcp", addr)
 	if err != nil {
 		return nil, codes.ConnectionError
