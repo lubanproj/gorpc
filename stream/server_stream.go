@@ -14,7 +14,7 @@ const ServerStreamKey = StreamContextKey("GORPC_SERVER_STREAM")
 func GetServerStream(ctx context.Context) *ServerStream {
 	v := ctx.Value(ServerStreamKey)
 	if v == nil {
-		cs := &ClientStream{}
+		cs := &ServerStream{}
 		context.WithValue(ctx, ServerStreamKey, cs)
 	}
 	return v.(*ServerStream)

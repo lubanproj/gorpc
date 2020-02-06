@@ -11,6 +11,7 @@ type ServerTransportOptions struct{
 	Timeout time.Duration  // 传输层请求超时时间，默认为 2 min
 	Handler Handler
 	Serialization string   // 序列化方式
+	KeepAlivePeriod time.Duration // 长连接时间
 }
 
 type Handler interface {
@@ -47,5 +48,11 @@ func WithHandler(handler Handler) ServerTransportOption {
 func WithSerialization(serialization string) ServerTransportOption {
 	return func(o *ServerTransportOptions) {
 		o.Serialization = serialization
+	}
+}
+
+func WithKeepAlivePeriod(keepAlivePeriod time.Duration) ServerTransportOption {
+	return func(o *ServerTransportOptions) {
+		o.KeepAlivePeriod = keepAlivePeriod
 	}
 }

@@ -9,6 +9,7 @@ import (
 	"github.com/lubanproj/gorpc/protocol"
 	"github.com/lubanproj/gorpc/stream"
 	"github.com/lubanproj/gorpc/utils"
+	"io"
 	"net"
 )
 
@@ -66,19 +67,34 @@ func (s *serverTransport) ListenAndServeTcp(ctx context.Context, opts ...ServerT
 	}
 
 	for {
-		conn , err := lis.Accept()
+
+		tl, ok := lis.(*net.TCPListener);
+		if !ok {
+			return codes.NewFrameworkError(codes.ServerNetworkErrorCode, "unsupported network")
+		}
+
+		conn , err := tl.AcceptTCP()
+		if err = conn.SetKeepAlive(true); err != nil {
+			return err
+		}
+
+		if s.opts.KeepAlivePeriod != 0 {
+			conn.SetKeepAlivePeriod(s.opts.KeepAlivePeriod)
+		}
 
 		if err != nil {
-			return codes.NewFrameworkError(codes.ServerNetworkErrorCode, err.Error())
+			return err
 		}
 
 		go func() {
+
 			// 构造 stream
 			newCtx, _ := stream.NewServerStream(ctx)
 
 			if err := s.handleConn(newCtx, conn); err != nil {
 				log.Error("gorpc handle conn error, %v", err)
 			}
+
 		}()
 
 	}
@@ -92,32 +108,49 @@ func (s *serverTransport) ListenAndServeUdp(ctx context.Context, opts ...ServerT
 
 func (s *serverTransport) handleConn(ctx context.Context, rawConn net.Conn) error {
 
-	// rawConn.SetDeadline(time.Now().Add(s.opts.Timeout))
-	// tcpConn := newTcpConn(rawConn)
-	frame , err := s.read(ctx,rawConn)
-	if err != nil {
-		return err
+	//rawConn.SetDeadline(time.Now().Add(s.opts.Timeout))
+	//tcpConn := newTcpConn(rawConn)
+
+	for {
+		// 检查 ctx 是否关闭
+		select {
+		case <-ctx.Done():
+			return nil
+		default:
+		}
+
+		frame , err := s.read(ctx, rawConn)
+		if err == io.EOF {
+			// 读完数据，对端关闭连接
+			return nil
+		}
+
+		if err != nil {
+			return err
+		}
+
+		// 解析协议头
+		request := &protocol.Request{}
+		if err = proto.Unmarshal(frame[codec.FrameHeadLen:], request); err != nil {
+			return err
+		}
+
+		// 构造 serverStream
+		_, err = s.getServerStream(ctx, request)
+		if err != nil {
+			return err
+		}
+
+		rsp , err := s.handle(ctx, request.Payload)
+		if err != nil {
+			return err
+		}
+
+		if err = s.write(ctx, rawConn,rsp); err != nil {
+			return err
+		}
 	}
 
-	// 解析协议头
-	request := &protocol.Request{}
-	if err = proto.Unmarshal(frame[codec.FrameHeadLen:], request); err != nil {
-		return err
-	}
-
-	// 构造 serverStream
-	_, err = s.buildServerStream(ctx, request)
-	if err != nil {
-		return err
-	}
-
-	rsp , err := s.handle(ctx, request.Payload)
-	if err != nil {
-		return err
-	}
-
-	err = s.write(ctx, rawConn,rsp)
-	return err
 }
 
 func (s *serverTransport) read(ctx context.Context, conn net.Conn) ([]byte, error) {
@@ -161,7 +194,7 @@ func newTcpConn(rawConn net.Conn) *tcpConn {
 }
 
 
-func (s *serverTransport) buildServerStream(ctx context.Context, request *protocol.Request) (*stream.ServerStream, error) {
+func (s *serverTransport) getServerStream(ctx context.Context, request *protocol.Request) (*stream.ServerStream, error) {
 	serverStream := stream.GetServerStream(ctx)
 
 	_, method , err := utils.ParseServicePath(string(request.ServicePath))
