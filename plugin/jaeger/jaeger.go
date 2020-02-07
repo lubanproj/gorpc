@@ -115,8 +115,8 @@ func (j *Jaeger) Init(opts ...plugin.Option) (opentracing.Tracer, error) {
 func initJaeger(tracingSvrAddr string, jaegerServiceName string, opts ... plugin.Option) (opentracing.Tracer, error) {
 	cfg := &config.Configuration{
 		Sampler : &config.SamplerConfig{
-			Type : "const",  // 固定采样
-			Param : 1,       // 1= 全采样，0=不采样
+			Type : "const",  // Fixed sampling
+			Param : 1,       // 1= full sampling, 0= no sampling
 		},
 		Reporter : &config.ReporterConfig{
 			LogSpans: true,

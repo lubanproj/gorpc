@@ -1,15 +1,16 @@
-// 网络通讯层，负责底层网络通讯，主要包括 tcp && udp 两种协议方式实现
+// Network communication layer, responsible for the bottom layer of network communication,
+// mainly including tcp && udp two protocol implementation
 package transport
 
 import "context"
 
 type ServerTransport interface {
-	// 请求的监听和处理
+	// monitoring and processing of requests
 	ListenAndServe(context.Context, ...ServerTransportOption) error
 }
 
 type ClientTransport interface {
-	// 发送请求
+	// send requests
 	Send(context.Context, []byte, ...ClientTransportOption) ([]byte, error)
 }
 

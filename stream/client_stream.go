@@ -6,8 +6,8 @@ const ClientStreamKey = StreamContextKey("GORPC_CLIENT_STREAM")
 
 type ClientStream struct {
 	ctx context.Context
-	ServiceName string // 服务名
-	Method string // 方法名
+	ServiceName string // service name
+	Method string // method
 }
 
 func GetClientStream(ctx context.Context) *ClientStream {

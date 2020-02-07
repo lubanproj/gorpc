@@ -60,9 +60,9 @@ func (level Level) String() string {
 }
 
 type Options struct {
-	path string `default:"../log/gorpc"`   // 日志文件路径前缀，文件名为 gorpc.2019-09-26.log
-	frame string `default:"../log/frame"`  // 框架日志打印路径，默认 ../log/frame.log
-	level Level `default:"2"`          // 日志级别，默认为 debug
+	path string `default:"../log/gorpc"`   // log file path prefix, filename : gorpc.2019-09-26.log
+	frame string `default:"../log/frame"`  // frame log print path, default : ../log/frame.log
+	level Level `default:"2"`         	   // log level, default: debug
 }
 
 type Option func(*Options)

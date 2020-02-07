@@ -15,12 +15,12 @@ import (
 	"github.com/lubanproj/gorpc/utils"
 )
 
-// Client 定义了客户端通用接口
+// global client interface
 type Client interface {
 	Invoke(ctx context.Context, req , rsp interface{}, path string, opts ...Option) error
 }
 
-// 全局使用一个 client
+// use a global client
 var DefaultClient = New()
 
 var New = func() *defaultClient {
@@ -35,11 +35,11 @@ type defaultClient struct {
 	opts *Options
 }
 
-// 通过反射调用
+// call by reflect
 func (c *defaultClient) Call(ctx context.Context, servicePath string, req interface{}, rsp interface{},
 	opts ...Option) error {
 
-	// 反射调用需要使用 MsgPack 序列化方式
+	// reflection calls need to be serialized using msgpack
 	callOpts := make([]Option, 0, len(opts)+1)
 	callOpts = append(callOpts, opts ...)
 	callOpts = append(callOpts, WithSerializationType(codec.MsgPack))
@@ -60,7 +60,7 @@ func (c *defaultClient) Invoke(ctx context.Context, req , rsp interface{}, path 
 		o(c.opts)
 	}
 
-	// 设置服务名、方法名
+	// set serviceName, method
 	newCtx, clientStream := stream.NewClientStream(ctx)
 
 	serviceName, method , err := utils.ParseServicePath(path)
@@ -71,11 +71,11 @@ func (c *defaultClient) Invoke(ctx context.Context, req , rsp interface{}, path 
 	c.opts.serviceName = serviceName
 	c.opts.method = method
 
-	// 这里先保留看看，需不需要去掉
+	// TODO : delete or not
 	clientStream.WithServiceName(serviceName)
 	clientStream.WithMethod(method)
 
-	// 先执行拦截器
+	// execute the interceptor first
 	return interceptor.ClientIntercept(newCtx, req, rsp, c.opts.interceptors, c.invoke)
 }
 
@@ -89,7 +89,7 @@ func (c *defaultClient) invoke(ctx context.Context, req, rsp interface{}) error 
 
 	clientCodec := codec.GetCodec(c.opts.protocol)
 
-	// 拼装 header
+	// assemble header
 	request := addReqHeader(ctx, payload)
 	reqbuf, err := proto.Marshal(request)
 	if err != nil {
@@ -119,7 +119,7 @@ func (c *defaultClient) invoke(ctx context.Context, req, rsp interface{}) error 
 		return err
 	}
 
-	// 解析包头
+	// parse protocol header
 	response := &protocol.Response{}
 	if err = proto.Unmarshal(rspbuf, response); err != nil {
 		return err

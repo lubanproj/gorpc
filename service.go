@@ -64,10 +64,8 @@ func (s *service) Serve(opts *ServerOptions) {
 
 	serverTransport := transport.GetServerTransport("default")
 
-	newCtx, cancel := context.WithTimeout(context.Background(), s.opts.timeout)
-	defer cancel()
+	s.ctx, s.cancel = context.WithCancel(context.Background())
 
-	s.ctx = newCtx
 	if err := serverTransport.ListenAndServe(s.ctx, transportOpts ...); err != nil {
 		log.Error("%s serve error, %v", s.serviceName, err)
 		return

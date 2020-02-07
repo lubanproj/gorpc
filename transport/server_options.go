@@ -6,12 +6,12 @@ import (
 )
 
 type ServerTransportOptions struct{
-	Address string // 地址，格式例如 ip://127.0.0.1：8080
-	Network string  // 网络类型
-	Timeout time.Duration  // 传输层请求超时时间，默认为 2 min
-	Handler Handler
-	Serialization string   // 序列化方式
-	KeepAlivePeriod time.Duration // 长连接时间
+	Address string // address，e.g: ip://127.0.0.1：8080
+	Network string  // network type
+	Timeout time.Duration  // Transport layer request timeout ，default: 2 min
+	Handler Handler		   // handler
+	Serialization string   // serialization type, e.g : proto、json、msgpack
+	KeepAlivePeriod time.Duration // keepalive period
 }
 
 type Handler interface {

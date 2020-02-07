@@ -13,7 +13,7 @@ import (
 	"syscall"
 )
 
-// gorpc Server, 一个 Server 可以拥有一个或者多个 service
+// gorpc Server, a Server can have one or more Services
 type Server struct {
 	opts *ServerOptions
 	services map[string]Service
@@ -59,7 +59,7 @@ func (s *Server) RegisterService(serviceName string, svr interface{}) error {
 
 	sd := &ServiceDesc{
 		ServiceName: serviceName,
-		// 这里为了和代码生成兼容
+		// for compatibility with code generation
 		HandlerType : (*emptyInterface)(nil),
 		Svr : svr,
 	}
@@ -91,7 +91,7 @@ func getServiceMethods(serviceType reflect.Type, serviceValue reflect.Value) ([]
 
 			reqType := method.Type.In(2)
 
-			// 判断类型
+			// determine type
 			req := reflect.New(reqType.Elem()).Interface()
 
 			if err := dec(req); err != nil {
@@ -100,16 +100,14 @@ func getServiceMethods(serviceType reflect.Type, serviceValue reflect.Value) ([]
 
 			if len(ceps) == 0 {
 				values := method.Func.Call([]reflect.Value{serviceValue,reflect.ValueOf(ctx),reflect.ValueOf(req)})
-				// 判断错误
+				// determine error
 				return values[0].Interface(), nil
 			}
 
 			handler := func(ctx context.Context, reqbody interface{}) (interface{}, error) {
 
-				// 执行反射
 				values := method.Func.Call([]reflect.Value{serviceValue,reflect.ValueOf(ctx),reflect.ValueOf(req)})
 
-				// 判断错误
 				return values[0].Interface(), nil
 			}
 
@@ -127,36 +125,36 @@ func getServiceMethods(serviceType reflect.Type, serviceValue reflect.Value) ([]
 
 func checkMethod(method reflect.Type) error {
 
-	// 参数个数 >= 2 , 这里需要加上自身
+	// params num must >= 2 , needs to be combined with itself
 	if method.NumIn() < 3 {
 		return fmt.Errorf("method %s invalid, the number of params < 2", method.Name())
 	}
 
-	// 返回值个数为 2
+	// return values nums must be 2
 	if method.NumOut() != 2 {
 		return fmt.Errorf("method %s invalid, the number of return values != 2", method.Name())
 	}
 
-	// 第一个参数必须是 context
+	// the first parameter must be context
 	ctxType := method.In(1)
 	var contextType = reflect.TypeOf((*context.Context)(nil)).Elem()
 	if !ctxType.Implements(contextType) {
 		return fmt.Errorf("method %s invalid, first param is not context", method.Name())
 	}
 
-	// 第二个参数必须是指针
+	// the second parameter type must be pointer
 	argType := method.In(2)
 	if argType.Kind() != reflect.Ptr {
 		return fmt.Errorf("method %s invalid, req type is not a pointer", method.Name())
 	}
 
-	// 第一个返回值必须是指针
+	// the first return type must be a pointer
 	replyType := method.Out(0)
 	if replyType.Kind() != reflect.Ptr {
 		return fmt.Errorf("method %s invalid, reply type is not a pointer", method.Name())
 	}
 
-	// 第二个返回值必须是 error
+	// The second return value must be an error
 	errType := method.Out(1)
 	var errorType = reflect.TypeOf((*error)(nil)).Elem()
 	if !errType.Implements(errorType) {
@@ -214,7 +212,7 @@ func (s *Server) Close() {
 
 
 func (s *Server) InitPlugins() error {
-	// 加载所有插件
+	// init plugins
 	for _, p := range s.plugins {
 
 		switch val := p.(type) {

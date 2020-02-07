@@ -88,10 +88,15 @@ func (s *serverTransport) ListenAndServeTcp(ctx context.Context, opts ...ServerT
 
 		go func() {
 
-			// 构造 stream
-			newCtx, _ := stream.NewServerStream(ctx)
+			// build stream
+			ctx, _ := stream.NewServerStream(ctx)
 
-			if err := s.handleConn(newCtx, conn); err != nil {
+			// set timeout
+			if s.opts.Timeout != 0 {
+				ctx, _ = context.WithTimeout(ctx, s.opts.Timeout)
+			}
+
+			if err := s.handleConn(ctx, conn); err != nil {
 				log.Error("gorpc handle conn error, %v", err)
 			}
 
@@ -112,7 +117,7 @@ func (s *serverTransport) handleConn(ctx context.Context, rawConn net.Conn) erro
 	//tcpConn := newTcpConn(rawConn)
 
 	for {
-		// 检查 ctx 是否关闭
+		// check ctx is done
 		select {
 		case <-ctx.Done():
 			return nil
@@ -121,7 +126,7 @@ func (s *serverTransport) handleConn(ctx context.Context, rawConn net.Conn) erro
 
 		frame , err := s.read(ctx, rawConn)
 		if err == io.EOF {
-			// 读完数据，对端关闭连接
+			// read compeleted
 			return nil
 		}
 
@@ -129,13 +134,13 @@ func (s *serverTransport) handleConn(ctx context.Context, rawConn net.Conn) erro
 			return err
 		}
 
-		// 解析协议头
+		// parse protocol header
 		request := &protocol.Request{}
 		if err = proto.Unmarshal(frame[codec.FrameHeadLen:], request); err != nil {
 			return err
 		}
 
-		// 构造 serverStream
+		// build serverStream
 		_, err = s.getServerStream(ctx, request)
 		if err != nil {
 			return err

@@ -6,18 +6,18 @@ import (
 	"time"
 )
 
-// Options 定义了客户端调用参数
+// Options defines the client call parameters
 type Options struct {
-	serviceName string // 服务名
-	method string // 方法名
-	target string 	// 调用地址，格式为 ip:port 127.0.0.1:8000
-	timeout time.Duration 	// 超时时间
-	network string  // 网络类型 tcp/udp
-	protocol   string  // 协议类型 proto/json
-	serializationType string // 序列化类型
+	serviceName string // service name
+	method string // method name
+	target string 	// format e.g.:  ip:port 127.0.0.1:8000
+	timeout time.Duration  // timeout
+	network string  // network type, e.g.:  tcp、udp
+	protocol   string  // protocol type , e.g. : proto、json
+	serializationType string // seralization type , e.g. : proto、msgpack
 	transportOpts transport.ClientTransportOptions
 	interceptors []interceptor.ClientInterceptor
-	selectorName string      // 第三方服务发现名称
+	selectorName string      // service discovery name, e.g. : consul、zookeeper、etcd
 }
 
 type Option func(*Options)

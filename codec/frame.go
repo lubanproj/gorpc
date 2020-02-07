@@ -8,14 +8,14 @@ import (
 )
 
 type FrameHeader struct {
-	Magic uint8  // 魔数
-	Version uint8 // 版本号
-	MsgType uint8  // 消息类型   0x0 普通请求  0x1 心跳包
-	ReqType uint8  // 请求类型   0x0 一发一收  0x1 只发不收 0x2 客户端流式请求 0x3 服务端流式请求 0x4 双向流式请求
-	CompressType uint8 // 是否压缩 0x0 不压缩 0x1 压缩
-	StreamID uint16    // 流 ID
-	Length uint32  	// 数据包总长度
-	Reserved uint32  // 4 字节保留字段
+	Magic uint8
+	Version uint8
+	MsgType uint8  // msg type e.g. :   0x0: general req,  0x1: heartbeat
+	ReqType uint8  // request type e.g. :   0x0: send and receive,   0x1: send but not receive,  0x2: client stream request, 0x3: server stream request, 0x4: bidirectional streaming request
+	CompressType uint8 // compression or not :  0x0: not compression,  0x1: compression
+	StreamID uint16    // stream ID
+	Length uint32  	// total packet length
+	Reserved uint32  // 4 bytes reserved
 }
 
 func ReadFrame(conn net.Conn) ([]byte, error) {
@@ -25,7 +25,7 @@ func ReadFrame(conn net.Conn) ([]byte, error) {
 		return nil, err
 	}
 
-	// 校验魔数
+	// validate magic
 	if magic := uint8(frameHeader[0]); magic != Magic {
 		return nil, codes.ClientMsgError
 	}

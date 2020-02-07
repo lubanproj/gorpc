@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-// 解析 target 地址，例如 ip://127.0.0.1:6379
+// parse target address，e.g: ip://127.0.0.1:6379
 func ParseAddress(target string) (string, string, error){
 	if target == "" {
 		return "","",codes.ConfigError
@@ -22,7 +22,7 @@ func ParseAddress(target string) (string, string, error){
 	return ipAndPort[0], ipAndPort[1],nil
 }
 
-// 解析 service path
+// parse service path
 func ParseServicePath(path string) (string, string, error) {
 	index := strings.LastIndex(path, "/")
 	if index == 0 || index == -1 {

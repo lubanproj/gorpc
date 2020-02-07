@@ -12,7 +12,7 @@ type PoolConn struct {
 	mu sync.RWMutex
 }
 
-// 覆盖 conn Close, 实现连接复用
+// overwrite conn Close for connection reuse
 func (p *PoolConn) Close() error {
 	p.mu.RLock()
 	defer p.mu.RUnlock()

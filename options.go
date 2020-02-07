@@ -6,16 +6,16 @@ import (
 )
 
 type ServerOptions struct {
-	address string  // 监听地址，格式 ip://127.0.0.1:8080 , dns://www.google.com
-	network string  // 网络类型，如 tcp、udp
-	protocol string  // 协议类型，如 proto/json 等
-	timeout time.Duration       // 超时时间
-	serializationType string 	// 序列化方式，默认是 proto
+	address string  // listening address, e.g. :( ip://127.0.0.1:8080、 dns://www.google.com)
+	network string  // network type, e.g. : tcp、udp
+	protocol string  // protocol typpe, e.g. : proto、json
+	timeout time.Duration       // timeout
+	serializationType string 	// serialization type, default: proto
 
-	selectorSvrAddr string       // 服务发现 server 地址，当使用第三方服务发现方式时需要填写
-	tracingSvrAddr  string 		 // tracing 类插件 server 地址，当使用第三方 tracing 类插件时需要填写
-	tracingSpanName string       // tracing 类插件 span name, 当使用第三方 tracing 类插件时需要填写
-	pluginNames []string         // 插件名字
+	selectorSvrAddr string       // service discovery server address, required when using the third-party service discovery plugin
+	tracingSvrAddr  string 		 // tracing plugin server address, required when using the third-party tracing plugin
+	tracingSpanName string       // tracing span name, required when using the third-party tracing plugin
+	pluginNames []string         // plugin name
 	interceptors []interceptor.ServerInterceptor
 }
 

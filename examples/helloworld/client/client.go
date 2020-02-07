@@ -13,6 +13,7 @@ func main() {
 		client.WithTarget("127.0.0.1:8000"),
 		client.WithNetwork("tcp"),
 		client.WithTimeout(2000 * time.Millisecond),
+		client.WithSerializationType("msgpack"),
 	}
 	c := client.DefaultClient
 	req := &helloworld.HelloRequest{

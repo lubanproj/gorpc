@@ -14,7 +14,7 @@ type Consul struct {
 	opts *plugin.Options
 	client *api.Client
 	config *api.Config
-	balancerName string  // 负载均衡模式，包括随机、轮询、加权轮询、一致性hash 等
+	balancerName string  // load balancing mode, including random, polling, weighted polling, consistent hash, etc
 	writeOptions *api.WriteOptions
 	queryOptions *api.QueryOptions
 }

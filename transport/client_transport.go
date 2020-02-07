@@ -52,13 +52,13 @@ func (c *clientTransport) Send(ctx context.Context, req []byte, opts ...ClientTr
 
 func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, error) {
 
-	// 服务发现
+	// service discovery
 	addr, err := c.opts.Selector.Select(c.opts.ServiceName)
 	if err != nil {
 		return nil, err
 	}
 
-	// defaultSelector 返回 "", 失败兜底
+	// defaultSelector returns "", use the target as address
 	if addr == "" {
 		addr = c.opts.Target
 	}
@@ -83,7 +83,7 @@ func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, e
 		}
 	}
 
-	// 解析帧
+	// parse frame
 	frame, err := codec.ReadFrame(conn)
 	if err != nil {
 		return nil, codes.NewFrameworkError(codes.ClientNetworkErrorCode, err.Error())
