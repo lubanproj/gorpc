@@ -120,7 +120,7 @@ func (s *serverTransport) handleConn(ctx context.Context, rawConn net.Conn) erro
 		// check ctx is done
 		select {
 		case <-ctx.Done():
-			return nil
+			return ctx.Err();
 		default:
 		}
 
