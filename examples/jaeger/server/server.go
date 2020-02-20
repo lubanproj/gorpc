@@ -9,11 +9,14 @@ import (
 
 
 func main() {
+
+	pprof()
+
 	opts := []gorpc.ServerOption{
 		gorpc.WithAddress("127.0.0.1:8000"),
 		gorpc.WithNetwork("tcp"),
 		gorpc.WithSerializationType("msgpack"),
-		gorpc.WithTimeout(time.Millisecond * 800),
+		gorpc.WithTimeout(time.Millisecond * 2000),
 		gorpc.WithTracingSvrAddr("localhost:6831"),
 		gorpc.WithTracingSpanName("helloworld.Greeter"),
 		gorpc.WithPlugin(jaeger.Name),

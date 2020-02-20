@@ -4,8 +4,10 @@ import (
 	"context"
 	"errors"
 	"github.com/lubanproj/gorpc/codes"
+	"io"
 	"net"
 	"sync"
+	"time"
 )
 
 type Pool interface {
@@ -18,6 +20,7 @@ type pool struct {
 }
 
 var poolMap = make(map[string]Pool)
+var oneByte = make([]byte, 1)
 
 func init() {
 	registorPool("default", DefaultPool)
@@ -42,6 +45,7 @@ func NewConnPool(opt ...Option) *pool {
 	opts := &Options {
 		initialCap: 5,
 		maxCap: 1000,
+		idleTimeout: 60 * time.Second,
 	}
 	m := &sync.Map{}
 
@@ -77,10 +81,13 @@ func (p *pool) Get(ctx context.Context, network string, address string) (net.Con
 
 type channelPool struct {
 	net.Conn
-	initialCap int
-	maxCap int
+	initialCap int  // initial capacity
+	maxCap int      // max capacity
+	maxIdle int     // max idle conn number
+	idleTimeout time.Duration  // idle timeout
 	Dial func(context.Context) (net.Conn, error)
 	conns chan net.Conn
+	connsForCopy chan net.Conn     // conns for copy
 	mu sync.Mutex
 }
 
@@ -93,13 +100,17 @@ func (p *pool) NewChannelPool(ctx context.Context, network string, address strin
 			return net.Dial(network, address)
 		},
 		conns : make(chan net.Conn, p.opts.maxCap),
+		connsForCopy : make(chan net.Conn, p.opts.maxCap),
+		idleTimeout: p.opts.idleTimeout,
 	}
 	conn , err := c.Dial(ctx);
 	if err != nil {
 		c.Close()
 		return nil, codes.ConnectionPoolInitError
 	}
-	c.conns <- conn
+	c.conns <- c.wrapConn(conn)
+
+	c.RegisterChecker(3 * time.Second, c.Checker)
 	return c, nil
 }
 
@@ -156,6 +167,77 @@ func (c *channelPool) Put(conn net.Conn) error {
 		return conn.Close()
 	}
 }
+
+func (c *channelPool) RegisterChecker(internal time.Duration, checker func(conn *PoolConn) bool) {
+	if internal > 0 && checker != nil {
+		for {
+			time.Sleep(internal)
+
+			c.mu.Lock()
+			defer c.mu.Unlock()
+
+			for pc := range c.conns {
+				if conn, ok := pc.(*PoolConn); ok {
+					conn.checked = false
+				}
+			}
+
+			flag := true
+			for flag {
+				select {
+				case pc := <- c.conns :
+					if conn, ok := pc.(*PoolConn); ok {
+						if !checker(conn) {
+							conn.MarkUnusable()
+							conn.Close()
+							break
+						}
+
+						c.connsForCopy <- conn
+					}
+
+				default:
+					flag = false
+					for cc := range c.connsForCopy {
+						c.conns <- cc
+					}
+				}
+
+			}
+
+
+		}
+	}
+}
+
+func (c *channelPool) Checker (conn *PoolConn) bool {
+
+	// check timeout
+	if conn.t.Add(c.idleTimeout).Before(time.Now()) {
+		conn.MarkUnusable()
+		return false
+	}
+
+	// check conn is alive or not
+	if !isConnAlive(conn) {
+		conn.MarkUnusable()
+		return false
+	}
+
+	return true
+}
+
+func isConnAlive(conn net.Conn) bool {
+	conn.SetReadDeadline(time.Now().Add(time.Millisecond))
+
+	if n, err := conn.Read(oneByte); n > 0 || err == io.EOF {
+		return false
+	}
+
+	conn.SetReadDeadline(time.Time{})
+	return true
+}
+
 
 
 

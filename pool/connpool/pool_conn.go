@@ -3,13 +3,16 @@ package connpool
 import (
 	"net"
 	"sync"
+	"time"
 )
 
 type PoolConn struct {
 	net.Conn
 	c *channelPool
-	unusable bool
+	unusable bool		// if unusable is true, the conn should be closed
 	mu sync.RWMutex
+	t time.Time  // connection idle time
+	checked bool        // flags to be used by the checker
 }
 
 // overwrite conn Close for connection reuse
@@ -35,6 +38,7 @@ func (p *PoolConn) MarkUnusable() {
 func (c *channelPool) wrapConn(conn net.Conn) net.Conn {
 	p := &PoolConn {
 		c : c,
+		t : time.Now(),
 	}
 	p.Conn = conn
 	return p
