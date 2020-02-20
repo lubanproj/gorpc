@@ -170,43 +170,45 @@ func (c *channelPool) Put(conn net.Conn) error {
 
 func (c *channelPool) RegisterChecker(internal time.Duration, checker func(conn *PoolConn) bool) {
 	if internal > 0 && checker != nil {
-		for {
-			time.Sleep(internal)
+		go func() {
+			for {
+				time.Sleep(internal)
 
-			c.mu.Lock()
-			defer c.mu.Unlock()
+				c.mu.Lock()
+				defer c.mu.Unlock()
 
-			for pc := range c.conns {
-				if conn, ok := pc.(*PoolConn); ok {
-					conn.checked = false
-				}
-			}
-
-			flag := true
-			for flag {
-				select {
-				case pc := <- c.conns :
+				for pc := range c.conns {
 					if conn, ok := pc.(*PoolConn); ok {
-						if !checker(conn) {
-							conn.MarkUnusable()
-							conn.Close()
-							break
+						conn.checked = false
+					}
+				}
+
+				flag := true
+				for flag {
+					select {
+					case pc := <- c.conns :
+						if conn, ok := pc.(*PoolConn); ok {
+							if !checker(conn) {
+								conn.MarkUnusable()
+								conn.Close()
+								break
+							}
+
+							c.connsForCopy <- conn
 						}
 
-						c.connsForCopy <- conn
+					default:
+						flag = false
+						for cc := range c.connsForCopy {
+							c.conns <- cc
+						}
 					}
 
-				default:
-					flag = false
-					for cc := range c.connsForCopy {
-						c.conns <- cc
-					}
 				}
 
+
 			}
-
-
-		}
+		}()
 	}
 }
 
