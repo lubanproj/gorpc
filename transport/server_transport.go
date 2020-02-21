@@ -113,8 +113,8 @@ func (s *serverTransport) ListenAndServeUdp(ctx context.Context, opts ...ServerT
 
 func (s *serverTransport) handleConn(ctx context.Context, rawConn net.Conn) error {
 
-	//rawConn.SetDeadline(time.Now().Add(s.opts.Timeout))
-	//tcpConn := newTcpConn(rawConn)
+	// close the connection before return
+	defer rawConn.Close()
 
 	for {
 		// check ctx is done
