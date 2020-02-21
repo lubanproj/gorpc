@@ -7,6 +7,7 @@ type Options struct {
 	maxCap int    // max capacity
 	idleTimeout time.Duration
 	maxIdle int   // max idle connections
+	dialTimeout time.Duration  // dial timeout
 }
 
 type Option func(*Options)
@@ -33,5 +34,11 @@ func WithMaxIdle (maxIdle int) Option {
 func WithIdleTimeout(idleTimeout time.Duration) Option {
 	return func(o *Options) {
 		o.idleTimeout = idleTimeout
+	}
+}
+
+func WithDialTimeout(dialTimeout time.Duration) Option {
+	return func(o *Options) {
+		o.dialTimeout = dialTimeout
 	}
 }

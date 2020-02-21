@@ -97,18 +97,37 @@ func (p *pool) NewChannelPool(ctx context.Context, network string, address strin
 		initialCap: p.opts.initialCap,
 		maxCap: p.opts.maxCap,
 		Dial : func(ctx context.Context) (net.Conn, error) {
-			return net.Dial(network, address)
+			select {
+			case <-ctx.Done():
+				return nil, ctx.Err()
+			default:
+			}
+
+			timeout := p.opts.dialTimeout
+			if t , ok := ctx.Deadline(); ok {
+				timeout = t.Sub(time.Now())
+			}
+
+			return net.DialTimeout(network, address, timeout)
 		},
 		conns : make(chan net.Conn, p.opts.maxCap),
 		connsForCopy : make(chan net.Conn, p.opts.maxCap),
 		idleTimeout: p.opts.idleTimeout,
 	}
-	conn , err := c.Dial(ctx);
-	if err != nil {
-		c.Close()
-		return nil, codes.ConnectionPoolInitError
+
+	if p.opts.initialCap == 0 {
+		// default initialCap is 1
+		p.opts.initialCap = 1
 	}
-	c.conns <- c.wrapConn(conn)
+
+	for i := 0; i < p.opts.initialCap; i++ {
+		conn , err := c.Dial(ctx);
+		if err != nil {
+			c.Close()
+			return nil, codes.ConnectionPoolInitError
+		}
+		c.conns <- c.wrapConn(conn)
+	}
 
 	c.RegisterChecker(3 * time.Second, c.Checker)
 	return c, nil
@@ -127,7 +146,7 @@ func (c *channelPool) Get(ctx context.Context) (net.Conn, error) {
 		default:
 			conn, err := c.Dial(ctx)
 			if err != nil {
-				return nil, codes.ClientNetworkError
+				return nil, err
 			}
 			return c.wrapConn(conn), nil
 	}

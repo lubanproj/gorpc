@@ -28,7 +28,7 @@ func main() {
 	}
 	rsp := &helloworld.HelloReply{}
 
-	for i:= 1; i< 20; i ++ {
+	for i:= 1; i< 200; i ++ {
 		err = c.Call(context.Background(), "/helloworld.Greeter/SayHello", req, rsp, opts ...)
 		fmt.Println(rsp.Msg, err)
 		time.Sleep(100 * time.Millisecond)
