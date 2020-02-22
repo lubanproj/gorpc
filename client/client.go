@@ -60,6 +60,12 @@ func (c *defaultClient) Invoke(ctx context.Context, req , rsp interface{}, path 
 		o(c.opts)
 	}
 
+	if c.opts.timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, c.opts.timeout)
+		defer cancel()
+	}
+
 	// set serviceName, method
 	newCtx, clientStream := stream.NewClientStream(ctx)
 
