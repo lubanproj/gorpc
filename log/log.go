@@ -32,7 +32,7 @@ type logger struct{
 }
 
 var defaultLog = &logger {
-	Logger : log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile),
+	Logger : log.New(os.Stdout, "", log.LstdFlags|log.Llongfile),
 	options : &Options {
 		level : 2,
 	},
