@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/lubanproj/gorpc/codec"
 	"github.com/lubanproj/gorpc/codes"
+	"net"
 )
 
 type clientTransport struct {
@@ -63,8 +64,8 @@ func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, e
 		addr = c.opts.Target
 	}
 
-	conn, err := c.opts.Pool.Get(ctx, "tcp", addr)
-//	conn, err := net.DialTimeout("tcp", addr, c.opts.Timeout);
+//	conn, err := c.opts.Pool.Get(ctx, "tcp", addr)
+	conn, err := net.DialTimeout("tcp", addr, c.opts.Timeout);
 	if err != nil {
 		return nil, codes.ConnectionError
 	}

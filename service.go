@@ -103,6 +103,12 @@ func (s *service) Handle (ctx context.Context, payload []byte) ([]byte, error) {
 		return nil
 	}
 
+	if s.opts.timeout != 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, s.opts.timeout)
+		defer cancel()
+	}
+
 	rsp, err := handler(s.svr, ctx, dec, s.opts.interceptors)
 	if err != nil {
 		return nil, err

@@ -91,11 +91,6 @@ func (s *serverTransport) ListenAndServeTcp(ctx context.Context, opts ...ServerT
 			// build stream
 			ctx, _ := stream.NewServerStream(ctx)
 
-			// set timeout
-			if s.opts.Timeout != 0 {
-				ctx, _ = context.WithTimeout(ctx, s.opts.Timeout)
-			}
-
 			if err := s.handleConn(ctx, conn); err != nil {
 				log.Error("gorpc handle conn error, %v", err)
 			}
@@ -114,10 +109,10 @@ func (s *serverTransport) ListenAndServeUdp(ctx context.Context, opts ...ServerT
 func (s *serverTransport) handleConn(ctx context.Context, rawConn net.Conn) error {
 
 	// close the connection before return
-	defer rawConn.Close()
+	// defer rawConn.Close()
 
 	for {
-		// check ctx is done
+		// check upstream ctx is done
 		select {
 		case <-ctx.Done():
 			return ctx.Err();
@@ -127,6 +122,7 @@ func (s *serverTransport) handleConn(ctx context.Context, rawConn net.Conn) erro
 		frame , err := s.read(ctx, rawConn)
 		if err == io.EOF {
 			// read compeleted
+			log.Debug("read compeleted...")
 			return nil
 		}
 
