@@ -114,6 +114,7 @@ func (c *defaultClient) invoke(ctx context.Context, req, rsp interface{}) error 
 		transport.WithClientNetwork(c.opts.network),
 		transport.WithClientPool(connpool.GetPool("default")),
 		transport.WithSelector(selector.GetSelector(c.opts.selectorName)),
+		transport.WithTimeout(c.opts.timeout),
 	}
 	frame, err := clientTransport.Send(ctx, reqbody, clientTransportOpts ...)
 	if err != nil {

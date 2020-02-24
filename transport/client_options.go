@@ -3,6 +3,7 @@ package transport
 import (
 	"github.com/lubanproj/gorpc/pool/connpool"
 	"github.com/lubanproj/gorpc/selector"
+	"time"
 )
 
 type ClientTransportOptions struct {
@@ -11,6 +12,7 @@ type ClientTransportOptions struct {
 	Network string
 	Pool connpool.Pool
 	Selector selector.Selector
+	Timeout  time.Duration
 }
 
 type ClientTransportOption func(*ClientTransportOptions)
@@ -42,5 +44,11 @@ func WithClientPool(pool connpool.Pool) ClientTransportOption {
 func WithSelector(selector selector.Selector) ClientTransportOption {
 	return func(o *ClientTransportOptions) {
 		o.Selector = selector
+	}
+}
+
+func WithTimeout(timeout time.Duration) ClientTransportOption {
+	return func(o *ClientTransportOptions) {
+		o.Timeout = timeout
 	}
 }
