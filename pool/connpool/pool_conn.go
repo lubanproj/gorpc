@@ -13,6 +13,7 @@ type PoolConn struct {
 	mu sync.RWMutex
 	t time.Time  // connection idle time
 	checked bool        // flags to be used by the checker
+	dialTimeout time.Duration // connection timeout duration
 }
 
 // overwrite conn Close for connection reuse
@@ -25,6 +26,9 @@ func (p *PoolConn) Close() error {
 			return p.Conn.Close()
 		}
 	}
+
+	// reset connection deadline
+	p.Conn.SetReadDeadline(time.Now().Add(p.dialTimeout))
 
 	return p.c.Put(p.Conn)
 }
@@ -39,6 +43,7 @@ func (c *channelPool) wrapConn(conn net.Conn) net.Conn {
 	p := &PoolConn {
 		c : c,
 		t : time.Now(),
+		dialTimeout: c.dialTimeout,
 	}
 	p.Conn = conn
 	return p

@@ -85,6 +85,7 @@ type channelPool struct {
 	maxCap int      // max capacity
 	maxIdle int     // max idle conn number
 	idleTimeout time.Duration  // idle timeout
+	dialTimeout time.Duration  // dial timeout
 	Dial func(context.Context) (net.Conn, error)
 	conns chan net.Conn
 	connsForCopy chan net.Conn     // conns for copy
@@ -113,6 +114,7 @@ func (p *pool) NewChannelPool(ctx context.Context, network string, address strin
 		conns : make(chan net.Conn, p.opts.maxCap),
 		connsForCopy : make(chan net.Conn, p.opts.maxCap),
 		idleTimeout: p.opts.idleTimeout,
+		dialTimeout: p.opts.dialTimeout,
 	}
 
 	if p.opts.initialCap == 0 {
