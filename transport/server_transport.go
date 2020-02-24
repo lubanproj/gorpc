@@ -122,7 +122,6 @@ func (s *serverTransport) handleConn(ctx context.Context, rawConn net.Conn) erro
 		frame , err := s.read(ctx, rawConn)
 		if err == io.EOF {
 			// read compeleted
-			log.Debug("read compeleted...")
 			return nil
 		}
 
