@@ -106,7 +106,7 @@ func (c *Consul) Init(opts ...plugin.Option) error {
 	}
 
 	if len(c.opts.Services) == 0 || c.opts.SvrAddr == "" || c.opts.SelectorSvrAddr == "" {
-		return fmt.Errorf("consul init error, len(services) : %s, svrAddr : %s, selectorSvrAddr : %s",
+		return fmt.Errorf("consul init error, len(services) : %d, svrAddr : %s, selectorSvrAddr : %s",
 			len(c.opts.Services), c.opts.SvrAddr, c.opts.SelectorSvrAddr)
 	}
 

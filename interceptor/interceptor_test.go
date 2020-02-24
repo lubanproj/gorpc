@@ -24,6 +24,6 @@ func TestIntercept(t *testing.T) {
 	}
 	ceps := []ClientInterceptor{inter1, inter2}
 
-	err := Intercept(context.Background(), nil ,nil, ceps , ivk)
+	err := ClientIntercept(context.Background(), nil ,nil, ceps , ivk)
 	assert.Nil(t, err)
 }
