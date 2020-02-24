@@ -32,7 +32,7 @@ type logger struct{
 }
 
 var defaultLog = &logger {
-	Logger : log.New(os.Stdout, "", log.LstdFlags|log.Llongfile),
+	Logger : log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile),
 	options : &Options {
 		level : 2,
 	},
@@ -97,7 +97,7 @@ func (log *logger) Trace(format string, v ...interface{}) {
 	var buffer bytes.Buffer
 	buffer.WriteString("[TRACE] ")
 	buffer.WriteString(data)
-
+	log.Output(3, buffer.String())
 }
 
 func Debug(format string, v ...interface{}) {
@@ -112,7 +112,7 @@ func (log *logger) Debug(format string, v ...interface{}) {
 	var buffer bytes.Buffer
 	buffer.WriteString("[DEBUG] ")
 	buffer.WriteString(data)
-	Output(log, 2, buffer.String())
+	log.Output(3, buffer.String())
 }
 
 func Info(format string, v ...interface{}) {
@@ -127,7 +127,7 @@ func (log *logger) Info(format string, v ...interface{}) {
 	var buffer bytes.Buffer
 	buffer.WriteString("[INFO] ")
 	buffer.WriteString(data)
-	Output(log, 2, buffer.String())
+	log.Output(3, buffer.String())
 }
 
 func Warning(format string, v ...interface{}) {
@@ -142,7 +142,7 @@ func (log *logger) Warning(format string, v ...interface{}) {
 	var buffer bytes.Buffer
 	buffer.WriteString("[WARNING] ")
 	buffer.WriteString(data)
-	Output(log, 2, buffer.String())
+	log.Output(3, buffer.String())
 }
 
 func Error(format string, v ...interface{}) {
@@ -157,7 +157,7 @@ func (log *logger) Error(format string, v ...interface{}) {
 	var buffer bytes.Buffer
 	buffer.WriteString("[ERROR] ")
 	buffer.WriteString(data)
-	Output(log, 2, buffer.String())
+	log.Output(3, buffer.String())
 }
 
 func Fatal(format string, v ...interface{}) {
@@ -172,11 +172,6 @@ func (log *logger) Fatal(format string, v ...interface{}) {
 	var buffer bytes.Buffer
 	buffer.WriteString("[FATAL] ")
 	buffer.WriteString(data)
-	Output(log, 2, buffer.String())
+	log.Output(3, buffer.String())
 }
 
-func Output(log *logger, calldepth int, s string) {
-	if err := log.Output(2, s); err != nil {
-		fmt.Println("log output fail...")
-	}
-}
