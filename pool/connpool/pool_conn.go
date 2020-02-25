@@ -12,7 +12,6 @@ type PoolConn struct {
 	unusable bool		// if unusable is true, the conn should be closed
 	mu sync.RWMutex
 	t time.Time  // connection idle time
-	checked bool        // flags to be used by the checker
 	dialTimeout time.Duration // connection timeout duration
 }
 

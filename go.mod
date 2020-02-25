@@ -6,6 +6,8 @@ require (
 	github.com/golang/protobuf v1.3.2
 	github.com/hashicorp/consul/api v1.4.0
 	github.com/opentracing/opentracing-go v1.1.0
+	github.com/petermattis/goid v0.0.0-20180202154549-b0b1615b78e5 // indirect
+	github.com/sasha-s/go-deadlock v0.2.0 // indirect
 	github.com/stretchr/testify v1.4.0
 	github.com/uber/jaeger-client-go v2.22.1+incompatible
 	github.com/uber/jaeger-lib v2.2.0+incompatible // indirect

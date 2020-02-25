@@ -108,7 +108,7 @@ func (s *serverTransport) ListenAndServeUdp(ctx context.Context, opts ...ServerT
 func (s *serverTransport) handleConn(ctx context.Context, rawConn net.Conn) error {
 
 	// close the connection before return
-	// defer rawConn.Close()
+	defer rawConn.Close()
 
 	for {
 		// check upstream ctx is done

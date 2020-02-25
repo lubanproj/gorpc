@@ -45,6 +45,7 @@ func NewConnPool(opt ...Option) *pool {
 		initialCap: 5,
 		maxCap: 1000,
 		idleTimeout: 60 * time.Second,
+		dialTimeout: 1 * time.Second,
 	}
 	m := &sync.Map{}
 
@@ -180,8 +181,8 @@ func (c *channelPool) Put(conn net.Conn) error {
 	defer c.mu.Unlock()
 
 	select {
-		case c.conns <- conn :
-			return nil
+	case c.conns <- conn :
+		return nil
 	default:
 		// 连接池满
 		return conn.Close()
@@ -189,47 +190,32 @@ func (c *channelPool) Put(conn net.Conn) error {
 }
 
 func (c *channelPool) RegisterChecker(internal time.Duration, checker func(conn *PoolConn) bool) {
-	if internal > 0 && checker != nil {
-		go func() {
-			for {
-				time.Sleep(internal)
 
-				c.mu.Lock()
-				defer c.mu.Unlock()
-
-				for pc := range c.conns {
-					if conn, ok := pc.(*PoolConn); ok {
-						conn.checked = false
-					}
-				}
-
-				flag := true
-				for flag {
-					select {
-					case pc := <- c.conns :
-						if conn, ok := pc.(*PoolConn); ok {
-							if !checker(conn) {
-								conn.MarkUnusable()
-								conn.Close()
-								break
-							}
-
-							c.connsForCopy <- conn
-						}
-
-					default:
-						flag = false
-						for cc := range c.connsForCopy {
-							c.conns <- cc
-						}
-					}
-
-				}
-
-
-			}
-		}()
+	if internal <= 0 || checker == nil {
+		return
 	}
+
+	go func() {
+
+		time.Sleep(internal)
+
+		for pc := range c.conns {
+			conn, ok := pc.(*PoolConn)
+
+			if !ok {
+				continue
+			}
+
+			if !checker(conn) {
+				conn.MarkUnusable()
+				conn.Close()
+				continue
+			}
+
+			c.conns <- conn
+		}
+
+	}()
 }
 
 func (c *channelPool) Checker (conn *PoolConn) bool {
