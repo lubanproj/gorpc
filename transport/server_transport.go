@@ -61,29 +61,28 @@ func (s *serverTransport) ListenAndServe(ctx context.Context, opts ...ServerTran
 func (s *serverTransport) ListenAndServeTcp(ctx context.Context, opts ...ServerTransportOption) error {
 
 	lis, err := net.Listen(s.opts.Network, s.opts.Address)
-
 	if err != nil {
-		return codes.NewFrameworkError(codes.ServerNetworkErrorCode, err.Error())
+		return err
 	}
 
 	for {
 
 		tl, ok := lis.(*net.TCPListener);
 		if !ok {
-			return codes.NewFrameworkError(codes.ServerNetworkErrorCode, "unsupported network")
+			return codes.NetworkNotSupportedError
 		}
 
 		conn , err := tl.AcceptTCP()
+		if err != nil {
+			return err
+		}
+
 		if err = conn.SetKeepAlive(true); err != nil {
 			return err
 		}
 
 		if s.opts.KeepAlivePeriod != 0 {
 			conn.SetKeepAlivePeriod(s.opts.KeepAlivePeriod)
-		}
-
-		if err != nil {
-			return err
 		}
 
 		go func() {
@@ -169,7 +168,7 @@ func (s *serverTransport) handle(ctx context.Context, payload []byte) ([]byte, e
 
 	rsp , err := s.opts.Handler.Handle(ctx, payload)
 	if err != nil {
-		return nil, codes.NewFrameworkError(codes.ServerNoResponseErrorCode, err.Error())
+		return nil, err
 	}
 
 	return rsp, nil

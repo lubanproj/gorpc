@@ -3,7 +3,6 @@ package connpool
 import (
 	"context"
 	"errors"
-	"github.com/lubanproj/gorpc/codes"
 	"io"
 	"net"
 	"sync"
@@ -71,7 +70,7 @@ func (p *pool) Get(ctx context.Context, network string, address string) (net.Con
 
 	cp, err := p.NewChannelPool(ctx, network, address)
 	if err != nil {
-		return nil, codes.ConnectionPoolInitError
+		return nil, err
 	}
 
 	p.conns.Store(address, cp)
@@ -126,7 +125,7 @@ func (p *pool) NewChannelPool(ctx context.Context, network string, address strin
 		conn , err := c.Dial(ctx);
 		if err != nil {
 			c.Close()
-			return nil, codes.ConnectionPoolInitError
+			return nil, err
 		}
 		c.conns <- c.wrapConn(conn)
 	}

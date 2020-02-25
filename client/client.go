@@ -71,7 +71,7 @@ func (c *defaultClient) Invoke(ctx context.Context, req , rsp interface{}, path 
 
 	serviceName, method , err := utils.ParseServicePath(path)
 	if err != nil {
-		return codes.NewFrameworkError(codes.ClientDialErrorCode, "invalid path")
+		return err
 	}
 
 	c.opts.serviceName = serviceName

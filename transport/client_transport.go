@@ -67,7 +67,7 @@ func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, e
 //	conn, err := c.opts.Pool.Get(ctx, "tcp", addr)
 	conn, err := net.DialTimeout("tcp", addr, c.opts.Timeout);
 	if err != nil {
-		return nil, codes.ConnectionError
+		return nil, err
 	}
 	defer conn.Close()
 
@@ -76,7 +76,7 @@ func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, e
 	for sendNum < len(req) {
 		num , err = conn.Write(req)
 		if err != nil {
-			return nil, codes.NewFrameworkError(codes.ClientNetworkErrorCode,err.Error())
+			return nil, err
 		}
 		sendNum += num
 
@@ -88,7 +88,7 @@ func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, e
 	// parse frame
 	frame, err := codec.ReadFrame(conn)
 	if err != nil {
-		return nil, codes.NewFrameworkError(codes.ClientNetworkErrorCode, err.Error())
+		return nil, err
 	}
 
 	return frame, err
@@ -103,12 +103,7 @@ func (c *clientTransport) SendUdpReq(ctx context.Context, req []byte) ([]byte, e
 func isDone(ctx context.Context) error {
 	select {
 	case <- ctx.Done() :
-		if ctx.Err() == context.Canceled {
-			return codes.ClientContextCanceledError
-		}
-		if ctx.Err() == context.DeadlineExceeded {
-			return codes.ClientTimeoutError
-		}
+		return ctx.Err()
 	default:
 	}
 
