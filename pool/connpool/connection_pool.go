@@ -44,8 +44,8 @@ func NewConnPool(opt ...Option) *pool {
 	opts := &Options {
 		initialCap: 5,
 		maxCap: 1000,
-		idleTimeout: 60 * time.Second,
-		dialTimeout: 1 * time.Second,
+		idleTimeout: 1 * time.Minute,
+		dialTimeout: 200 * time.Millisecond,
 	}
 	m := &sync.Map{}
 
@@ -65,7 +65,7 @@ func (p *pool) Get(ctx context.Context, network string, address string) (net.Con
 	if value, ok := p.conns.Load(address); ok {
 		if cp, ok := value.(*channelPool); ok {
 			conn, err := cp.Get(ctx)
-			return cp.wrapConn(conn), err
+			return conn, err
 		}
 	}
 
@@ -87,8 +87,7 @@ type channelPool struct {
 	idleTimeout time.Duration  // idle timeout
 	dialTimeout time.Duration  // dial timeout
 	Dial func(context.Context) (net.Conn, error)
-	conns chan net.Conn
-	connsForCopy chan net.Conn     // conns for copy
+	conns chan *PoolConn
 	mu sync.Mutex
 }
 
@@ -111,8 +110,7 @@ func (p *pool) NewChannelPool(ctx context.Context, network string, address strin
 
 			return net.DialTimeout(network, address, timeout)
 		},
-		conns : make(chan net.Conn, p.opts.maxCap),
-		connsForCopy : make(chan net.Conn, p.opts.maxCap),
+		conns : make(chan *PoolConn, p.opts.maxCap),
 		idleTimeout: p.opts.idleTimeout,
 		dialTimeout: p.opts.dialTimeout,
 	}
@@ -128,7 +126,7 @@ func (p *pool) NewChannelPool(ctx context.Context, network string, address strin
 			c.Close()
 			return nil, err
 		}
-		c.conns <- c.wrapConn(conn)
+		c.Put(c.wrapConn(conn))
 	}
 
 	c.RegisterChecker(3 * time.Second, c.Checker)
@@ -137,14 +135,19 @@ func (p *pool) NewChannelPool(ctx context.Context, network string, address strin
 
 func (c *channelPool) Get(ctx context.Context) (net.Conn, error) {
 	if c.conns == nil {
-		return nil, errors.New("connection closed")
+		return nil, ErrConnClosed
 	}
 	select {
-		case conn := <-c.conns :
-			if conn == nil {
-				return nil, errors.New("connection closed")
+		case pc := <-c.conns :
+			if pc == nil {
+				return nil, ErrConnClosed
 			}
-			return c.wrapConn(conn), nil
+
+			if pc.unusable {
+				return nil, ErrConnClosed
+			}
+
+			return pc, nil
 		default:
 			conn, err := c.Dial(ctx)
 			if err != nil {
@@ -170,7 +173,7 @@ func (c *channelPool) Close() {
 	}
 }
 
-func (c *channelPool) Put(conn net.Conn) error {
+func (c *channelPool) Put(conn *PoolConn) error {
 	if conn == nil {
 		return errors.New("connection closed")
 	}
@@ -199,36 +202,38 @@ func (c *channelPool) RegisterChecker(internal time.Duration, checker func(conn 
 
 		time.Sleep(internal)
 
-		for pc := range c.conns {
-			conn, ok := pc.(*PoolConn)
+		length := len(c.conns)
 
-			if !ok {
-				continue
+		for i:=0; i < length; i++ {
+
+			select {
+			case pc := <- c.conns :
+
+				if !checker(pc) {
+					pc.MarkUnusable()
+					pc.Close()
+					break
+				} else {
+					c.Put(pc)
+				}
+			default:
+				break
 			}
 
-			if !checker(conn) {
-				conn.MarkUnusable()
-				conn.Close()
-				continue
-			}
-
-			c.conns <- conn
 		}
 
 	}()
 }
 
-func (c *channelPool) Checker (conn *PoolConn) bool {
+func (c *channelPool) Checker (pc *PoolConn) bool {
 
 	// check timeout
-	if conn.t.Add(c.idleTimeout).Before(time.Now()) {
-		conn.MarkUnusable()
+	if pc.t.Add(c.idleTimeout).Before(time.Now()) {
 		return false
 	}
 
 	// check conn is alive or not
-	if !isConnAlive(conn) {
-		conn.MarkUnusable()
+	if !isConnAlive(pc.Conn) {
 		return false
 	}
 

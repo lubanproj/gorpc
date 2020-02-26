@@ -1,9 +1,14 @@
 package connpool
 
 import (
+	"errors"
 	"net"
 	"sync"
 	"time"
+)
+
+var (
+	ErrConnClosed = errors.New("connection closed ...")
 )
 
 type PoolConn struct {
@@ -27,9 +32,9 @@ func (p *PoolConn) Close() error {
 	}
 
 	// reset connection deadline
-	p.Conn.SetReadDeadline(time.Now().Add(p.dialTimeout))
+	p.Conn.SetDeadline(time.Time{})
 
-	return p.c.Put(p.Conn)
+	return p.c.Put(p)
 }
 
 func (p *PoolConn) MarkUnusable() {
@@ -38,7 +43,31 @@ func (p *PoolConn) MarkUnusable() {
 	p.mu.Unlock()
 }
 
-func (c *channelPool) wrapConn(conn net.Conn) net.Conn {
+func (p *PoolConn) Read(b []byte) (int, error) {
+	if p.unusable {
+		return 0, ErrConnClosed
+	}
+	n, err := p.Conn.Read(b)
+	if err != nil {
+		p.MarkUnusable()
+		p.Conn.Close()
+	}
+	return n, err
+}
+
+func (p *PoolConn) Write(b []byte) (int, error) {
+	if p.unusable {
+		return 0, ErrConnClosed
+	}
+	n, err := p.Conn.Write(b)
+	if err != nil {
+		p.MarkUnusable()
+		p.Conn.Close()
+	}
+	return n, err
+}
+
+func (c *channelPool) wrapConn(conn net.Conn) *PoolConn {
 	p := &PoolConn {
 		c : c,
 		t : time.Now(),
@@ -47,3 +76,4 @@ func (c *channelPool) wrapConn(conn net.Conn) net.Conn {
 	p.Conn = conn
 	return p
 }
+

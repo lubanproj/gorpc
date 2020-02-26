@@ -68,6 +68,7 @@ func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, e
 	if err != nil {
 		return nil, err
 	}
+
 	defer conn.Close()
 
 	sendNum := 0
