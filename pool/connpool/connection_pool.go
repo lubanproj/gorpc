@@ -123,7 +123,6 @@ func (p *pool) NewChannelPool(ctx context.Context, network string, address strin
 	for i := 0; i < p.opts.initialCap; i++ {
 		conn , err := c.Dial(ctx);
 		if err != nil {
-			c.Close()
 			return nil, err
 		}
 		c.Put(c.wrapConn(conn))
