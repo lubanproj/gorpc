@@ -20,8 +20,8 @@ go run server/server.go
 go run client/client.go
 ```
 ### Documentation
-[Examples](https://github.com/lubanproj/gorpc/tree/master/examples).
-[FAQ](https://github.com/lubanproj/gorpc/wiki/FAQ)
+- [Examples](https://github.com/lubanproj/gorpc/tree/master/examples).
+- [FAQ](https://github.com/lubanproj/gorpc/wiki/FAQ)
 ### Features
 - **High performance**, performance far exceeds that of the grpc, refer to [Performance](#Performance)
 - Support **reflection**, **code generation** two ways to call
