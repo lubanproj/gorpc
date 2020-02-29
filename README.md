@@ -20,6 +20,80 @@ go run server/server.go
 # start client，start another terminal and execute
 go run client/client.go
 ```
+### Example
+
+You only need three steps to complete a service call
+
+1. define a service
+2. use a server to publish a service
+3. use a client to initiate a service call
+
+**1. define a service**
+
+```
+type Service struct {
+
+}
+
+type HelloRequest struct {
+	Msg string
+}
+
+type HelloReply struct {
+	Msg string
+}
+
+func (s *Service) SayHello(ctx context.Context, req *HelloRequest) (*HelloReply, error) {
+	rsp := &HelloReply{
+		Msg : "world",
+	}
+
+	return rsp, nil
+}
+
+```
+
+**2. use a server to publish a service**
+
+```
+func main() {
+	opts := []gorpc.ServerOption{
+		gorpc.WithAddress("127.0.0.1:8000"),
+		gorpc.WithNetwork("tcp"),
+		gorpc.WithSerializationType("msgpack"),
+		gorpc.WithTimeout(time.Millisecond * 2000),
+	}
+	s := gorpc.NewServer(opts ...)
+	if err := s.RegisterService("/helloworld.Greeter", new(helloworld.Service)); err != nil {
+		panic(err)
+	}
+	s.Serve()
+}
+```
+
+**3. use a client to initiate a service call**
+
+```
+func main() {
+	opts := []client.Option {
+		client.WithTarget("127.0.0.1:8000"),
+		client.WithNetwork("tcp"),
+		client.WithTimeout(2000 * time.Millisecond),
+		client.WithSerializationType("msgpack"),
+	}
+	c := client.DefaultClient
+	req := &helloworld.HelloRequest{
+		Msg: "hello",
+	}
+	rsp := &helloworld.HelloReply{}
+	err := c.Call(context.Background(), "/helloworld.Greeter/SayHello", req, rsp, opts ...)
+	fmt.Println(rsp.Msg, err)
+}
+```
+
+See [helloworld](https://github.com/lubanproj/gorpc/tree/master/examples/helloworld) for more details
+
+
 ### Documentation
 - [Examples](https://github.com/lubanproj/gorpc/tree/master/examples).
 - [FAQ](https://github.com/lubanproj/gorpc/wiki/FAQ)
