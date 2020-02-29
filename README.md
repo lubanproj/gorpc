@@ -14,9 +14,9 @@ In the go modules mode, you simply import the package "github.com/lubanproj/gorp
 ```
 git clone https://github.com/lubanproj/gorpc.git
 cd gorpc/examples/helloworld
-# 启动 server
+# start server
 go run server/server.go
-# 启动 client，另起终端，执行
+# start client，start another terminal and execute
 go run client/client.go
 ```
 ### Documentation
@@ -49,9 +49,9 @@ The results were performed using [**gorpc-benchmark**](https://github.com/lubanp
 ```
 git clone https://github.com/lubanproj/gorpc-benchmark.git
 cd gorpc-benchmark
-# 运行 gorpc server
+# start gorpc server
 go run server.go
-# 另起终端，运行 gorpc-benchmark client
+# start gorpc-benchmark client，start another terminal and execute
 go run client.go -concurrency=100 -total=1000000
 ```
 The performance test results are as follows : 
@@ -71,7 +71,7 @@ git clone https://github.com/lubanproj/gorpc-benchmark.git
 cd gorpc-benchmark/grpc
 # 运行 gorpc server
 go run server.go
-# 另起终端，运行 gorpc-benchmark client
+# start gorpc-benchmark client, start another terminal and execute 
 go run client.go -concurrency=100 -total=1000000
 ```
 The performance test results are as follows : 
