@@ -11,14 +11,10 @@ type roundRobinBalancer struct {
 }
 
 type roundRobinPicker struct {
-	nodes []*Node			// service nodes
+	length int       // service nodes length
 	lastUpdateTime time.Time  // last update time
 	duration time.Duration    // time duration to update again
 	lastIndex int    // last accessed index
-}
-
-func (rr *roundRobinBalancer) updateServer(picker *roundRobinPicker, nodes []*Node) {
-
 }
 
 func (rp *roundRobinPicker) pick(nodes []*Node) *Node {
@@ -28,8 +24,9 @@ func (rp *roundRobinPicker) pick(nodes []*Node) *Node {
 
 	// update picker after timeout
 	if time.Now().Sub(rp.lastUpdateTime) > rp.duration ||
-		len(nodes) != len(rp.nodes){
-		rp.nodes = nodes
+		len(nodes) != rp.length {
+		rp.length = len(nodes)
+		rp.lastUpdateTime = time.Now()
 		rp.lastIndex = 0
 	}
 
@@ -50,14 +47,12 @@ func (r *roundRobinBalancer) Balance(serviceName string, nodes []*Node) *Node {
 		picker = &roundRobinPicker{
 			lastUpdateTime: time.Now(),
 			duration : r.duration,
-			nodes : nodes,
+			length : len(nodes),
 		}
-		r.pickers.Store(serviceName,picker)
 	} else {
 		picker = p.(*roundRobinPicker)
 	}
 
-	r.updateServer(picker, nodes)
 	node := picker.pick(nodes)
 	r.pickers.Store(serviceName,picker)
 	return node

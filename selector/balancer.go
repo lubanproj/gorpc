@@ -22,11 +22,13 @@ const (
 
 func init() {
 	RegisterBalancer(Random, DefaultBalancer)
-	RegisterBalancer(RoundRobin, RoundRobinBalancer)
+	RegisterBalancer(RoundRobin, RRBalancer)
+	RegisterBalancer(WeightedRoundRobin, WRRBalancer)
 }
 
-var DefaultBalancer = &randomBalancer{}
-var RoundRobinBalancer = newRoundRobinBalancer()
+var DefaultBalancer = newRandomBalancer()
+var RRBalancer = newRoundRobinBalancer()
+var WRRBalancer = newWeightedRoundRobinBalancer()
 
 func RegisterBalancer(name string, balancer Balancer) {
 	if balancerMap == nil {
@@ -40,6 +42,10 @@ func GetBalancer(name string) Balancer {
 		return balancer
 	}
 	return DefaultBalancer
+}
+
+func newRandomBalancer() *randomBalancer {
+	return &randomBalancer{}
 }
 
 type randomBalancer struct {
