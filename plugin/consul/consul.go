@@ -80,7 +80,7 @@ func (c *Consul) Select(serviceName string) (string, error) {
 	}
 
 	balancer := selector.GetBalancer(c.balancerName)
-	node := balancer.Balance(nodes)
+	node := balancer.Balance(serviceName,nodes)
 
 	if node == nil {
 		return "", fmt.Errorf("no services find in %s", serviceName)

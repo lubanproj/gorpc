@@ -6,7 +6,7 @@ import (
 )
 
 type Balancer interface {
-	Balance([]*Node) *Node
+	Balance(string, []*Node) *Node
 }
 
 var balancerMap = make(map[string]Balancer, 0)
@@ -21,10 +21,12 @@ const (
 )
 
 func init() {
-	RegisterBalancer(Random, &randomBalancer{})
+	RegisterBalancer(Random, DefaultBalancer)
+	RegisterBalancer(RoundRobin, RoundRobinBalancer)
 }
 
 var DefaultBalancer = &randomBalancer{}
+var RoundRobinBalancer = newRoundRobinBalancer()
 
 func RegisterBalancer(name string, balancer Balancer) {
 	if balancerMap == nil {
@@ -44,7 +46,7 @@ type randomBalancer struct {
 
 }
 
-func (r *randomBalancer) Balance(nodes []*Node) *Node {
+func (r *randomBalancer) Balance(serviceName string, nodes []*Node) *Node {
 	if len(nodes) == 0 {
 		return nil
 	}
@@ -52,3 +54,6 @@ func (r *randomBalancer) Balance(nodes []*Node) *Node {
 	num := rand.Intn(len(nodes))
 	return nodes[num]
 }
+
+
+
