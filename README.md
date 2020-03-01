@@ -140,6 +140,7 @@ The performance test results are as follows :
 2020/02/29 15:56:57 client.go:76: [INFO] throughput  (TPS)      : 191791
 ```
 **grpc** : 
+
 Test grpc with the same machine :
 ```
 git clone https://github.com/lubanproj/gorpc-benchmark.git

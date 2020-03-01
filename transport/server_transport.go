@@ -13,8 +13,6 @@ import (
 	"net"
 )
 
-const GORPCHeaderLength = 5
-
 type serverTransport struct {
 	opts *ServerTransportOptions
 }
@@ -90,7 +88,7 @@ func (s *serverTransport) ListenAndServeTcp(ctx context.Context, opts ...ServerT
 			// build stream
 			ctx, _ := stream.NewServerStream(ctx)
 
-			if err := s.handleConn(ctx, conn); err != nil {
+			if err := s.handleConn(ctx, wrapConn(conn)); err != nil {
 				log.Error("gorpc handle conn error, %v", err)
 			}
 
@@ -100,15 +98,11 @@ func (s *serverTransport) ListenAndServeTcp(ctx context.Context, opts ...ServerT
 
 }
 
-func (s *serverTransport) ListenAndServeUdp(ctx context.Context, opts ...ServerTransportOption) error {
 
-	return nil
-}
-
-func (s *serverTransport) handleConn(ctx context.Context, rawConn net.Conn) error {
+func (s *serverTransport) handleConn(ctx context.Context, conn *connWrapper) error {
 
 	// close the connection before return
-	defer rawConn.Close()
+	defer conn.Close()
 
 	for {
 		// check upstream ctx is done
@@ -118,7 +112,7 @@ func (s *serverTransport) handleConn(ctx context.Context, rawConn net.Conn) erro
 		default:
 		}
 
-		frame , err := s.read(ctx, rawConn)
+		frame , err := s.read(ctx, conn)
 		if err == io.EOF {
 			// read compeleted
 			return nil
@@ -145,16 +139,16 @@ func (s *serverTransport) handleConn(ctx context.Context, rawConn net.Conn) erro
 			return err
 		}
 
-		if err = s.write(ctx, rawConn,rsp); err != nil {
+		if err = s.write(ctx, conn,rsp); err != nil {
 			return err
 		}
 	}
 
 }
 
-func (s *serverTransport) read(ctx context.Context, conn net.Conn) ([]byte, error) {
+func (s *serverTransport) read(ctx context.Context, conn *connWrapper) ([]byte, error) {
 
-	frame, err := codec.ReadFrame(conn)
+	frame, err := conn.framer.ReadFrame(conn)
 
 	if err != nil {
 		return nil, err
@@ -181,14 +175,15 @@ func (s *serverTransport) write(ctx context.Context, conn net.Conn, rsp []byte) 
 }
 
 
-type tcpConn struct {
-	conn net.Conn
-
+type connWrapper struct {
+	net.Conn
+	framer Framer
 }
 
-func newTcpConn(rawConn net.Conn) *tcpConn {
-	return &tcpConn{
-		conn : rawConn,
+func wrapConn(rawConn net.Conn) *connWrapper {
+	return &connWrapper{
+		Conn : rawConn,
+		framer: NewFramer(),
 	}
 }
 

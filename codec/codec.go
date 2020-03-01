@@ -17,6 +17,17 @@ const FrameHeadLen = 15
 const Magic = 0x11
 const Version = 0
 
+type FrameHeader struct {
+	Magic uint8    // magic
+	Version uint8  // version
+	MsgType uint8  // msg type e.g. :   0x0: general req,  0x1: heartbeat
+	ReqType uint8  // request type e.g. :   0x0: send and receive,   0x1: send but not receive,  0x2: client stream request, 0x3: server stream request, 0x4: bidirectional streaming request
+	CompressType uint8 // compression or not :  0x0: not compression,  0x1: compression
+	StreamID uint16    // stream ID
+	Length uint32  	// total packet length
+	Reserved uint32  // 4 bytes reserved
+}
+
 func GetCodec(name string) Codec {
 	if codec, ok := codecMap[name]; ok {
 		return codec

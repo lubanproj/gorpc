@@ -2,7 +2,6 @@ package transport
 
 import (
 	"context"
-	"github.com/lubanproj/gorpc/codec"
 	"github.com/lubanproj/gorpc/codes"
 )
 
@@ -86,7 +85,9 @@ func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, e
 	}
 
 	// parse frame
-	frame, err := codec.ReadFrame(conn)
+
+	wrapperConn := wrapConn(conn)
+	frame, err := wrapperConn.framer.ReadFrame(conn)
 	if err != nil {
 		return nil, err
 	}

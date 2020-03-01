@@ -23,7 +23,6 @@ const (
 var (
 	ConfigError = NewFrameworkError(ConfigErrorCode,"config error")
 	NetworkNotSupportedError = NewFrameworkError(NetworkNotSupportedErrorCode,"network type not supported")
-	ClientMsgError = NewFrameworkError(ClientMsgErrorCode, "client msg error")
 )
 
 
