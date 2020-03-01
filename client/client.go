@@ -90,7 +90,7 @@ func (c *defaultClient) invoke(ctx context.Context, req, rsp interface{}) error 
 	serialization := codec.GetSerialization(c.opts.serializationType)
 	payload, err := serialization.Marshal(req)
 	if err != nil {
-		return codes.ClientMsgError
+		return codes.NewFrameworkError(codes.ClientMsgErrorCode, "request marshal failed ...")
 	}
 
 	clientCodec := codec.GetCodec(c.opts.protocol)
