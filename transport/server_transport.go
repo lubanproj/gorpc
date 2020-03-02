@@ -11,6 +11,7 @@ import (
 	"github.com/lubanproj/gorpc/utils"
 	"io"
 	"net"
+	"time"
 )
 
 type serverTransport struct {
@@ -63,6 +64,7 @@ func (s *serverTransport) ListenAndServeTcp(ctx context.Context, opts ...ServerT
 		return err
 	}
 
+	var tempDelay time.Duration
 	for {
 
 		tl, ok := lis.(*net.TCPListener);
@@ -72,6 +74,18 @@ func (s *serverTransport) ListenAndServeTcp(ctx context.Context, opts ...ServerT
 
 		conn , err := tl.AcceptTCP()
 		if err != nil {
+			if ne, ok := err.(net.Error); ok && ne.Temporary() {
+				if tempDelay == 0 {
+					tempDelay = 5 * time.Millisecond
+				} else {
+					tempDelay *= 2
+				}
+				if max := 1 * time.Second; tempDelay > max {
+					tempDelay = max
+				}
+				time.Sleep(tempDelay)
+				continue
+			}
 			return err
 		}
 
@@ -89,7 +103,7 @@ func (s *serverTransport) ListenAndServeTcp(ctx context.Context, opts ...ServerT
 			ctx, _ := stream.NewServerStream(ctx)
 
 			if err := s.handleConn(ctx, wrapConn(conn)); err != nil {
-				log.Error("gorpc handle conn error, %v", err)
+				log.Error("gorpc handle tcp conn error, %v", err)
 			}
 
 		}()

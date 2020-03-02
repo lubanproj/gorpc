@@ -62,7 +62,7 @@ func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, e
 		addr = c.opts.Target
 	}
 
-	conn, err := c.opts.Pool.Get(ctx, "tcp", addr)
+	conn, err := c.opts.Pool.Get(ctx, c.opts.Network, addr)
 //	conn, err := net.DialTimeout("tcp", addr, c.opts.Timeout);
 	if err != nil {
 		return nil, err
@@ -93,11 +93,6 @@ func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, e
 	}
 
 	return frame, err
-}
-
-func (c *clientTransport) SendUdpReq(ctx context.Context, req []byte) ([]byte, error) {
-
-	return nil, nil
 }
 
 
