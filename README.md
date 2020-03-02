@@ -164,6 +164,8 @@ The performance test results are as follows :
 ### Contributing
 [Contributors](https://github.com/lubanproj/gorpc/graphs/contributors)
 
-Welcome to submit issues|requirements|PRs and so on
+How to contribute?
+
+refer to [Contributing](https://github.com/lubanproj/gorpc/blob/master/CONTRIBUTING.md)
 
 
