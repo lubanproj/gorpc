@@ -5,6 +5,7 @@ go 1.12
 require (
 	github.com/golang/protobuf v1.3.2
 	github.com/hashicorp/consul/api v1.4.0
+	github.com/hhatto/gocloc v0.3.2 // indirect
 	github.com/opentracing/opentracing-go v1.1.0
 	github.com/petermattis/goid v0.0.0-20180202154549-b0b1615b78e5 // indirect
 	github.com/sasha-s/go-deadlock v0.2.0 // indirect

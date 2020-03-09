@@ -148,7 +148,7 @@ func (s *serverTransport) handleConn(ctx context.Context, conn *connWrapper) err
 			return err
 		}
 
-		rsp , err := s.handle(ctx, request.Payload)
+		rsp , err := s.handle(ctx, request)
 		if err != nil {
 			return err
 		}
@@ -172,9 +172,9 @@ func (s *serverTransport) read(ctx context.Context, conn *connWrapper) ([]byte, 
 }
 
 
-func (s *serverTransport) handle(ctx context.Context, payload []byte) ([]byte, error) {
+func (s *serverTransport) handle(ctx context.Context, frame []byte) ([]byte, error) {
 
-	rsp , err := s.opts.Handler.Handle(ctx, payload)
+	rsp , err := s.opts.Handler.Handle(ctx, frame)
 	if err != nil {
 		return nil, err
 	}

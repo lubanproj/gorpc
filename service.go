@@ -79,9 +79,9 @@ func (s *service) Close() {
 }
 
 
-func (s *service) Handle (ctx context.Context, payload []byte) ([]byte, error) {
+func (s *service) Handle (ctx context.Context, frame []byte) ([]byte, error) {
 
-	if len(payload) == 0 {
+	if len(frame) == 0 {
 		return nil, errors.New("req is nil")
 	}
 
@@ -93,6 +93,12 @@ func (s *service) Handle (ctx context.Context, payload []byte) ([]byte, error) {
 
 	// 将 reqbuf 解析成 req interface {}
 	serverCodec := codec.GetCodec(s.opts.protocol)
+
+	payload, err := serverCodec.Decode(frame)
+	if err != nil {
+		return nil, err
+	}
+
 	serverSerialization := codec.GetSerialization(s.opts.serializationType)
 
 	dec := func(req interface {}) error {
