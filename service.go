@@ -5,11 +5,13 @@ import (
 	"errors"
 	"github.com/golang/protobuf/proto"
 	"github.com/lubanproj/gorpc/codec"
+	"github.com/lubanproj/gorpc/codes"
 	"github.com/lubanproj/gorpc/interceptor"
 	"github.com/lubanproj/gorpc/log"
 	"github.com/lubanproj/gorpc/protocol"
 	"github.com/lubanproj/gorpc/stream"
 	"github.com/lubanproj/gorpc/transport"
+	"github.com/lubanproj/gorpc/utils"
 )
 
 // Service 定义了某个具体服务的通用实现接口
@@ -85,17 +87,16 @@ func (s *service) Handle (ctx context.Context, frame []byte) ([]byte, error) {
 		return nil, errors.New("req is nil")
 	}
 
-	serverStream := stream.GetServerStream(ctx)
-	handler := s.handlers[serverStream.Method]
-	if handler == nil {
-		return nil, errors.New("handlers is nil")
-	}
-
 	// 将 reqbuf 解析成 req interface {}
 	serverCodec := codec.GetCodec(s.opts.protocol)
-
-	payload, err := serverCodec.Decode(frame)
+	reqbuf, err := serverCodec.Decode(frame)
 	if err != nil {
+		return nil, err
+	}
+
+	// parse protocol header
+	request := &protocol.Request{}
+	if err = proto.Unmarshal(reqbuf, request); err != nil {
 		return nil, err
 	}
 
@@ -103,7 +104,7 @@ func (s *service) Handle (ctx context.Context, frame []byte) ([]byte, error) {
 
 	dec := func(req interface {}) error {
 
-		if err := serverSerialization.Unmarshal(payload, req); err != nil {
+		if err := serverSerialization.Unmarshal(request.Payload, req); err != nil {
 			return err
 		}
 		return nil
@@ -113,6 +114,16 @@ func (s *service) Handle (ctx context.Context, frame []byte) ([]byte, error) {
 		var cancel context.CancelFunc
 		ctx, cancel = context.WithTimeout(ctx, s.opts.timeout)
 		defer cancel()
+	}
+
+	_, method , err := utils.ParseServicePath(string(request.ServicePath))
+	if err != nil {
+		return nil, codes.New(codes.ClientMsgErrorCode, "method is invalid")
+	}
+
+	handler := s.handlers[method]
+	if handler == nil {
+		return nil, errors.New("handlers is nil")
 	}
 
 	rsp, err := handler(s.svr, ctx, dec, s.opts.interceptors)

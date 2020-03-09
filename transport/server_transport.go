@@ -2,8 +2,6 @@ package transport
 
 import (
 	"context"
-	"github.com/golang/protobuf/proto"
-	"github.com/lubanproj/gorpc/codec"
 	"github.com/lubanproj/gorpc/codes"
 	"github.com/lubanproj/gorpc/log"
 	"github.com/lubanproj/gorpc/protocol"
@@ -136,19 +134,7 @@ func (s *serverTransport) handleConn(ctx context.Context, conn *connWrapper) err
 			return err
 		}
 
-		// parse protocol header
-		request := &protocol.Request{}
-		if err = proto.Unmarshal(frame[codec.FrameHeadLen:], request); err != nil {
-			return err
-		}
-
-		// build serverStream
-		_, err = s.getServerStream(ctx, request)
-		if err != nil {
-			return err
-		}
-
-		rsp , err := s.handle(ctx, request)
+		rsp , err := s.handle(ctx, frame)
 		if err != nil {
 			return err
 		}
