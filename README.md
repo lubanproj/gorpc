@@ -145,9 +145,9 @@ Test grpc with the same machine :
 ```
 git clone https://github.com/lubanproj/gorpc-benchmark.git
 cd gorpc-benchmark/grpc
-# 运行 gorpc server
+# run gorpc server
 go run server.go
-# start gorpc-benchmark client, start another terminal and execute 
+# run gorpc-benchmark client, start another terminal and execute 
 go run client.go -concurrency=100 -total=1000000
 ```
 The performance test results are as follows : 
