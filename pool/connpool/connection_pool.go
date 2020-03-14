@@ -42,7 +42,6 @@ var DefaultPool = NewConnPool()
 func NewConnPool(opt ...Option) *pool {
 	// 默认值
 	opts := &Options {
-		initialCap: 5,
 		maxCap: 1000,
 		idleTimeout: 1 * time.Minute,
 		dialTimeout: 200 * time.Millisecond,
