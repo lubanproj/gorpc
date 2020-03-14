@@ -44,10 +44,10 @@ var NewCodec = 	func () Codec {
 }
 
 func init() {
-	registerCodec("proto", DefaultCodec)
+	RegisterCodec("proto", DefaultCodec)
 }
 
-func registerCodec(name string, codec Codec) {
+func RegisterCodec(name string, codec Codec) {
 	if codecMap == nil {
 		codecMap = make(map[string]Codec)
 	}

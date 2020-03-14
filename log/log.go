@@ -20,10 +20,10 @@ const (
 type Log interface {
 	Trace(format string, v ...interface{})
 	Debug(format string, v ...interface{})
-	INFO(format string, v ...interface{})
-	WARNING(format string, v ...interface{})
-	ERROR(format string, v ...interface{})
-	FATAL(format string, v ...interface{})
+	Info(format string, v ...interface{})
+	Warning(format string, v ...interface{})
+	Error(format string, v ...interface{})
+	Fatal(format string, v ...interface{})
 }
 
 type logger struct{
@@ -31,7 +31,7 @@ type logger struct{
 	options *Options
 }
 
-var defaultLog = &logger {
+var DefaultLog = &logger {
 	Logger : log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile),
 	options : &Options {
 		level : 2,
@@ -86,7 +86,7 @@ func WithLevel(level Level) Option {
 }
 
 func Trace(format string, v ...interface{}) {
-	defaultLog.Trace(format, v...)
+	DefaultLog.Trace(format, v...)
 }
 
 func (log *logger) Trace(format string, v ...interface{}) {
@@ -101,7 +101,7 @@ func (log *logger) Trace(format string, v ...interface{}) {
 }
 
 func Debug(format string, v ...interface{}) {
-	defaultLog.Debug(format, v...)
+	DefaultLog.Debug(format, v...)
 }
 
 func (log *logger) Debug(format string, v ...interface{}) {
@@ -116,7 +116,7 @@ func (log *logger) Debug(format string, v ...interface{}) {
 }
 
 func Info(format string, v ...interface{}) {
-	defaultLog.Info(format, v...)
+	DefaultLog.Info(format, v...)
 }
 
 func (log *logger) Info(format string, v ...interface{}) {
@@ -131,7 +131,7 @@ func (log *logger) Info(format string, v ...interface{}) {
 }
 
 func Warning(format string, v ...interface{}) {
-	defaultLog.Warning(format, v...)
+	DefaultLog.Warning(format, v...)
 }
 
 func (log *logger) Warning(format string, v ...interface{}) {
@@ -146,7 +146,7 @@ func (log *logger) Warning(format string, v ...interface{}) {
 }
 
 func Error(format string, v ...interface{}) {
-	defaultLog.Error(format, v...)
+	DefaultLog.Error(format, v...)
 }
 
 func (log *logger) Error(format string, v ...interface{}) {
@@ -161,7 +161,7 @@ func (log *logger) Error(format string, v ...interface{}) {
 }
 
 func Fatal(format string, v ...interface{}) {
-	defaultLog.Fatal(format, v...)
+	DefaultLog.Fatal(format, v...)
 }
 
 func (log *logger) Fatal(format string, v ...interface{}) {
