@@ -17,13 +17,21 @@ const (
 	FATAL = 6
 )
 
+// general log interface for gorpc
 type Log interface {
-	Trace(format string, v ...interface{})
-	Debug(format string, v ...interface{})
-	Info(format string, v ...interface{})
-	Warning(format string, v ...interface{})
-	Error(format string, v ...interface{})
-	Fatal(format string, v ...interface{})
+	Trace(v ...interface{})
+	Debug(v ...interface{})
+	Info(v ...interface{})
+	Warning(v ...interface{})
+	Error(v ...interface{})
+	Fatal(v ...interface{})
+	Tracef(format string, v ...interface{})
+	Debugf(format string, v ...interface{})
+	Infof(format string, v ...interface{})
+	Warningf(format string, v ...interface{})
+	Errorf(format string, v ...interface{})
+	Fatalf(format string, v ...interface{})
+
 }
 
 type logger struct{
@@ -42,136 +50,213 @@ type Level int
 
 func (level Level) String() string {
 	switch level {
-		case TRACE :
-			return "trace"
-		case DEBUG :
-			return "debug"
-		case INFO :
-			return "info"
-		case WARNGING :
-			return "warning"
-		case ERROR :
-			return "error"
-		case FATAL :
-			return "fatal"
-		default :
-			return "unkown"
+	case TRACE :
+		return "trace"
+	case DEBUG :
+		return "debug"
+	case INFO :
+		return "info"
+	case WARNGING :
+		return "warning"
+	case ERROR :
+		return "error"
+	case FATAL :
+		return "fatal"
+	default :
+		return "unkown"
 	}
+	return "unknown"
 }
 
 type Options struct {
-	path string `default:"../log/gorpc"`   // log file path prefix, filename : gorpc.2019-09-26.log
-	frame string `default:"../log/frame"`  // frame log print path, default : ../log/frame.log
-	level Level `default:"2"`         	   // log level, default: debug
+	path string `default:"../log/gorpc"`   // 日志文件路径前缀，文件名为 gorpc.3019-09-36.log
+	frame string `default:"../log/frame"`  // 框架日志打印路径，默认 ../log/frame.log
+	level Level `defalut:"debug"`          // 日志级别，默认为 debug
 }
 
 type Option func(*Options)
 
+// set the log path
 func WithPath(path string) Option {
 	return func(o *Options) {
 		o.path = path
 	}
 }
 
+// set the frame log path
 func WithFrame(frame string) Option {
 	return func(o *Options) {
 		o.frame = frame
 	}
 }
 
+// set the log level
 func WithLevel(level Level) Option {
 	return func(o *Options) {
 		o.level = level
 	}
 }
 
-func Trace(format string, v ...interface{}) {
-	DefaultLog.Trace(format, v...)
+// Trace print trace log
+func Trace(v ...interface{}) {
+	DefaultLog.Trace(v...)
 }
 
-func (log *logger) Trace(format string, v ...interface{}) {
-	if log.options.level > TRACE {
+// Tracef print a formatted trace log
+func Tracef(format string, v ...interface{}) {
+	DefaultLog.Tracef(format, v...)
+}
+
+func (log *logger) Trace(v ...interface{}) {
+	if log.options.level < TRACE {
+		return
+	}
+	data := log.Prefix() + fmt.Sprint(v...)
+	Output(log, 3,"[TRACE] ", data)
+}
+
+func (log *logger) Tracef(format string, v ...interface{}) {
+	if log.options.level < TRACE {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
-	var buffer bytes.Buffer
-	buffer.WriteString("[TRACE] ")
-	buffer.WriteString(data)
-	log.Output(3, buffer.String())
+	Output(log, 3,"[TRACE] ", data)
 }
 
-func Debug(format string, v ...interface{}) {
-	DefaultLog.Debug(format, v...)
+// Debug print debug log
+func Debug(v ...interface{}) {
+	DefaultLog.Debug(v...)
 }
 
-func (log *logger) Debug(format string, v ...interface{}) {
-	if log.options.level > DEBUG {
+// Debugf print a formatted debug log
+func Debugf(format string, v ...interface{}) {
+	DefaultLog.Debugf(format, v...)
+}
+
+func (log *logger) Debug(v ...interface{}) {
+	if log.options.level < DEBUG {
+		return
+	}
+	data := log.Prefix() + fmt.Sprint(v...)
+	Output(log, 3,"[DEBUG] ", data)
+}
+
+func (log *logger) Debugf(format string, v ...interface{}) {
+	if log.options.level < DEBUG {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
-	var buffer bytes.Buffer
-	buffer.WriteString("[DEBUG] ")
-	buffer.WriteString(data)
-	log.Output(3, buffer.String())
+	Output(log, 3,"[DEBUG] ", data)
 }
 
-func Info(format string, v ...interface{}) {
-	DefaultLog.Info(format, v...)
+// Info print info log
+func Info(v ...interface{}) {
+	DefaultLog.Info(v...)
 }
 
-func (log *logger) Info(format string, v ...interface{}) {
-	if log.options.level > INFO {
+// Infof print a formatted info log
+func Infof(format string, v ...interface{}) {
+	DefaultLog.Infof(format, v...)
+}
+
+func (log *logger) Info(v ...interface{}) {
+	if log.options.level < INFO {
+		return
+	}
+	data := log.Prefix() + fmt.Sprint(v...)
+	Output(log, 3,"[INFO] ", data)
+}
+
+func (log *logger) Infof(format string, v ...interface{}) {
+	if log.options.level < INFO {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
-	var buffer bytes.Buffer
-	buffer.WriteString("[INFO] ")
-	buffer.WriteString(data)
-	log.Output(3, buffer.String())
+	Output(log, 3,"[INFO] ", data)
 }
 
-func Warning(format string, v ...interface{}) {
-	DefaultLog.Warning(format, v...)
+// Warning print warning log
+func Warning(v ...interface{}) {
+	DefaultLog.Warning(v...)
 }
 
-func (log *logger) Warning(format string, v ...interface{}) {
-	if log.options.level > WARNGING {
+// Warningf print a formatted warning log
+func Warningf(format string, v ...interface{}) {
+	DefaultLog.Warningf(format, v...)
+}
+
+func (log *logger) Warning(v ...interface{}) {
+	if log.options.level < WARNGING {
+		return
+	}
+	data := log.Prefix() + fmt.Sprint(v...)
+	Output(log, 3,"[WARNING] ", data)
+}
+
+func (log *logger) Warningf(format string, v ...interface{}) {
+	if log.options.level < WARNGING {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
-	var buffer bytes.Buffer
-	buffer.WriteString("[WARNING] ")
-	buffer.WriteString(data)
-	log.Output(3, buffer.String())
+	Output(log, 3,"[WARNING] ", data)
 }
 
-func Error(format string, v ...interface{}) {
-	DefaultLog.Error(format, v...)
+// Error print error log
+func Error(v ...interface{}) {
+	DefaultLog.Error(v...)
 }
 
-func (log *logger) Error(format string, v ...interface{}) {
-	if log.options.level > ERROR {
+// Errorf print a formatted error log
+func Errorf(format string, v ...interface{}) {
+	DefaultLog.Errorf(format, v...)
+}
+
+func (log *logger) Error(v ...interface{}) {
+	if log.options.level < ERROR {
+		return
+	}
+	data := log.Prefix() + fmt.Sprint(v...)
+	Output(log, 3,"[ERROR] ", data)
+}
+
+func (log *logger) Errorf(format string, v ...interface{}) {
+	if log.options.level < ERROR {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
-	var buffer bytes.Buffer
-	buffer.WriteString("[ERROR] ")
-	buffer.WriteString(data)
-	log.Output(3, buffer.String())
+	Output(log, 3,"[ERROR] ", data)
 }
 
-func Fatal(format string, v ...interface{}) {
-	DefaultLog.Fatal(format, v...)
+// Fatal print fatal log
+func Fatal(v ...interface{}) {
+	DefaultLog.Fatal(v...)
 }
 
-func (log *logger) Fatal(format string, v ...interface{}) {
-	if log.options.level > FATAL {
+// Fatalf print a formatted fatal log
+func Fatalf(format string, v ...interface{}) {
+	DefaultLog.Fatalf(format, v...)
+}
+
+func (log *logger) Fatal(v ...interface{}) {
+	if log.options.level < FATAL {
+		return
+	}
+	data := log.Prefix() + fmt.Sprint(v...)
+	Output(log, 3,"[FATAL] ", data)
+}
+
+func (log *logger) Fatalf(format string, v ...interface{}) {
+	if log.options.level < FATAL {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
-	var buffer bytes.Buffer
-	buffer.WriteString("[FATAL] ")
-	buffer.WriteString(data)
-	log.Output(3, buffer.String())
+	Output(log, 3,"[FATAL] ", data)
 }
 
+// call Output to write log
+func Output(log *logger, calldepth int, prefix string, data string) {
+	var buffer bytes.Buffer
+	buffer.WriteString(prefix)
+	buffer.WriteString(data)
+	log.Output(calldepth, buffer.String())
+}
