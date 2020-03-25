@@ -69,7 +69,7 @@ func (level Level) String() string {
 }
 
 type Options struct {
-	path string `default:"../log/gorpc"`   // 日志文件路径前缀，文件名为 gorpc.3019-09-36.log
+	path string `default:"../log/gorpc"`   // 日志文件路径前缀，文件名为 gorpc.4019-09-46.log
 	frame string `default:"../log/frame"`  // 框架日志打印路径，默认 ../log/frame.log
 	level Level `defalut:"debug"`          // 日志级别，默认为 debug
 }
@@ -112,7 +112,7 @@ func (log *logger) Trace(v ...interface{}) {
 		return
 	}
 	data := log.Prefix() + fmt.Sprint(v...)
-	Output(log, 3,"[TRACE] ", data)
+	Output(log, 4,"[TRACE] ", data)
 }
 
 func (log *logger) Tracef(format string, v ...interface{}) {
@@ -120,7 +120,7 @@ func (log *logger) Tracef(format string, v ...interface{}) {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
-	Output(log, 3,"[TRACE] ", data)
+	Output(log, 4,"[TRACE] ", data)
 }
 
 // Debug print debug log
@@ -138,7 +138,7 @@ func (log *logger) Debug(v ...interface{}) {
 		return
 	}
 	data := log.Prefix() + fmt.Sprint(v...)
-	Output(log, 3,"[DEBUG] ", data)
+	Output(log, 4,"[DEBUG] ", data)
 }
 
 func (log *logger) Debugf(format string, v ...interface{}) {
@@ -146,7 +146,7 @@ func (log *logger) Debugf(format string, v ...interface{}) {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
-	Output(log, 3,"[DEBUG] ", data)
+	Output(log, 4,"[DEBUG] ", data)
 }
 
 // Info print info log
@@ -164,7 +164,7 @@ func (log *logger) Info(v ...interface{}) {
 		return
 	}
 	data := log.Prefix() + fmt.Sprint(v...)
-	Output(log, 3,"[INFO] ", data)
+	Output(log, 4,"[INFO] ", data)
 }
 
 func (log *logger) Infof(format string, v ...interface{}) {
@@ -172,7 +172,7 @@ func (log *logger) Infof(format string, v ...interface{}) {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
-	Output(log, 3,"[INFO] ", data)
+	Output(log, 4,"[INFO] ", data)
 }
 
 // Warning print warning log
@@ -190,7 +190,7 @@ func (log *logger) Warning(v ...interface{}) {
 		return
 	}
 	data := log.Prefix() + fmt.Sprint(v...)
-	Output(log, 3,"[WARNING] ", data)
+	Output(log, 4,"[WARNING] ", data)
 }
 
 func (log *logger) Warningf(format string, v ...interface{}) {
@@ -198,7 +198,7 @@ func (log *logger) Warningf(format string, v ...interface{}) {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
-	Output(log, 3,"[WARNING] ", data)
+	Output(log, 4,"[WARNING] ", data)
 }
 
 // Error print error log
@@ -216,7 +216,7 @@ func (log *logger) Error(v ...interface{}) {
 		return
 	}
 	data := log.Prefix() + fmt.Sprint(v...)
-	Output(log, 3,"[ERROR] ", data)
+	Output(log, 4,"[ERROR] ", data)
 }
 
 func (log *logger) Errorf(format string, v ...interface{}) {
@@ -224,7 +224,7 @@ func (log *logger) Errorf(format string, v ...interface{}) {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
-	Output(log, 3,"[ERROR] ", data)
+	Output(log, 4,"[ERROR] ", data)
 }
 
 // Fatal print fatal log
@@ -242,7 +242,7 @@ func (log *logger) Fatal(v ...interface{}) {
 		return
 	}
 	data := log.Prefix() + fmt.Sprint(v...)
-	Output(log, 3,"[FATAL] ", data)
+	Output(log, 4,"[FATAL] ", data)
 }
 
 func (log *logger) Fatalf(format string, v ...interface{}) {
@@ -250,7 +250,7 @@ func (log *logger) Fatalf(format string, v ...interface{}) {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
-	Output(log, 3,"[FATAL] ", data)
+	Output(log, 4,"[FATAL] ", data)
 }
 
 // call Output to write log
