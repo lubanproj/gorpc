@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/lubanproj/gorpc/client"
 	"github.com/lubanproj/gorpc/examples/helloworld/helloworld"
 	"github.com/lubanproj/gorpc/plugin/jaeger"
-	"time"
 )
 
 func main() {

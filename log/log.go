@@ -17,6 +17,8 @@ const (
 	FATAL = 6
 )
 
+const DefaultLogPath = "gorpc.log"
+
 // general log interface for gorpc
 type Log interface {
 	Trace(v ...interface{})
@@ -39,12 +41,21 @@ type logger struct{
 	options *Options
 }
 
-var DefaultLog = &logger {
-	Logger : log.New(os.Stdout, "", log.LstdFlags|log.Lshortfile),
-	options : &Options {
-		level : 2,
-	},
+var DefaultLog *logger
+
+func init() {
+	logFile, err := os.OpenFile(DefaultLogPath, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666)
+	if err != nil {
+		fmt.Println("open file, error : ", err)
+	}
+	DefaultLog = &logger {
+		Logger : log.New(logFile, "", log.LstdFlags|log.Lshortfile),
+		options : &Options{
+			level: 2,
+		},
+	}
 }
+
 
 type Level int
 
@@ -69,9 +80,9 @@ func (level Level) String() string {
 }
 
 type Options struct {
-	path string `default:"../log/gorpc"`   // 日志文件路径前缀，文件名为 gorpc.4019-09-46.log
-	frame string `default:"../log/frame"`  // 框架日志打印路径，默认 ../log/frame.log
-	level Level `defalut:"debug"`          // 日志级别，默认为 debug
+	path string `default:"../log/gorpc.log"`   // 日志文件路径前缀，文件名为 gorpc.4019-09-46.log
+	frame string `default:"../log/frame.log"`  // 框架 panic 日志打印路径，默认 ../log/frame.log
+	level Level `default:"debug"`          // 日志级别，默认为 debug
 }
 
 type Option func(*Options)
