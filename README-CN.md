@@ -1,19 +1,21 @@
 ## gorpc
-A simple, easy to use, high performance, pluggable micro services framework
 
-**English** | [**Chinese**](README-CN.md)
+一个简单，易用，高性能，可插拔的微服务框架
 
-### Installation
-Before installing gorpc, you need to install go and configure the go environment
+### 安装
 
-In gopath mode, you simply execute the following command to install
+在安装 gorpc 之前，您需要安装 go 并配置 go 环境。
+
+gopath 模式下，您只需执行以下命令即可安装：
 
 ```
 go get -u -v github.com/lubanproj/gorpc
 ```
-In the go modules mode, you simply import the package "github.com/lubanproj/gorpc", which automatically downloads the dependency when you execute the go [build|run|test]
 
-### Quick Start
+go modules 模式下，您只需导入软件包 “ github.com/lubanproj/gorpc”，该软件包在执行 go [build | run | test] 时会自动下载依赖项。
+
+### 快速开始
+
 ```
 git clone https://github.com/lubanproj/gorpc.git
 cd gorpc/examples/helloworld
@@ -22,15 +24,16 @@ go run server/server.go
 # start client，start another terminal and execute
 go run client/client.go
 ```
-### Example
 
-You only need three steps to complete a service call
+### 示例
 
-1. define a service
-2. use a server to publish a service
-3. use a client to initiate a service call
+发起一个服务调用只需要以下三个步骤：
 
-**1. define a service**
+1. 定义一个服务
+2. server 发布服务
+3. 使用一个客户端发起调用
+
+**1.定义一个服务**
 
 ```
 type Service struct {
@@ -55,7 +58,7 @@ func (s *Service) SayHello(ctx context.Context, req *HelloRequest) (*HelloReply,
 
 ```
 
-**2. use a server to publish a service**
+**2. server 发布服务**
 
 ```
 func main() {
@@ -73,7 +76,7 @@ func main() {
 }
 ```
 
-**3. use a client to initiate a service call**
+**3. 使用一个客户端发起调用**
 
 ```
 func main() {
@@ -93,36 +96,42 @@ func main() {
 }
 ```
 
-See [helloworld](https://github.com/lubanproj/gorpc/tree/master/examples/helloworld) for more details
+更多细节可以参考 [helloworld](https://github.com/lubanproj/gorpc/tree/master/examples/helloworld) 
 
 
-### Documentation
+### 文档
+
 - [Examples](https://github.com/lubanproj/gorpc/tree/master/examples).
 - [FAQ](https://github.com/lubanproj/gorpc/wiki/FAQ)
-### Features
-- **High performance**, performance far exceeds that of the grpc, refer to [Performance](#Performance)
-- Support **reflection**, **code generation** two ways to call
-- All plug-ins are **configurable**
-- **Multi-protocol** support, currently supported tcp, extensible and customizable
-- Support **interceptor**, extensible and customizable
-- Support **connection pooling**, extensible and customizable
-- Support **service discovery**, provides the **consul** plug-in implementation, extensible and customizable
-- Support **load balancing**, provides the **random**、**round robin**、**weighted round robin**、**consistent hash** implementation, extensible and customizable
-- Support **opentracing**, provides the **jaeger** plug-in implementation, extensible and customizable
-- Support for **a variety of serialization methods**, the default reflection calls using **protobuf** serialization,  code generation calls using **msgpack** serialization，support custom serialization
-- More features are being supported ......
 
-### <span id="Performance">Performance</span>
-**Environment** :
+### 特性
+
+- **高性能**，性能远远超过 grpc ，详情可以参考 [性能](#Performance)
+- 支持 **反射**, **代码生成** 两种调用方式
+- **可插拔** 所有插件都是**可插拔、支持业务自定义的**
+- **多协议支持**，目前支持 tcp 和 udp，后续会支持更多协议
+- 实现了**拦截器**，支持业务自己定义拦截器
+- 实现了**连接池**，支持业务自定义连接池
+- 支持**服务发现**，提供了基于 **consul** 的默认服务发现实现，支持业务自定义服务发现实现。
+- 支持**负载均衡** ，提供了**随机、轮询、加权轮询、一致性哈希**等默认负载均衡实现，支持业务自定义负载均衡实现。
+- 支持**分布式链路追踪**，遵循业界 opentracing 规范，提供了基于 **jaeger** 的分布式链路追踪默认实现，支持业务自定义。
+- 支持**多种序列化方式**，框架默认采用 **protocol** 和 **msgpack** 序列化，用代码生成方式调用会使用 protocol 序列化。用反射方式调用会采用 msgpack 序列化，支持业务自定义序列化方式。
+- 更多特性正在陆续支持中 ......
+
+### <span id="Performance">性能</span>
+
+**环境** :
+
 - CPU : Intel(R) Xeon(R) Gold 61xx CPU @2.44GHz
 - CPU cores : 8
 - Memory : 16G
 - Disk : 540G
 
 **Result** :
-The results were performed using [**gorpc-benchmark**](https://github.com/lubanproj/gorpc-benchmark) ，which performed three times to get the maximum
+使用 [**gorpc-benchmark**](https://github.com/lubanproj/gorpc-benchmark) 进行测试，测试三次取性能最大值
 
 **gorpc** :
+
 ```
 git clone https://github.com/lubanproj/gorpc-benchmark.git
 cd gorpc-benchmark
@@ -131,7 +140,9 @@ go run server.go
 # start gorpc-benchmark client，start another terminal and execute
 go run client.go -concurrency=100 -total=1000000
 ```
-The performance test results are as follows : 
+
+性能测试结果如下：
+
 ```
 > go run client.go -concurrency=100 -total=1000000
 2020/02/29 15:56:57 client.go:71: [INFO] took 5214 ms for 1000000 requests
@@ -141,9 +152,11 @@ The performance test results are as follows :
 2020/02/29 15:56:57 client.go:75: [INFO] received requests fail : 0
 2020/02/29 15:56:57 client.go:76: [INFO] throughput  (TPS)      : 191791
 ```
+
 **grpc** : 
 
-Test grpc with the same machine :
+在相同机器上进行 grpc 性能测试，如下：
+
 ```
 git clone https://github.com/lubanproj/gorpc-benchmark.git
 cd gorpc-benchmark/grpc
@@ -152,7 +165,9 @@ go run server.go
 # run gorpc-benchmark client, start another terminal and execute 
 go run client.go -concurrency=100 -total=1000000
 ```
-The performance test results are as follows : 
+
+性能测试结果如下：
+
 ```
 > go run client.go -concurrency=100 -total=1000000
 2020/02/29 15:46:14 client.go:77: [INFO] took 17169 ms for 1000000 requests
@@ -163,11 +178,10 @@ The performance test results are as follows :
 2020/02/29 15:46:14 client.go:82: [INFO] throughput  (TPS)      : 58244
 ```
 
-### Contributing
-[Contributors](https://github.com/lubanproj/gorpc/graphs/contributors)
+### 贡献
 
-How to contribute?
+[贡献者](https://github.com/lubanproj/gorpc/graphs/contributors)
 
-refer to [Contributing](https://github.com/lubanproj/gorpc/blob/master/CONTRIBUTING.md)
+如何进行贡献？
 
-
+可以参考 [Contributing](
