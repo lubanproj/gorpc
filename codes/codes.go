@@ -2,7 +2,6 @@ package codes
 
 import "fmt"
 
-// 框架状态码
 const (
 	OK = 0
 	ConfigErrorCode = 101
@@ -10,30 +9,24 @@ const (
 	ClientMsgErrorCode = 301
 )
 
-type ErrorCode uint8
-
-// 错误码类型
+// errorcode type
 const (
 	FrameworkError = 1
 	BusinuessError = 2
 )
 
 
-// 框架错误码
+// framework error
 var (
 	ConfigError = NewFrameworkError(ConfigErrorCode,"config error")
 	NetworkNotSupportedError = NewFrameworkError(NetworkNotSupportedErrorCode,"network type not supported")
 )
 
 
-// 业务错误码
-const (
-
-)
-
+// Error defines all errors in the framework
 type Error struct {
 	Code int
-	Type int32
+	Type int
 	Message string
 }
 
@@ -51,6 +44,7 @@ func (e *Error) Error() string {
 	return fmt.Sprintf("type : business, code : %d, msg : %s",e.Code, e.Message)
 }
 
+// new a framework type error
 func NewFrameworkError(code int, msg string) *Error{
 	return &Error{
 		Type : FrameworkError,
@@ -59,7 +53,7 @@ func NewFrameworkError(code int, msg string) *Error{
 	}
 }
 
-// 方便业务使用，默认是业务类型错误
+// new a business type error
 func New(code int, msg string) *Error{
 	return &Error{
 		Type : BusinuessError,

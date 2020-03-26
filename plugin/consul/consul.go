@@ -10,6 +10,7 @@ import (
 	"strings"
 )
 
+// Consul implements the server discovery specification
 type Consul struct {
 	opts *plugin.Options
 	client *api.Client
@@ -26,6 +27,7 @@ func init() {
 	selector.RegisterSelector(Name, ConsulSvr)
 }
 
+// global consul objects for framework
 var ConsulSvr = &Consul {
 	opts : &plugin.Options{},
 }
@@ -70,7 +72,7 @@ func (c *Consul) Resolve(serviceName string) ([]*selector.Node, error) {
 	return nodes, nil
 }
 
-// 实现 selector 服务发现
+// implements selector Select method
 func (c *Consul) Select(serviceName string) (string, error) {
 
 	nodes, err := c.Resolve(serviceName)
@@ -132,6 +134,7 @@ func (c *Consul) Init(opts ...plugin.Option) error {
 	return nil
 }
 
+// Init implements the initialization of the consul configuration when the framework is loaded
 func Init(consulSvrAddr string, opts ... plugin.Option) error {
 	for _, o := range opts {
 		o(ConsulSvr.opts)

@@ -1,7 +1,11 @@
 package consul
 
-import "testing"
+import (
+	"github.com/stretchr/testify/assert"
+	"testing"
+)
 
-func TestConsulSelect(t *testing.T) {
-
+func TestInit(t *testing.T) {
+	err := Init("localhost:8500")
+	assert.Nil(t,err)
 }

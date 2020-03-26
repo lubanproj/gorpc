@@ -3,8 +3,8 @@ package jaeger
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/lubanproj/gorpc/interceptor"
-	gorpclog "github.com/lubanproj/gorpc/log"
 	"github.com/lubanproj/gorpc/plugin"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
@@ -13,7 +13,7 @@ import (
 	"strings"
 )
 
-
+// Jaeger implements the opentracing specification
 type Jaeger struct {
 	opts *plugin.Options
 }
@@ -26,6 +26,7 @@ func init() {
 	plugin.Register(Name, JaegerSvr)
 }
 
+// global jaeger objects for framework
 var JaegerSvr = &Jaeger {
 	opts : &plugin.Options{},
 }
@@ -44,7 +45,7 @@ func (m jaegerCarrier) ForeachKey(handler func(key, val string) error) error {
 	return nil
 }
 
-
+// OpenTracingClientInterceptor packaging jaeger tracer as a client interceptor
 func OpenTracingClientInterceptor(tracer opentracing.Tracer, spanName string) interceptor.ClientInterceptor {
 
 	return func (ctx context.Context, req, rsp interface{}, ivk interceptor.Invoker) error {
@@ -72,6 +73,7 @@ func OpenTracingClientInterceptor(tracer opentracing.Tracer, spanName string) in
 	}
 }
 
+// OpenTracingServerInterceptor packaging jaeger tracer as a server interceptor
 func OpenTracingServerInterceptor(tracer opentracing.Tracer, spanName string) interceptor.ServerInterceptor {
 
 	return func(ctx context.Context, req interface{}, handler interceptor.Handler) (interface{}, error) {
@@ -80,7 +82,7 @@ func OpenTracingServerInterceptor(tracer opentracing.Tracer, spanName string) in
 
 		spanContext, err := tracer.Extract(opentracing.HTTPHeaders, mdCarrier)
 		if err != nil && err != opentracing.ErrSpanContextNotFound {
-			gorpclog.Error("Tracer.Extract() failed, %v", err)
+			return nil, errors.New(fmt.Sprintf("tracer extract error : %v", err))
 		}
 		serverSpan := tracer.StartSpan(spanName, ext.RPCServerOption(spanContext),ext.SpanKindRPCServer)
 		defer serverSpan.Finish()
@@ -94,6 +96,7 @@ func OpenTracingServerInterceptor(tracer opentracing.Tracer, spanName string) in
 
 }
 
+// Init implements the initialization of the jaeger configuration when the framework is loaded
 func Init(tracingSvrAddr string, opts ... plugin.Option) (opentracing.Tracer, error) {
 	return initJaeger(tracingSvrAddr, JaegerClientName, opts ...)
 }
