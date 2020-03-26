@@ -69,7 +69,7 @@ func (s *service) Serve(opts *ServerOptions) {
 	s.ctx, s.cancel = context.WithCancel(context.Background())
 
 	if err := serverTransport.ListenAndServe(s.ctx, transportOpts ...); err != nil {
-		log.Error("%s serve error, %v", s.serviceName, err)
+		log.Errorf("%s serve error, %v", s.serviceName, err)
 		return
 	}
 

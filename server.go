@@ -172,7 +172,7 @@ func (s *Server) Register(sd *ServiceDesc, svr interface{}) {
 	ht := reflect.TypeOf(sd.HandlerType).Elem()
 	st := reflect.TypeOf(svr)
 	if !st.Implements(ht) {
-		log.Fatal("handlerType %v not match service : %v ", ht, st)
+		log.Fatalf("handlerType %v not match service : %v ", ht, st)
 	}
 
 	ser := &service {
@@ -229,7 +229,7 @@ func (s *Server) InitPlugins() error {
 				plugin.WithServices(services),
 			}
 			if err := val.Init(pluginOpts ...); err != nil {
-				log.Error("resolver init error, %v", err)
+				log.Errorf("resolver init error, %v", err)
 				return err
 			}
 
@@ -241,7 +241,7 @@ func (s *Server) InitPlugins() error {
 
 			tracer, err := val.Init(pluginOpts ...)
 			if err != nil {
-				log.Error("tracing init error, %v", err)
+				log.Errorf("tracing init error, %v", err)
 				return err
 			}
 
