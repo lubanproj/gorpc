@@ -119,7 +119,7 @@ func Tracef(format string, v ...interface{}) {
 }
 
 func (log *logger) Trace(v ...interface{}) {
-	if log.options.level < TRACE {
+	if log.options.level > TRACE {
 		return
 	}
 	data := log.Prefix() + fmt.Sprint(v...)
@@ -127,7 +127,7 @@ func (log *logger) Trace(v ...interface{}) {
 }
 
 func (log *logger) Tracef(format string, v ...interface{}) {
-	if log.options.level < TRACE {
+	if log.options.level > TRACE {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
@@ -145,7 +145,7 @@ func Debugf(format string, v ...interface{}) {
 }
 
 func (log *logger) Debug(v ...interface{}) {
-	if log.options.level < DEBUG {
+	if log.options.level > DEBUG {
 		return
 	}
 	data := log.Prefix() + fmt.Sprint(v...)
@@ -153,7 +153,7 @@ func (log *logger) Debug(v ...interface{}) {
 }
 
 func (log *logger) Debugf(format string, v ...interface{}) {
-	if log.options.level < DEBUG {
+	if log.options.level > DEBUG {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
@@ -171,7 +171,7 @@ func Infof(format string, v ...interface{}) {
 }
 
 func (log *logger) Info(v ...interface{}) {
-	if log.options.level < INFO {
+	if log.options.level > INFO {
 		return
 	}
 	data := log.Prefix() + fmt.Sprint(v...)
@@ -179,7 +179,7 @@ func (log *logger) Info(v ...interface{}) {
 }
 
 func (log *logger) Infof(format string, v ...interface{}) {
-	if log.options.level < INFO {
+	if log.options.level > INFO {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
@@ -197,7 +197,7 @@ func Warningf(format string, v ...interface{}) {
 }
 
 func (log *logger) Warning(v ...interface{}) {
-	if log.options.level < WARNGING {
+	if log.options.level > WARNGING {
 		return
 	}
 	data := log.Prefix() + fmt.Sprint(v...)
@@ -205,7 +205,7 @@ func (log *logger) Warning(v ...interface{}) {
 }
 
 func (log *logger) Warningf(format string, v ...interface{}) {
-	if log.options.level < WARNGING {
+	if log.options.level > WARNGING {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
@@ -223,7 +223,7 @@ func Errorf(format string, v ...interface{}) {
 }
 
 func (log *logger) Error(v ...interface{}) {
-	if log.options.level < ERROR {
+	if log.options.level > ERROR {
 		return
 	}
 	data := log.Prefix() + fmt.Sprint(v...)
@@ -231,7 +231,7 @@ func (log *logger) Error(v ...interface{}) {
 }
 
 func (log *logger) Errorf(format string, v ...interface{}) {
-	if log.options.level < ERROR {
+	if log.options.level > ERROR {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
@@ -249,7 +249,7 @@ func Fatalf(format string, v ...interface{}) {
 }
 
 func (log *logger) Fatal(v ...interface{}) {
-	if log.options.level < FATAL {
+	if log.options.level > FATAL {
 		return
 	}
 	data := log.Prefix() + fmt.Sprint(v...)
@@ -257,7 +257,7 @@ func (log *logger) Fatal(v ...interface{}) {
 }
 
 func (log *logger) Fatalf(format string, v ...interface{}) {
-	if log.options.level < FATAL {
+	if log.options.level > FATAL {
 		return
 	}
 	data := log.Prefix() + fmt.Sprintf(format,v...)
