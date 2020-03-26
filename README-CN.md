@@ -186,4 +186,4 @@ go run client.go -concurrency=100 -total=1000000
 
 如何进行贡献？
 
-可以参考 [Contributing](
+可以参考 [Contributing](https://github.com/lubanproj/gorpc/blob/master/CONTRIBUTING.md)
