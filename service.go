@@ -64,7 +64,7 @@ func (s *service) Serve(opts *ServerOptions) {
 		transport.WithSerialization(s.opts.serializationType),
 	}
 
-	serverTransport := transport.GetServerTransport("default")
+	serverTransport := transport.GetServerTransport(s.opts.protocol)
 
 	s.ctx, s.cancel = context.WithCancel(context.Background())
 

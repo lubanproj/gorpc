@@ -22,6 +22,14 @@ func init() {
 	serverTransportMap["default"] = DefaultServerTransport
 }
 
+// RegisterServerTransport supports business custom registered ServerTransport
+func RegisterServerTransport(name string, serverTransport ServerTransport) {
+	if serverTransportMap == nil {
+		serverTransportMap = make(map[string]ServerTransport)
+	}
+	serverTransportMap[name] = serverTransport
+}
+
 // Get the ServerTransport
 func GetServerTransport(transport string) ServerTransport {
 

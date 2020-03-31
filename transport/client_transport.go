@@ -15,6 +15,14 @@ func init() {
 	clientTransportMap["default"] = DefaultClientTransport
 }
 
+// RegisterClientTransport supports business custom registered ClientTransport
+func RegisterClientTransport(name string, clientTransport ClientTransport) {
+	if clientTransportMap == nil {
+		clientTransportMap = make(map[string]ClientTransport)
+	}
+	clientTransportMap[name] = clientTransport
+}
+
 // Get the ServerTransport
 func GetClientTransport(transport string) ClientTransport {
 
