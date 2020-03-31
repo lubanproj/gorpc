@@ -15,6 +15,7 @@ func init() {
 	clientTransportMap["default"] = DefaultClientTransport
 }
 
+// Get the ServerTransport
 func GetClientTransport(transport string) ClientTransport {
 
 	if v, ok := clientTransportMap[transport]; ok {
@@ -24,8 +25,10 @@ func GetClientTransport(transport string) ClientTransport {
 	return DefaultClientTransport
 }
 
+// The default ClientTransport
 var DefaultClientTransport = New()
 
+// Use the singleton pattern to create a ClientTransport
 var New = func() ClientTransport {
 	return &clientTransport{
 		opts : &ClientTransportOptions{},

@@ -14,16 +14,21 @@ import (
 const DefaultPayloadLength = 1024
 const MaxPayloadLength = 4 * 1024 * 1024
 
+// ServerTransport defines the criteria that all server transport layers
+// need to support
 type ServerTransport interface {
 	// monitoring and processing of requests
 	ListenAndServe(context.Context, ...ServerTransportOption) error
 }
 
+// ClientTransport defines the criteria that all client transport layers
+// need to support
 type ClientTransport interface {
 	// send requests
 	Send(context.Context, []byte, ...ClientTransportOption) ([]byte, error)
 }
 
+// Framer defines the reading of data frames from a data stream
 type Framer interface {
 	// read a full frame
 	ReadFrame(net.Conn) ([]byte, error)
@@ -34,6 +39,7 @@ type framer struct {
 	counter int  // to prevent the dead loop
 }
 
+// Create a Framer
 func NewFramer() Framer {
 	return &framer {
 		buffer : make([]byte, DefaultPayloadLength),

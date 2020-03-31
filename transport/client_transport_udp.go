@@ -2,8 +2,9 @@ package transport
 
 import (
 	"context"
-	"github.com/lubanproj/gorpc/codes"
 	"net"
+
+	"github.com/lubanproj/gorpc/codes"
 )
 
 func (c *clientTransport) SendUdpReq(ctx context.Context, req []byte) ([]byte, error) {

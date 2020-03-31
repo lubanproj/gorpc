@@ -22,6 +22,7 @@ func init() {
 	serverTransportMap["default"] = DefaultServerTransport
 }
 
+// Get the ServerTransport
 func GetServerTransport(transport string) ServerTransport {
 
 	if v, ok := serverTransportMap[transport]; ok {
@@ -31,8 +32,10 @@ func GetServerTransport(transport string) ServerTransport {
 	return DefaultServerTransport
 }
 
+// The default server transport
 var DefaultServerTransport = NewServerTransport()
 
+// Use the singleton pattern to create a server transport
 var NewServerTransport = func() ServerTransport {
 	return &serverTransport{
 		opts : &ServerTransportOptions{},
