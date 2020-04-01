@@ -3,6 +3,7 @@ package gorpc
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/lubanproj/gorpc/codec"
 	"github.com/lubanproj/gorpc/codes"
@@ -69,9 +70,11 @@ func (s *service) Serve(opts *ServerOptions) {
 	s.ctx, s.cancel = context.WithCancel(context.Background())
 
 	if err := serverTransport.ListenAndServe(s.ctx, transportOpts ...); err != nil {
-		log.Errorf("%s serve error, %v", s.serviceName, err)
+		log.Errorf("%s serve error, %v", s.opts.network, err)
 		return
 	}
+
+	fmt.Printf("%s service serving at %s ... \n",s.opts.protocol, s.opts.address)
 
 	<- s.ctx.Done()
 }

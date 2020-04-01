@@ -2,14 +2,26 @@ package http
 
 import (
 	"context"
-	"github.com/lubanproj/gorpc/transport"
+	"github.com/julienschmidt/httprouter"
+	"github.com/lubanproj/gorpc/log"
 	"net"
 	"net/http"
+
+	"github.com/lubanproj/gorpc/transport"
 )
 
 type httpServerTransport struct {
 	http.Server
 	opts *transport.ServerTransportOptions
+
+	Router *httprouter.Router // router for httpServerTransport
+}
+
+var DefaultRouter *httprouter.Router
+
+func init() {
+	// use httprouter for default router
+	DefaultRouter = httprouter.New()
 }
 
 // The default httpServerTransport
@@ -35,8 +47,27 @@ func (s *httpServerTransport) ListenAndServe(ctx context.Context, opts ...transp
 	if err != nil {
 		return err
 	}
-	return s.Server.Serve(lis)
+
+
+	s.Server.Handler = DefaultRouter
+	go func() {
+		if err = s.Server.Serve(lis); err != nil {
+			log.Errorf("http serve error, %v", err)
+		}
+	}()
+
+	return nil
 }
 
+type emptyService struct{}
+
+// HandlerFunc is an adapter which allows the usage of an http handler
+// request handle.
+func HandleFunc(method, path string, handler func(http.ResponseWriter, *http.Request)) error {
+
+	DefaultRouter.HandlerFunc(method, path, handler)
+
+	return nil
+}
 
 
