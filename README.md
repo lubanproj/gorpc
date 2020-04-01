@@ -103,7 +103,7 @@ See [helloworld](https://github.com/lubanproj/gorpc/tree/master/examples/hellowo
 - **High performance**, performance far exceeds that of the grpc, refer to [Performance](#Performance)
 - Support **reflection**, **code generation** two ways to call
 - All plug-ins are **configurable**
-- **Multi-protocol** support, currently supported tcp, extensible and customizable
+- **Multi-protocol** support, currently supported tcp、udp、http, extensible and customizable
 - Support **interceptor**, extensible and customizable
 - Support **connection pooling**, extensible and customizable
 - Support **service discovery**, provides the **consul** plug-in implementation, extensible and customizable
