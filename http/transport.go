@@ -59,8 +59,6 @@ func (s *httpServerTransport) ListenAndServe(ctx context.Context, opts ...transp
 	return nil
 }
 
-type emptyService struct{}
-
 // HandlerFunc is an adapter which allows the usage of an http handler
 // request handle.
 func HandleFunc(method, path string, handler func(http.ResponseWriter, *http.Request)) error {
