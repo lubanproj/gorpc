@@ -1,8 +1,9 @@
 package stream
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestGetServerStream(t *testing.T) {
@@ -11,9 +12,8 @@ func TestGetServerStream(t *testing.T) {
 
 func TestWithMethod(t *testing.T) {
 	var ss ServerStream
-	var testString = "test"
-	ss.WithMethod(testString)
-	assert.Equal(t, testString, ss.Method)
+	ss.WithMethod("test")
+	assert.Equal(t, "test", ss.Method)
 }
 
 func TestClone(t *testing.T) {
