@@ -1,11 +1,13 @@
 package transport
 
 import (
-	"github.com/lubanproj/gorpc/pool/connpool"
-	"github.com/lubanproj/gorpc/selector"
-	"github.com/stretchr/testify/assert"
 	"testing"
 	"time"
+
+	"github.com/lubanproj/gorpc/pool/connpool"
+	"github.com/lubanproj/gorpc/selector"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestWithServiceName(t *testing.T) {
