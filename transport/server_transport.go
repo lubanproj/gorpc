@@ -128,7 +128,7 @@ func (s *serverTransport) serve(ctx context.Context,lis net.Listener) error {
 			ctx, _ := stream.NewServerStream(ctx)
 
 			if err := s.handleConn(ctx, wrapConn(conn)); err != nil {
-				log.Error("gorpc handle tcp conn error, %v", err)
+				log.Errorf("gorpc handle tcp conn error, %v", err)
 			}
 
 		}()

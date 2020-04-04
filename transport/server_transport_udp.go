@@ -54,7 +54,7 @@ func (s *serverTransport) ListenAndServeUdp(ctx context.Context, opts ...ServerT
 			ctx, _ := stream.NewServerStream(ctx)
 
 			if err := s.handleUdpConn(ctx, conn, addr, req); err != nil {
-				log.Error("gorpc handle udp conn error, %v", err)
+				log.Errorf("gorpc handle udp conn error, %v", err)
 			}
 
 		}()
