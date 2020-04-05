@@ -31,6 +31,7 @@ type service struct{
 	opts *ServerOptions  		// 参数选项
 }
 
+// ServiceDesc is a detailed description of a service
 type ServiceDesc struct {
 	Svr interface{}
 	ServiceName string
@@ -38,11 +39,13 @@ type ServiceDesc struct {
 	HandlerType interface{}
 }
 
+// MethodDesc is a detailed description of a method
 type MethodDesc struct {
 	MethodName string
 	Handler Handler
 }
 
+// Handler is the handler of a method
 type Handler func (interface{}, context.Context, func(interface{}) error, []interceptor.ServerInterceptor) (interface{}, error)
 
 func (s *service) Register(handlerName string, handler Handler) {
@@ -80,7 +83,8 @@ func (s *service) Serve(opts *ServerOptions) {
 }
 
 func (s *service) Close() {
-
+	s.cancel()
+	fmt.Println("service Closing ...")
 }
 
 

@@ -20,6 +20,7 @@ type Server struct {
 	plugins []plugin.Plugin
 }
 
+// NewServer creates a Server, Support to pass in ServerOption parameters
 func NewServer(opt ...ServerOption) *Server{
 
 	s := &Server {
