@@ -6,17 +6,17 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var NewTest = func() ClientTransport {
+var NewClientTransport = func() ClientTransport {
 	return &clientTransport{
 		opts: &ClientTransportOptions{ServiceName: "test"},
 	}
 }
 
 func TestGetClientTransport(t *testing.T) {
-	var testClientTransport = NewTest()
+	var testClientTransport = NewClientTransport()
 	clientTransportMap["clinetTest"] = testClientTransport
-	clientTranspot := GetClientTransport("clinetTest")
-	assert.Equal(t, clientTranspot, testClientTransport)
-	clientTranspot = GetClientTransport("test")
-	assert.Equal(t, clientTranspot, DefaultClientTransport)
+	clientTransport := GetClientTransport("clinetTest")
+	assert.Equal(t, clientTransport, testClientTransport)
+	clientTransport = GetClientTransport("test")
+	assert.Equal(t, clientTransport, DefaultClientTransport)
 }
