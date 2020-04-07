@@ -31,7 +31,7 @@ func TestWithProtocol(t *testing.T) {
 	var serverops ServerOptions
 	fServerops := WithProtocol("http")
 	fServerops(&serverops)
-	assert.Equal(t, "test", serverops.protocol)
+	assert.Equal(t, "http", serverops.protocol)
 	fServerops = WithProtocol("")
 	fServerops(&serverops)
 	assert.Equal(t, "", serverops.protocol)
