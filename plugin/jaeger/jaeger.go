@@ -4,13 +4,14 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
+
 	"github.com/lubanproj/gorpc/interceptor"
 	"github.com/lubanproj/gorpc/plugin"
 	"github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"
 	"github.com/opentracing/opentracing-go/log"
 	"github.com/uber/jaeger-client-go/config"
-	"strings"
 )
 
 // Jaeger implements the opentracing specification
