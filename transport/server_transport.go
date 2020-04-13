@@ -92,7 +92,7 @@ func (s *serverTransport) serve(ctx context.Context,lis net.Listener) error {
 
 	for {
 
-		tl, ok := lis.(*net.TCPListener);
+		tl, ok := lis.(*net.TCPListener)
 		if !ok {
 			return codes.NetworkNotSupportedError
 		}
@@ -146,7 +146,7 @@ func (s *serverTransport) handleConn(ctx context.Context, conn *connWrapper) err
 		// check upstream ctx is done
 		select {
 		case <-ctx.Done():
-			return ctx.Err();
+			return ctx.Err()
 		default:
 		}
 
