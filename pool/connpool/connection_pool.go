@@ -87,7 +87,7 @@ type channelPool struct {
 	dialTimeout time.Duration  // dial timeout
 	Dial func(context.Context) (net.Conn, error)
 	conns chan *PoolConn
-	mu sync.Mutex
+	mu sync.RWMutex
 }
 
 
@@ -175,11 +175,11 @@ func (c *channelPool) Put(conn *PoolConn) error {
 	if conn == nil {
 		return errors.New("connection closed")
 	}
+	c.mu.RLock()
+	defer c.mu.RUnlock()
 	if c.conns == nil {
 		conn.Close()
 	}
-	c.mu.Lock()
-	defer c.mu.Unlock()
 
 	select {
 	case c.conns <- conn :
