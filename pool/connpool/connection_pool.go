@@ -198,26 +198,28 @@ func (c *channelPool) RegisterChecker(internal time.Duration, checker func(conn 
 
 	go func() {
 
-		time.Sleep(internal)
+		for {
+			time.Sleep(internal)
 
-		length := len(c.conns)
+			length := len(c.conns)
 
-		for i:=0; i < length; i++ {
+			for i:=0; i < length; i++ {
 
-			select {
-			case pc := <- c.conns :
+				select {
+				case pc := <- c.conns :
 
-				if !checker(pc) {
-					pc.MarkUnusable()
-					pc.Close()
+					if !checker(pc) {
+						pc.MarkUnusable()
+						pc.Close()
+						break
+					} else {
+						c.Put(pc)
+					}
+				default:
 					break
-				} else {
-					c.Put(pc)
 				}
-			default:
-				break
-			}
 
+			}
 		}
 
 	}()
