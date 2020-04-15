@@ -199,6 +199,7 @@ func (c *channelPool) RegisterChecker(internal time.Duration, checker func(conn 
 	go func() {
 
 		for {
+
 			time.Sleep(internal)
 
 			length := len(c.conns)

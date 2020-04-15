@@ -57,6 +57,8 @@ func (d *pbSerialization) Marshal(v interface{}) ([]byte, error) {
 	}
 	data := buffer.Bytes()
 	buffer.lastMarshaledSize = upperLimit(len(data))
+	buffer.SetBuf(nil)
+	bufferPool.Put(buffer)
 
 	return data, nil
 }
