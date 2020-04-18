@@ -84,7 +84,7 @@ func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, e
 	sendNum := 0
 	num := 0
 	for sendNum < len(req) {
-		num , err = conn.Write(req)
+		num , err = conn.Write(req[sendNum:])
 		if err != nil {
 			return nil, err
 		}
