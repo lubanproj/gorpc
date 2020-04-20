@@ -86,12 +86,12 @@ func (s *serverTransport) serve(ctx context.Context,lis net.Listener) error {
 
 	var tempDelay time.Duration
 
-	for {
+	tl, ok := lis.(*net.TCPListener)
+	if !ok {
+		return codes.NetworkNotSupportedError
+	}
 
-		tl, ok := lis.(*net.TCPListener)
-		if !ok {
-			return codes.NetworkNotSupportedError
-		}
+	for {
 
 		conn , err := tl.AcceptTCP()
 		if err != nil {
