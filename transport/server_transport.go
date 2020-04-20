@@ -68,10 +68,6 @@ func (s *serverTransport) ListenAndServe(ctx context.Context, opts ...ServerTran
 
 func (s *serverTransport) ListenAndServeTcp(ctx context.Context, opts ...ServerTransportOption) error {
 
-	for _, o := range opts {
-		o(s.opts)
-	}
-
 	lis, err := net.Listen(s.opts.Network, s.opts.Address)
 	if err != nil {
 		return err
