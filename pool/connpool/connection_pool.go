@@ -167,6 +167,7 @@ func (c *channelPool) Close() {
 	}
 	close(conns)
 	for conn := range conns {
+		conn.MarkUnusable()
 		conn.Close()
 	}
 }
@@ -178,6 +179,7 @@ func (c *channelPool) Put(conn *PoolConn) error {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
 	if c.conns == nil {
+		conn.MarkUnusable()
 		conn.Close()
 	}
 
