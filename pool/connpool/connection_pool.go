@@ -36,7 +36,7 @@ func GetPool(poolName string) Pool {
 	return DefaultPool
 }
 
-// TODO 暴露 ConnPool 属性
+// TODO expose the ConnPool options
 var DefaultPool = NewConnPool()
 
 func NewConnPool(opt ...Option) *pool {

@@ -3,14 +3,15 @@ package gorpc
 import (
 	"context"
 	"fmt"
-	"github.com/lubanproj/gorpc/interceptor"
-	"github.com/lubanproj/gorpc/log"
-	"github.com/lubanproj/gorpc/plugin"
-	"github.com/lubanproj/gorpc/plugin/jaeger"
 	"os"
 	"os/signal"
 	"reflect"
 	"syscall"
+
+	"github.com/lubanproj/gorpc/interceptor"
+	"github.com/lubanproj/gorpc/log"
+	"github.com/lubanproj/gorpc/plugin"
+	"github.com/lubanproj/gorpc/plugin/jaeger"
 )
 
 // gorpc Server, a Server can have one or more Services
@@ -18,6 +19,8 @@ type Server struct {
 	opts *ServerOptions
 	services map[string]Service
 	plugins []plugin.Plugin
+
+	closing bool // whether the server is closing
 }
 
 // NewServer creates a Server, Support to pass in ServerOption parameters
@@ -219,7 +222,11 @@ func (s *Server) ServeHttp() {
 }
 
 func (s *Server) Close() {
+	s.closing = false
 
+	for _, service := range s.services {
+		service.Close()
+	}
 }
 
 

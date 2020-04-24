@@ -2,14 +2,15 @@ package transport
 
 import (
 	"context"
+	"io"
+	"net"
+	"time"
+
 	"github.com/lubanproj/gorpc/codes"
 	"github.com/lubanproj/gorpc/log"
 	"github.com/lubanproj/gorpc/protocol"
 	"github.com/lubanproj/gorpc/stream"
 	"github.com/lubanproj/gorpc/utils"
-	"io"
-	"net"
-	"time"
 )
 
 type serverTransport struct {
@@ -93,6 +94,13 @@ func (s *serverTransport) serve(ctx context.Context,lis net.Listener) error {
 
 	for {
 
+		// check upstream ctx is done
+		select {
+		case <-ctx.Done():
+			return ctx.Err();
+		default:
+		}
+
 		conn , err := tl.AcceptTCP()
 		if err != nil {
 			if ne, ok := err.(net.Error); ok && ne.Temporary() {
@@ -130,6 +138,8 @@ func (s *serverTransport) serve(ctx context.Context,lis net.Listener) error {
 		}()
 
 	}
+
+	return nil
 }
 
 

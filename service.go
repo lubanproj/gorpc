@@ -29,6 +29,8 @@ type service struct{
 	serviceName string   		// 服务名
 	handlers map[string]Handler
 	opts *ServerOptions  		// 参数选项
+
+	closing bool    // whether the service is closing
 }
 
 // ServiceDesc is a detailed description of a service
@@ -57,7 +59,6 @@ func (s *service) Register(handlerName string, handler Handler) {
 
 func (s *service) Serve(opts *ServerOptions) {
 
-	// TODO 思考下除了 Server 和 Service 的 Options 如何处理
 	s.opts = opts
 
 	transportOpts := []transport.ServerTransportOption {
@@ -83,8 +84,9 @@ func (s *service) Serve(opts *ServerOptions) {
 }
 
 func (s *service) Close() {
+	s.closing = true
 	s.cancel()
-	fmt.Println("service Closing ...")
+	fmt.Println("service closing ...")
 }
 
 
