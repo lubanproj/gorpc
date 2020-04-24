@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/lubanproj/gorpc"
-	"github.com/stretchr/testify/assert"
 	"github.com/lubanproj/gorpc/examples/helloworld/helloworld"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestCall(t *testing.T) {
