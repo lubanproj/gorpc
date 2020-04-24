@@ -3,9 +3,10 @@ package codec
 import (
 	"bytes"
 	"encoding/binary"
-	"github.com/golang/protobuf/proto"
 	"math"
 	"sync"
+
+	"github.com/golang/protobuf/proto"
 )
 
 type Codec interface {

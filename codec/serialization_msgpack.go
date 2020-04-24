@@ -2,9 +2,9 @@ package codec
 
 import (
 	"bytes"
+
 	"github.com/vmihailenco/msgpack"
 )
-
 
 func init() {
 	registerSerialization("msgpack", &MsgpackSerialization{})
