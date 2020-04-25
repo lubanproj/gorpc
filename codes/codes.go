@@ -7,6 +7,7 @@ const (
 	ConfigErrorCode = 101
 	NetworkNotSupportedErrorCode = 201
 	ClientMsgErrorCode = 301
+	ClientCertFail = 401
 )
 
 // errorcode type
@@ -20,6 +21,7 @@ const (
 var (
 	ConfigError = NewFrameworkError(ConfigErrorCode,"config error")
 	NetworkNotSupportedError = NewFrameworkError(NetworkNotSupportedErrorCode,"network type not supported")
+	ClientCertFailError = NewFrameworkError(ClientCertFail, "client cert fail")
 )
 
 
