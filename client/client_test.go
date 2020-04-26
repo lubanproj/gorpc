@@ -18,7 +18,7 @@ func TestCall(t *testing.T) {
 	wg.Add(1)
 	go func() {
 		serverOpts := []gorpc.ServerOption{
-			gorpc.WithAddress("localhost:8000"),
+			gorpc.WithAddress("127.0.0.1:8001"),
 			gorpc.WithNetwork("tcp"),
 			gorpc.WithSerializationType("msgpack"),
 			gorpc.WithTimeout(time.Millisecond * 2000),
@@ -40,7 +40,7 @@ func TestCall(t *testing.T) {
 	wg.Wait()
 
 	opts := []Option {
-		WithTarget("localhost:8000"),
+		WithTarget("127.0.0.1:8001"),
 		WithNetwork("tcp"),
 		WithTimeout(2000 * time.Millisecond),
 		WithSerializationType("msgpack"),

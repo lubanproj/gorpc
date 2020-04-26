@@ -1,6 +1,7 @@
 package gorpc
 
 import (
+	"sync"
 	"testing"
 	"time"
 )
@@ -13,10 +14,12 @@ func TestServe(t *testing.T) {
 		timeout: time.Millisecond * 1000,
 	}
 	s := &service{}
+	var wg sync.WaitGroup
+	wg.Add(1)
 	go func() {
 		s.Serve(opts)
+		wg.Done()
 	}()
-	time.Sleep(time.Millisecond * 1000)
+	wg.Wait()
 	s.Close()
-
 }
