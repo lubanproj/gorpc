@@ -28,11 +28,17 @@ func TestCall(t *testing.T) {
 		if err := s.RegisterService("helloworld.Greeter", new(helloworld.Service)); err != nil {
 			panic(err)
 		}
-		s.Serve()
 		wg.Done()
 
+		go func() {
+			s.Serve()
+		}()
+
 		<- ch
+		s.Close()
 	}()
+
+	wg.Wait()
 
 	opts := []Option {
 		WithTarget("127.0.0.1:8000"),
@@ -45,6 +51,7 @@ func TestCall(t *testing.T) {
 		Msg: "hello",
 	}
 	rsp := &helloworld.HelloReply{}
+
 	err := c.Call(context.Background(), "/helloworld.Greeter/SayHello", req, rsp, opts ...)
 
 	close(ch)
