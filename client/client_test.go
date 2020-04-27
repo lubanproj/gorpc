@@ -2,7 +2,6 @@ package client
 
 import (
 	"context"
-	"sync"
 	"testing"
 	"time"
 
@@ -13,9 +12,7 @@ import (
 
 func TestCall(t *testing.T) {
 
-	var wg sync.WaitGroup
 	var ch = make(chan struct{})
-	wg.Add(1)
 	go func() {
 		serverOpts := []gorpc.ServerOption{
 			gorpc.WithAddress("127.0.0.1:8001"),
@@ -27,7 +24,6 @@ func TestCall(t *testing.T) {
 		if err := s.RegisterService("helloworld.Greeter", new(helloworld.Service)); err != nil {
 			panic(err)
 		}
-		wg.Done()
 
 		go func() {
 			s.Serve()
@@ -37,7 +33,7 @@ func TestCall(t *testing.T) {
 		s.Close()
 	}()
 
-	wg.Wait()
+	time.Sleep(1000 * time.Millisecond)
 
 	opts := []Option {
 		WithTarget("127.0.0.1:8001"),

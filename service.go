@@ -85,7 +85,9 @@ func (s *service) Serve(opts *ServerOptions) {
 
 func (s *service) Close() {
 	s.closing = true
-	s.cancel()
+	if s.cancel != nil {
+		s.cancel()
+	}
 	fmt.Println("service closing ...")
 }
 
