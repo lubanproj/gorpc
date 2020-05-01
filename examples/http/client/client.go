@@ -11,6 +11,9 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 	}
-	rspbody, err := ioutil.ReadAll(rsp.Body)
+
+    defer rsp.Body.Close()
+	
+    rspbody, err := ioutil.ReadAll(rsp.Body)
 	fmt.Println(string(rspbody), err)
 }
