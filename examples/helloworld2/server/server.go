@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"fmt"
+	"time"
+
 	"github.com/lubanproj/gorpc"
 	"github.com/lubanproj/gorpc/examples/helloworld2/helloworld"
-	"time"
 )
 
 type greeterService struct{}

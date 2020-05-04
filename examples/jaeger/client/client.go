@@ -6,8 +6,9 @@ import (
 	"time"
 
 	"github.com/lubanproj/gorpc/client"
-	"github.com/lubanproj/gorpc/examples/helloworld/helloworld"
 	"github.com/lubanproj/gorpc/plugin/jaeger"
+	"github.com/lubanproj/gorpc/testdata"
+
 )
 
 func main() {
@@ -24,10 +25,10 @@ func main() {
 		client.WithInterceptor(jaeger.OpenTracingClientInterceptor(tracer, "/helloworld.Greeter/SayHello")),
 	}
 	c := client.DefaultClient
-	req := &helloworld.HelloRequest{
+	req := &testdata.HelloRequest{
 		Msg: "hello",
 	}
-	rsp := &helloworld.HelloReply{}
+	rsp := &testdata.HelloReply{}
 
 	for i:= 1; i< 200; i ++ {
 		err = c.Call(context.Background(), "/helloworld.Greeter/SayHello", req, rsp, opts ...)

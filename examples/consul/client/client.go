@@ -3,10 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/lubanproj/gorpc/client"
-	"github.com/lubanproj/gorpc/examples/helloworld/helloworld"
-	"github.com/lubanproj/gorpc/plugin/consul"
 	"time"
+
+	"github.com/lubanproj/gorpc/client"
+	"github.com/lubanproj/gorpc/plugin/consul"
+	"github.com/lubanproj/gorpc/testdata"
 )
 
 func main() {
@@ -17,10 +18,10 @@ func main() {
 		client.WithSelectorName(consul.Name),
 	}
 	c := client.DefaultClient
-	req := &helloworld.HelloRequest{
+	req := &testdata.HelloRequest{
 		Msg: "hello",
 	}
-	rsp := &helloworld.HelloReply{}
+	rsp := &testdata.HelloReply{}
 
 	consul.Init("localhost:8500")
 	err := c.Call(context.Background(), "/helloworld.Greeter/SayHello", req, rsp, opts ...)

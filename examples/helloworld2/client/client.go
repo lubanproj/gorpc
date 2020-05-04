@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/lubanproj/gorpc/client"
-	pb "github.com/lubanproj/gorpc/examples/helloworld2/helloworld"
 	"time"
+
+	"github.com/lubanproj/gorpc/client"
+
+	pb "github.com/lubanproj/gorpc/examples/helloworld2/helloworld"
 )
 
 func main() {
