@@ -3,10 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"time"
-
 	"github.com/lubanproj/gorpc/client"
-	"github.com/lubanproj/gorpc/testdata"
+	"github.com/lubanproj/gorpc/examples/helloworld/helloworld"
+	"time"
 )
 
 func main() {
@@ -17,10 +16,10 @@ func main() {
 		client.WithSerializationType("msgpack"),
 	}
 	c := client.DefaultClient
-	req := &testdata.HelloRequest{
+	req := &helloworld.HelloRequest{
 		Msg: "hello",
 	}
-	rsp := &testdata.HelloReply{}
+	rsp := &helloworld.HelloReply{}
 	err := c.Call(context.Background(), "/helloworld.Greeter/SayHello", req, rsp, opts ...)
 	fmt.Println(rsp.Msg, err)
 }
