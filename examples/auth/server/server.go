@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/lubanproj/gorpc"
-	"github.com/lubanproj/gorpc/examples/helloworld/helloworld"
 	"time"
+
+	"github.com/lubanproj/gorpc"
+	"github.com/lubanproj/gorpc/testdata"
 )
 
 
@@ -15,7 +16,7 @@ func main() {
 		gorpc.WithTimeout(time.Millisecond * 2000),
 	}
 	s := gorpc.NewServer(opts ...)
-	if err := s.RegisterService("/helloworld.Greeter", new(helloworld.Service)); err != nil {
+	if err := s.RegisterService("/helloworld.Greeter", new(testdata.Service)); err != nil {
 		panic(err)
 	}
 	s.Serve()

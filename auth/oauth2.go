@@ -48,14 +48,15 @@ type AuthFunc func(ctx context.Context) (context.Context, error)
 
 
 // BuildAuthFilter constructs a client interceptor with an AuthFunc
-func ClientInterceptor(af AuthFunc) interceptor.ClientInterceptor {
-	return func(ctx context.Context, req, rsp interface{}, ivk interceptor.Invoker) error {
+func BuildAuthInterceptor(af AuthFunc) interceptor.ServerInterceptor {
 
+	return func(ctx context.Context, req interface{}, handler interceptor.Handler) (interface{}, error) {
 		newCtx, err := af(ctx)
+
 		if err != nil {
-			return codes.NewFrameworkError(codes.ClientCertFail, "token invalid ...")
+			return nil, codes.NewFrameworkError(codes.ClientCertFail, "token invalid ...")
 		}
 
-		return ivk(newCtx, req, rsp)
+		return handler(newCtx, req)
 	}
 }
