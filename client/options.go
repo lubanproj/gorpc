@@ -1,9 +1,11 @@
 package client
 
 import (
+	"time"
+
+	"github.com/lubanproj/gorpc/auth"
 	"github.com/lubanproj/gorpc/interceptor"
 	"github.com/lubanproj/gorpc/transport"
-	"time"
 )
 
 // Options defines the client call parameters
@@ -18,6 +20,8 @@ type Options struct {
 	transportOpts transport.ClientTransportOptions
 	interceptors []interceptor.ClientInterceptor
 	selectorName string      // service discovery name, e.g. : consul、zookeeper、etcd
+	perRPCAuth []auth.PerRPCAuth  // authentication information required for each RPC call
+	transportAuth auth.TransportAuth
 }
 
 type Option func(*Options)
@@ -73,6 +77,18 @@ func WithSelectorName(selectorName string) Option {
 func WithInterceptor(interceptors ...interceptor.ClientInterceptor) Option {
 	return func(o *Options) {
 		o.interceptors = append(o.interceptors, interceptors...)
+	}
+}
+
+func WithPerRPCAuth(rpcAuth auth.PerRPCAuth) Option {
+	return func(o *Options) {
+		o.perRPCAuth = append(o.perRPCAuth,rpcAuth)
+	}
+}
+
+func WithTransportAuth(transportAuth auth.TransportAuth) Option {
+	return func(o *Options) {
+		o.transportAuth = transportAuth
 	}
 }
 

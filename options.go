@@ -1,14 +1,16 @@
 package gorpc
 
 import (
-	"github.com/lubanproj/gorpc/interceptor"
 	"time"
+
+	"github.com/lubanproj/gorpc/interceptor"
 )
 
+// ServerOptions defines the server serve parameters
 type ServerOptions struct {
 	address string  // listening address, e.g. :( ip://127.0.0.1:8080、 dns://www.google.com)
 	network string  // network type, e.g. : tcp、udp
-	protocol string  // protocol typpe, e.g. : proto、json
+	protocol string  // protocol type, e.g. : proto、json
 	timeout time.Duration       // timeout
 	serializationType string 	// serialization type, default: proto
 

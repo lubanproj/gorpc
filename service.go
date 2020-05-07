@@ -70,6 +70,7 @@ func (s *service) Serve(opts *ServerOptions) {
 		transport.WithHandler(s),
 		transport.WithServerTimeout(s.opts.timeout),
 		transport.WithSerialization(s.opts.serializationType),
+		transport.WithProtocol(s.opts.protocol),
 	}
 
 	serverTransport := transport.GetServerTransport(s.opts.protocol)
