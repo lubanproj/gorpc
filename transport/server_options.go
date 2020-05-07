@@ -9,7 +9,8 @@ import (
 type ServerTransportOptions struct{
 	Address string // address，e.g: ip://127.0.0.1：8080
 	Network string  // network type
-	Timeout time.Duration  // Transport layer request timeout ，default: 2 min
+	Protocol string  // protocol type, e.g. : proto、json
+	Timeout time.Duration  // transport layer request timeout ，default: 2 min
 	Handler Handler		   // handler
 	Serialization string   // serialization type, e.g : proto、json、msgpack
 	KeepAlivePeriod time.Duration // keepalive period
@@ -34,6 +35,13 @@ func WithServerAddress(address string) ServerTransportOption {
 func WithServerNetwork(network string) ServerTransportOption {
 	return func(o *ServerTransportOptions) {
 		o.Network = network
+	}
+}
+
+// WithProtocol returns a ServerTransportOption which sets the value for protocol
+func WithProtocol(protocol string) ServerTransportOption {
+	return func(o *ServerTransportOptions) {
+		o.Protocol = protocol
 	}
 }
 

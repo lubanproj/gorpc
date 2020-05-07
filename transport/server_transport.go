@@ -171,7 +171,7 @@ func (s *serverTransport) handleConn(ctx context.Context, conn *connWrapper) err
 			return err
 		}
 
-		if err = s.write(ctx, conn,rsp); err != nil {
+		if err = s.write(ctx, conn, rsp); err != nil {
 			return err
 		}
 	}
@@ -193,6 +193,7 @@ func (s *serverTransport) read(ctx context.Context, conn *connWrapper) ([]byte, 
 func (s *serverTransport) handle(ctx context.Context, frame []byte) ([]byte, error) {
 
 	rsp , err := s.opts.Handler.Handle(ctx, frame)
+
 	if err != nil {
 		return nil, err
 	}
@@ -201,6 +202,17 @@ func (s *serverTransport) handle(ctx context.Context, frame []byte) ([]byte, err
 }
 
 func (s *serverTransport) write(ctx context.Context, conn net.Conn, rsp []byte) error {
+	_, err := conn.Write(rsp)
+
+	return err
+}
+
+func (s *serverTransport) writeError(ctx context.Context, conn net.Conn, rsp []byte, e error) error {
+
+	if err, ok := e.(*codes.Error); ok {
+
+	}
+
 	_, err := conn.Write(rsp)
 
 	return err
