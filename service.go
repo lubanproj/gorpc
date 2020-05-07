@@ -4,18 +4,21 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/golang/protobuf/proto"
+
 	"github.com/lubanproj/gorpc/codec"
 	"github.com/lubanproj/gorpc/codes"
 	"github.com/lubanproj/gorpc/interceptor"
 	"github.com/lubanproj/gorpc/log"
+	"github.com/lubanproj/gorpc/metadata"
 	"github.com/lubanproj/gorpc/protocol"
 	"github.com/lubanproj/gorpc/stream"
 	"github.com/lubanproj/gorpc/transport"
 	"github.com/lubanproj/gorpc/utils"
+
+	"github.com/golang/protobuf/proto"
 )
 
-// Service 定义了某个具体服务的通用实现接口
+// Service defines a generic implementation interface for a specific Service
 type Service interface {
 	Register(string, Handler)
 	Serve(*ServerOptions)
@@ -24,11 +27,11 @@ type Service interface {
 
 type service struct{
 	svr interface{}  			// server
-	ctx context.Context  		// 每一个 service 一个上下文进行管理
-	cancel context.CancelFunc   // context 的控制器
-	serviceName string   		// 服务名
+	ctx context.Context  		// Each service is managed in one context
+	cancel context.CancelFunc   // controller of context
+	serviceName string   		// service name
 	handlers map[string]Handler
-	opts *ServerOptions  		// 参数选项
+	opts *ServerOptions  		// parameter options
 
 	closing bool    // whether the service is closing
 }
@@ -126,6 +129,8 @@ func (s *service) Handle (ctx context.Context, frame []byte) ([]byte, error) {
 		ctx, cancel = context.WithTimeout(ctx, s.opts.timeout)
 		defer cancel()
 	}
+
+	metadata.WithServerMetadata(ctx, request.Metadata)
 
 	_, method , err := utils.ParseServicePath(string(request.ServicePath))
 	if err != nil {

@@ -96,7 +96,6 @@ func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, e
 	}
 
 	// parse frame
-
 	wrapperConn := wrapConn(conn)
 	frame, err := wrapperConn.framer.ReadFrame(conn)
 	if err != nil {
