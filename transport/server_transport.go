@@ -169,7 +169,10 @@ func (s *serverTransport) handleConn(ctx context.Context, conn *connWrapper) err
 			return err
 		}
 
-		rsp , _ := s.handle(ctx, frame)
+		rsp , err := s.handle(ctx, frame)
+		if err != nil {
+			log.Errorf("s.handle err is not nil, %v", err)
+		}
 
 		if err = s.write(ctx, conn, rsp); err != nil {
 			return err
@@ -220,6 +223,8 @@ func (s *serverTransport) handle(ctx context.Context, frame []byte) ([]byte, err
 		return nil, err
 	}
 
+	log.Debugf("rspbody : %v, err : %v", rspbody, err)
+
 	return rspbody, nil
 }
 
@@ -232,7 +237,7 @@ func addRspHeader(payload []byte, err error) *protocol.Response {
 
 	if err != nil {
 		if e, ok := err.(*codes.Error); ok {
-			response.RetCode = uint32(e.Code)
+			response.RetCode = e.Code
 			response.RetMsg = e.Message
 		} else {
 			response.RetCode = codes.ServerInternalErrorCode
@@ -244,9 +249,11 @@ func addRspHeader(payload []byte, err error) *protocol.Response {
 }
 
 func (s *serverTransport) write(ctx context.Context, conn net.Conn, rsp []byte) error {
-	_, err := conn.Write(rsp)
+	if _, err := conn.Write(rsp); err != nil {
+		log.Errorf("conn Write err: %v", err)
+	}
 
-	return err
+	return nil
 }
 
 

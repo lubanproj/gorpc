@@ -11,7 +11,6 @@ import (
 	"github.com/lubanproj/gorpc/log"
 	"github.com/lubanproj/gorpc/metadata"
 	"github.com/lubanproj/gorpc/protocol"
-	"github.com/lubanproj/gorpc/stream"
 	"github.com/lubanproj/gorpc/transport"
 	"github.com/lubanproj/gorpc/utils"
 
@@ -69,7 +68,7 @@ func (s *service) Serve(opts *ServerOptions) {
 		transport.WithServerNetwork(s.opts.network),
 		transport.WithHandler(s),
 		transport.WithServerTimeout(s.opts.timeout),
-		transport.WithSerialization(s.opts.serializationType),
+		transport.WithSerializationType(s.opts.serializationType),
 		transport.WithProtocol(s.opts.protocol),
 	}
 
@@ -96,24 +95,15 @@ func (s *service) Close() {
 }
 
 
-func (s *service) Handle (ctx context.Context, frame []byte) ([]byte, error) {
-
-	if len(frame) == 0 {
-		return nil, errors.New("req is nil")
-	}
-
-	// 将 reqbuf 解析成 req interface {}
-	serverCodec := codec.GetCodec(s.opts.protocol)
-	reqbuf, err := serverCodec.Decode(frame)
-	if err != nil {
-		return nil, err
-	}
+func (s *service) Handle (ctx context.Context, reqbuf []byte) ([]byte, error) {
 
 	// parse protocol header
 	request := &protocol.Request{}
-	if err = proto.Unmarshal(reqbuf, request); err != nil {
+	if err := proto.Unmarshal(reqbuf, request); err != nil {
 		return nil, err
 	}
+
+	ctx = metadata.WithServerMetadata(ctx, request.Metadata)
 
 	serverSerialization := codec.GetSerialization(s.opts.serializationType)
 
@@ -131,7 +121,6 @@ func (s *service) Handle (ctx context.Context, frame []byte) ([]byte, error) {
 		defer cancel()
 	}
 
-	metadata.WithServerMetadata(ctx, request.Metadata)
 
 	_, method , err := utils.ParseServicePath(string(request.ServicePath))
 	if err != nil {
@@ -153,28 +142,6 @@ func (s *service) Handle (ctx context.Context, frame []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	response := addRspHeader(ctx, rspbuf)
-	rspPb, err := proto.Marshal(response)
-	if err != nil {
-		return nil, err
-	}
-
-	rspbody, err := serverCodec.Encode(rspPb)
-	if err != nil {
-		return nil, err
-	}
-
-	return rspbody, nil
+	return rspbuf, nil
 }
 
-
-func addRspHeader(ctx context.Context, payload []byte) *protocol.Response {
-	serverStream := stream.GetServerStream(ctx)
-	response := &protocol.Response{
-		Payload: payload,
-		RetCode: serverStream.RetCode,
-		RetMsg: serverStream.RetMsg,
-	}
-
-	return response
-}

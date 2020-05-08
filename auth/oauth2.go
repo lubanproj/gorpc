@@ -54,7 +54,7 @@ func BuildAuthInterceptor(af AuthFunc) interceptor.ServerInterceptor {
 		newCtx, err := af(ctx)
 
 		if err != nil {
-			return nil, codes.NewFrameworkError(codes.ClientCertFail, "token invalid ...")
+			return nil, codes.NewFrameworkError(codes.ClientCertFail, err.Error())
 		}
 
 		return handler(newCtx, req)

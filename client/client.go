@@ -134,6 +134,10 @@ func (c *defaultClient) invoke(ctx context.Context, req, rsp interface{}) error 
 		return err
 	}
 
+	if response.RetCode != 0 {
+		return codes.New(response.RetCode, response.RetMsg)
+	}
+
 	return serialization.Unmarshal(response.Payload, rsp)
 
 }

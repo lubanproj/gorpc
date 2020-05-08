@@ -4,6 +4,7 @@ import "fmt"
 
 const (
 	OK = 0
+	ServerInternalErrorCode = 100
 	ConfigErrorCode = 101
 	NetworkNotSupportedErrorCode = 201
 	ClientMsgErrorCode = 301
@@ -19,6 +20,7 @@ const (
 
 // framework error
 var (
+	ServerInternalError = NewFrameworkError(ServerInternalErrorCode,"server internal error")
 	ConfigError = NewFrameworkError(ConfigErrorCode,"config error")
 	NetworkNotSupportedError = NewFrameworkError(NetworkNotSupportedErrorCode,"network type not supported")
 	ClientCertFailError = NewFrameworkError(ClientCertFail, "client cert fail")
@@ -27,7 +29,7 @@ var (
 
 // Error defines all errors in the framework
 type Error struct {
-	Code int
+	Code uint32
 	Type int
 	Message string
 }
@@ -47,7 +49,7 @@ func (e *Error) Error() string {
 }
 
 // new a framework type error
-func NewFrameworkError(code int, msg string) *Error{
+func NewFrameworkError(code uint32, msg string) *Error{
 	return &Error{
 		Type : FrameworkError,
 		Code : code,
@@ -56,7 +58,7 @@ func NewFrameworkError(code int, msg string) *Error{
 }
 
 // new a business type error
-func New(code int, msg string) *Error{
+func New(code uint32, msg string) *Error{
 	return &Error{
 		Type : BusinuessError,
 		Code : code,
