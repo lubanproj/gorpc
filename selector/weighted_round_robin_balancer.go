@@ -46,9 +46,10 @@ func (wr *wRoundRobinPicker) pick(nodes []*Node) *Node {
 	maxWeight := 0
 	index := 0
 	for i, node := range wr.nodes {
+		node.currentWeight += node.weight
 		totalWeight += node.weight
-		if node.weight > maxWeight {
-			maxWeight = node.weight
+		if node.currentWeight > maxWeight {
+			maxWeight = node.currentWeight
 			index = i
 		}
 	}
