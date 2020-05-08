@@ -1,6 +1,9 @@
 package codec
 
-import "github.com/golang/protobuf/proto"
+import (
+	"errors"
+	"github.com/golang/protobuf/proto"
+)
 
 type Serialization interface {
 	Marshal(interface{})([]byte, error)
@@ -42,6 +45,9 @@ func GetSerialization(name string) Serialization {
 type pbSerialization struct {}
 
 func (d *pbSerialization) Marshal(v interface{}) ([]byte, error) {
+	if v == nil {
+		return nil, errors.New("marshal nil interface{}")
+	}
 	if pm, ok := v.(proto.Marshaler); ok {
 		// 可以 marshal 自身，无需 buffer
 		return pm.Marshal()
@@ -64,6 +70,10 @@ func (d *pbSerialization) Marshal(v interface{}) ([]byte, error) {
 }
 
 func (d *pbSerialization) Unmarshal(data []byte, v interface{}) error {
+	if data == nil || len(data) == 0 {
+		return errors.New("unmarshal nil or empty bytes")
+	}
+
 	protoMsg := v.(proto.Message)
 	protoMsg.Reset()
 
