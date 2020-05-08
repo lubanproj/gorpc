@@ -17,6 +17,7 @@ type httpServerTransport struct {
 	Router *httprouter.Router // router for httpServerTransport
 }
 
+// DefaultRouter uses httprouter as the default router
 var DefaultRouter *httprouter.Router
 
 func init() {
