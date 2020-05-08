@@ -2,6 +2,8 @@ package transport
 
 import (
 	"context"
+	"github.com/golang/protobuf/proto"
+	"github.com/lubanproj/gorpc/codec"
 	"io"
 	"net"
 	"time"
@@ -146,6 +148,7 @@ func (s *serverTransport) serve(ctx context.Context,lis net.Listener) error {
 func (s *serverTransport) handleConn(ctx context.Context, conn *connWrapper) error {
 
 	// close the connection before return
+	// the connection closes only if a network read or write fails
 	defer conn.Close()
 
 	for {
@@ -166,10 +169,7 @@ func (s *serverTransport) handleConn(ctx context.Context, conn *connWrapper) err
 			return err
 		}
 
-		rsp , err := s.handle(ctx, frame)
-		if err != nil {
-			return err
-		}
+		rsp , _ := s.handle(ctx, frame)
 
 		if err = s.write(ctx, conn, rsp); err != nil {
 			return err
@@ -192,27 +192,58 @@ func (s *serverTransport) read(ctx context.Context, conn *connWrapper) ([]byte, 
 
 func (s *serverTransport) handle(ctx context.Context, frame []byte) ([]byte, error) {
 
-	rsp , err := s.opts.Handler.Handle(ctx, frame)
+	// parse reqbuf into req interface {}
+	serverCodec := codec.GetCodec(s.opts.Protocol)
 
+	reqbuf, err := serverCodec.Decode(frame)
 	if err != nil {
+		log.Errorf("server Decode error: %v", err)
 		return nil, err
 	}
 
-	return rsp, nil
+	rspbuf, err := s.opts.Handler.Handle(ctx, reqbuf)
+	if err != nil {
+		log.Errorf("server Handle error: %v", err)
+	}
+
+	response := addRspHeader(rspbuf, err)
+
+	rspPb, err := proto.Marshal(response)
+	if err != nil {
+		log.Errorf("proto Marshal error: %v", err)
+		return nil, err
+	}
+
+	rspbody, err := serverCodec.Encode(rspPb)
+	if err != nil {
+		log.Errorf("server Encode error, response: %v, err: %v", response, err)
+		return nil, err
+	}
+
+	return rspbody, nil
+}
+
+func addRspHeader(payload []byte, err error) *protocol.Response {
+	response := &protocol.Response{
+		Payload: payload,
+		RetCode: codes.OK,
+		RetMsg: "success",
+	}
+
+	if err != nil {
+		if e, ok := err.(*codes.Error); ok {
+			response.RetCode = uint32(e.Code)
+			response.RetMsg = e.Message
+		} else {
+			response.RetCode = codes.ServerInternalErrorCode
+			response.RetMsg = codes.ServerInternalError.Message
+		}
+	}
+
+	return response
 }
 
 func (s *serverTransport) write(ctx context.Context, conn net.Conn, rsp []byte) error {
-	_, err := conn.Write(rsp)
-
-	return err
-}
-
-func (s *serverTransport) writeError(ctx context.Context, conn net.Conn, rsp []byte, e error) error {
-
-	if err, ok := e.(*codes.Error); ok {
-
-	}
-
 	_, err := conn.Write(rsp)
 
 	return err

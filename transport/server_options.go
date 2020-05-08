@@ -12,7 +12,7 @@ type ServerTransportOptions struct{
 	Protocol string  // protocol type, e.g. : proto、json
 	Timeout time.Duration  // transport layer request timeout ，default: 2 min
 	Handler Handler		   // handler
-	Serialization string   // serialization type, e.g : proto、json、msgpack
+	SerializationType string   // serialization type, e.g : proto、json、msgpack
 	KeepAlivePeriod time.Duration // keepalive period
 }
 
@@ -60,9 +60,9 @@ func WithHandler(handler Handler) ServerTransportOption {
 }
 
 // WithSerialization returns a ServerTransportOption which sets the value for serialization
-func WithSerialization(serialization string) ServerTransportOption {
+func WithSerializationType(serializationType string) ServerTransportOption {
 	return func(o *ServerTransportOptions) {
-		o.Serialization = serialization
+		o.SerializationType = serializationType
 	}
 }
 
