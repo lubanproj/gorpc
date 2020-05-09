@@ -57,7 +57,7 @@ func NewServerTLSAuthFromFile(certFile, keyFile string) (TransportAuth, error) {
 
 // ClientHandshake implements the client's handshake
 func (t *tlsAuth) ClientHandshake(ctx context.Context, authority string, rawConn net.Conn) (net.Conn, AuthInfo, error) {
-	// 防止使用不同的 endpoints 时 ServerName 被污染
+	// Prevent ServerName from being contaminated when you use a different endpoint
 	cfg := cloneTLSConfig(t.config)
 	if cfg.ServerName == "" {
 		colonPos := strings.LastIndex(authority, ":")
