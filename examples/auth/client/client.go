@@ -3,9 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/lubanproj/gorpc/auth"
 	"time"
 
+	"github.com/lubanproj/gorpc/auth"
 	"github.com/lubanproj/gorpc/client"
 	"github.com/lubanproj/gorpc/testdata"
 )
