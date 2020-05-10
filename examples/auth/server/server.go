@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"errors"
-	"github.com/lubanproj/gorpc/log"
+
 	"time"
 
 	"github.com/lubanproj/gorpc"
 	"github.com/lubanproj/gorpc/auth"
+	"github.com/lubanproj/gorpc/log"
 	"github.com/lubanproj/gorpc/metadata"
 	"github.com/lubanproj/gorpc/testdata"
 )

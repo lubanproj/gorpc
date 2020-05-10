@@ -223,8 +223,6 @@ func (s *serverTransport) handle(ctx context.Context, frame []byte) ([]byte, err
 		return nil, err
 	}
 
-	log.Debugf("rspbody : %v, err : %v", rspbody, err)
-
 	return rspbody, nil
 }
 
