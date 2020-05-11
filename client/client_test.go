@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/lubanproj/gorpc"
-	"github.com/lubanproj/gorpc/examples/helloworld/helloworld"
+	"github.com/lubanproj/gorpc/testdata"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -21,7 +21,7 @@ func TestCall(t *testing.T) {
 			gorpc.WithTimeout(time.Millisecond * 2000),
 		}
 		s := gorpc.NewServer(serverOpts ...)
-		if err := s.RegisterService("helloworld.Greeter", new(helloworld.Service)); err != nil {
+		if err := s.RegisterService("helloworld.Greeter", new(testdata.Service)); err != nil {
 			panic(err)
 		}
 
