@@ -33,7 +33,7 @@ func TestClientHandshake(t *testing.T) {
 	tAuth , err := NewClientTLSAuthFromFile("../testdata/server.crt","helloworld")
 	assert.Nil(t, err)
 	var ctx = context.Background()
-	wrapperConn, _ , err := tAuth.ClientHandshake(ctx, "testAuth",conn)
+	wrapperConn, _ , err := tAuth.ClientHandshake(ctx, "helloworld", conn)
 	assert.Nil(t, err)
 
 	data , err := wrapperConn.Write([]byte("hello\n"))
