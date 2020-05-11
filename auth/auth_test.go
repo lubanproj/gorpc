@@ -30,7 +30,7 @@ func TestClientHandshake(t *testing.T) {
 	conn , err := net.Dial("tcp","127.0.0.1:8002")
 	assert.Nil(t, err)
 	defer conn.Close()
-	tAuth , err := NewClientTLSAuthFromFile("../testdata/server.crt","helloworld")
+	tAuth , err := NewClientTLSAuthFromFile("../testdata/server.crt","lubanstudio.cn")
 	assert.Nil(t, err)
 	var ctx = context.Background()
 	wrapperConn, _ , err := tAuth.ClientHandshake(ctx, "lubanstudio.cn", conn)
