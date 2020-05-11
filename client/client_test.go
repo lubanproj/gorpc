@@ -42,10 +42,10 @@ func TestCall(t *testing.T) {
 		WithSerializationType("msgpack"),
 	}
 	c := DefaultClient
-	req := &helloworld.HelloRequest{
+	req := &testdata.HelloRequest{
 		Msg: "hello",
 	}
-	rsp := &helloworld.HelloReply{}
+	rsp := &testdata.HelloReply{}
 
 	err := c.Call(context.Background(), "/helloworld.Greeter/SayHello", req, rsp, opts ...)
 
