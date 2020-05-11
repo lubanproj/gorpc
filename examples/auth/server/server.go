@@ -34,7 +34,7 @@ func main() {
 		gorpc.WithAddress("127.0.0.1:8003"),
 		gorpc.WithNetwork("tcp"),
 		gorpc.WithSerializationType("msgpack"),
-		gorpc.WithTimeout(time.Millisecond * 2000000),
+		gorpc.WithTimeout(time.Millisecond * 2000),
 		gorpc.WithInterceptor(auth.BuildAuthInterceptor(af)),
 	}
 	s := gorpc.NewServer(opts ...)
