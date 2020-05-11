@@ -40,12 +40,12 @@ func TestWithHandler(t *testing.T) {
 
 func TestWithSerialization(t *testing.T) {
 	var sto ServerTransportOptions
-	fSto := WithSerialization("test")
+	fSto := WithSerializationType("test")
 	fSto(&sto)
-	assert.Equal(t, "test", sto.Serialization)
-	fSto = WithSerialization("")
+	assert.Equal(t, "test", sto.SerializationType)
+	fSto = WithSerializationType("")
 	fSto(&sto)
-	assert.Equal(t, "", sto.Serialization)
+	assert.Equal(t, "", sto.SerializationType)
 }
 
 func TestWithKeepAlivePeriod(t *testing.T) {
