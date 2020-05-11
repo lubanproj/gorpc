@@ -44,7 +44,7 @@ func GetSerialization(name string) Serialization {
 
 type pbSerialization struct {}
 
-func (d *pbSerialization) Marshal(v interface{}) ([]byte, error) {
+func (d *pbSerialization) MarshalV2(v interface{}) ([]byte, error) {
 	if v == nil {
 		return nil, errors.New("marshal nil interface{}")
 	}
@@ -69,7 +69,7 @@ func (d *pbSerialization) Marshal(v interface{}) ([]byte, error) {
 	return data, nil
 }
 
-func (d *pbSerialization) Unmarshal(data []byte, v interface{}) error {
+func (d *pbSerialization) UnmarshalV2(data []byte, v interface{}) error {
 	if data == nil || len(data) == 0 {
 		return errors.New("unmarshal nil or empty bytes")
 	}
@@ -88,4 +88,28 @@ func (d *pbSerialization) Unmarshal(data []byte, v interface{}) error {
 	buffer.SetBuf(nil)
 	bufferPool.Put(buffer)
 	return err
+}
+
+
+func (d *pbSerialization) Marshal(v interface{}) ([]byte, error) {
+	if v == nil {
+		return nil, errors.New("marshal nil interface{}")
+	}
+	if val, ok := v.(proto.Message); ok {
+		return proto.Marshal(val)
+	}
+
+	return []byte(""), errors.New("data type not proto.Message")
+}
+
+func (d *pbSerialization) Unmarshal(data []byte, v interface{}) error {
+	if data == nil || len(data) == 0 {
+		return errors.New("unmarshal nil or empty bytes")
+	}
+
+	if val, ok := v.(proto.Message); ok {
+		return proto.Unmarshal(data, val)
+	}
+
+	return errors.New("data type not proto.Message")
 }
