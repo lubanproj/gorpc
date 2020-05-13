@@ -1,7 +1,9 @@
 package auth
 
 import (
+	"bufio"
 	"fmt"
+	"io"
 	"net"
 	"testing"
 

@@ -11,6 +11,7 @@ func init() {
 	registerSerialization("msgpack", &MsgpackSerialization{})
 }
 
+// MsgpackSerialization implemented msgpack serialization
 type MsgpackSerialization struct {}
 
 

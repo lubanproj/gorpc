@@ -5,6 +5,7 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
+// Serialization defines the serialization of data
 type Serialization interface {
 	Marshal(interface{})([]byte, error)
 	Unmarshal([]byte, interface{}) error
@@ -18,8 +19,10 @@ const (
 
 var serializationMap = make(map[string]Serialization)
 
+// DefaultSerialization defines the default serialization
 var DefaultSerialization = NewSerialization()
 
+// NewSerialization returns a globally unique serialization
 var NewSerialization = func () Serialization {
 	return &pbSerialization{}
 }
@@ -35,6 +38,7 @@ func registerSerialization(name string, serialization Serialization) {
 	serializationMap[name] = serialization
 }
 
+// GetSerialization get a Serialization by a serialization name
 func GetSerialization(name string) Serialization {
 	if v, ok := serializationMap[name]; ok {
 		return v

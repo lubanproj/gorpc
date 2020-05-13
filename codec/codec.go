@@ -9,6 +9,7 @@ import (
 	"github.com/golang/protobuf/proto"
 )
 
+// Codec defines the codec specification for data
 type Codec interface {
 	Encode([]byte) ([]byte, error)
 	Decode([]byte) ([]byte, error)
@@ -18,6 +19,7 @@ const FrameHeadLen = 15
 const Magic = 0x11
 const Version = 0
 
+// FrameHeader describes the header structure of a data frame
 type FrameHeader struct {
 	Magic uint8    // magic
 	Version uint8  // version
@@ -29,6 +31,7 @@ type FrameHeader struct {
 	Reserved uint32  // 4 bytes reserved
 }
 
+// GetCodec get a Codec by a codec name
 func GetCodec(name string) Codec {
 	if codec, ok := codecMap[name]; ok {
 		return codec
@@ -38,8 +41,10 @@ func GetCodec(name string) Codec {
 
 var codecMap = make(map[string]Codec)
 
+// DefaultCodec defines the default codec
 var DefaultCodec = NewCodec()
 
+// NewCodec returns a globally unique codec
 var NewCodec = 	func () Codec {
 	return &defaultCodec{}
 }
@@ -48,6 +53,7 @@ func init() {
 	RegisterCodec("proto", DefaultCodec)
 }
 
+// RegisterCodec registers a codec, which will be added to codecMap
 func RegisterCodec(name string, codec Codec) {
 	if codecMap == nil {
 		codecMap = make(map[string]Codec)
