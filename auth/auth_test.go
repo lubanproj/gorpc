@@ -2,6 +2,7 @@ package auth
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"io"
 	"net"
