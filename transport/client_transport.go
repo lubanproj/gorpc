@@ -2,6 +2,7 @@ package transport
 
 import (
 	"context"
+
 	"github.com/lubanproj/gorpc/codes"
 )
 
@@ -39,7 +40,7 @@ var DefaultClientTransport = New()
 // Use the singleton pattern to create a ClientTransport
 var New = func() ClientTransport {
 	return &clientTransport{
-		opts : &ClientTransportOptions{},
+		opts: &ClientTransportOptions{},
 	}
 }
 
@@ -74,7 +75,7 @@ func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, e
 	}
 
 	conn, err := c.opts.Pool.Get(ctx, c.opts.Network, addr)
-//	conn, err := net.DialTimeout("tcp", addr, c.opts.Timeout);
+	//	conn, err := net.DialTimeout("tcp", addr, c.opts.Timeout);
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +85,7 @@ func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, e
 	sendNum := 0
 	num := 0
 	for sendNum < len(req) {
-		num , err = conn.Write(req[sendNum:])
+		num, err = conn.Write(req[sendNum:])
 		if err != nil {
 			return nil, err
 		}
@@ -105,10 +106,9 @@ func (c *clientTransport) SendTcpReq(ctx context.Context, req []byte) ([]byte, e
 	return frame, err
 }
 
-
 func isDone(ctx context.Context) error {
 	select {
-	case <- ctx.Done() :
+	case <-ctx.Done():
 		return ctx.Err()
 	default:
 	}

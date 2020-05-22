@@ -5,10 +5,11 @@ package transport
 import (
 	"context"
 	"encoding/binary"
-	"github.com/lubanproj/gorpc/codec"
-	"github.com/lubanproj/gorpc/codes"
 	"io"
 	"net"
+
+	"github.com/lubanproj/gorpc/codec"
+	"github.com/lubanproj/gorpc/codes"
 )
 
 const DefaultPayloadLength = 1024
@@ -35,21 +36,20 @@ type Framer interface {
 }
 
 type framer struct {
-	buffer []byte
-	counter int  // to prevent the dead loop
+	buffer  []byte
+	counter int // to prevent the dead loop
 }
 
 // Create a Framer
 func NewFramer() Framer {
-	return &framer {
-		buffer : make([]byte, DefaultPayloadLength),
+	return &framer{
+		buffer: make([]byte, DefaultPayloadLength),
 	}
 }
 
 func (f *framer) Resize() {
-	f.buffer = make([]byte, len(f.buffer) * 2)
+	f.buffer = make([]byte, len(f.buffer)*2)
 }
-
 
 func (f *framer) ReadFrame(conn net.Conn) ([]byte, error) {
 
@@ -70,7 +70,7 @@ func (f *framer) ReadFrame(conn net.Conn) ([]byte, error) {
 	}
 
 	for uint32(len(f.buffer)) < length && f.counter <= 12 {
-		f.buffer = make([]byte, len(f.buffer) * 2)
+		f.buffer = make([]byte, len(f.buffer)*2)
 		f.counter++
 	}
 
@@ -78,7 +78,5 @@ func (f *framer) ReadFrame(conn net.Conn) ([]byte, error) {
 		return nil, err
 	}
 
-	return append(frameHeader, f.buffer[:length] ...), nil
+	return append(frameHeader, f.buffer[:length]...), nil
 }
-
-

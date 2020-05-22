@@ -2,19 +2,20 @@ package codec
 
 import (
 	"errors"
+
 	"github.com/golang/protobuf/proto"
 )
 
 // Serialization defines the serialization of data
 type Serialization interface {
-	Marshal(interface{})([]byte, error)
+	Marshal(interface{}) ([]byte, error)
 	Unmarshal([]byte, interface{}) error
 }
 
 const (
-	Proto         =  "proto" 	// protobuf
-	MsgPack 	  =  "msgpack"   // msgpack
-	Json      	  =  "json" 	// json
+	Proto   = "proto"   // protobuf
+	MsgPack = "msgpack" // msgpack
+	Json    = "json"    // json
 )
 
 var serializationMap = make(map[string]Serialization)
@@ -23,7 +24,7 @@ var serializationMap = make(map[string]Serialization)
 var DefaultSerialization = NewSerialization()
 
 // NewSerialization returns a globally unique serialization
-var NewSerialization = func () Serialization {
+var NewSerialization = func() Serialization {
 	return &pbSerialization{}
 }
 
@@ -46,7 +47,7 @@ func GetSerialization(name string) Serialization {
 	return DefaultSerialization
 }
 
-type pbSerialization struct {}
+type pbSerialization struct{}
 
 func (d *pbSerialization) Marshal(v interface{}) ([]byte, error) {
 	if v == nil {

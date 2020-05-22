@@ -3,19 +3,20 @@ package consul
 import (
 	"errors"
 	"fmt"
+	"net/http"
+	"strings"
+
 	"github.com/hashicorp/consul/api"
 	"github.com/lubanproj/gorpc/plugin"
 	"github.com/lubanproj/gorpc/selector"
-	"net/http"
-	"strings"
 )
 
 // Consul implements the server discovery specification
 type Consul struct {
-	opts *plugin.Options
-	client *api.Client
-	config *api.Config
-	balancerName string  // load balancing mode, including random, polling, weighted polling, consistent hash, etc
+	opts         *plugin.Options
+	client       *api.Client
+	config       *api.Config
+	balancerName string // load balancing mode, including random, polling, weighted polling, consistent hash, etc
 	writeOptions *api.WriteOptions
 	queryOptions *api.QueryOptions
 }
@@ -28,8 +29,8 @@ func init() {
 }
 
 // global consul objects for framework
-var ConsulSvr = &Consul {
-	opts : &plugin.Options{},
+var ConsulSvr = &Consul{
+	opts: &plugin.Options{},
 }
 
 func (c *Consul) InitConfig() error {
@@ -51,7 +52,6 @@ func (c *Consul) InitConfig() error {
 	return nil
 }
 
-
 func (c *Consul) Resolve(serviceName string) ([]*selector.Node, error) {
 
 	pairs, _, err := c.client.KV().List(serviceName, nil)
@@ -64,9 +64,9 @@ func (c *Consul) Resolve(serviceName string) ([]*selector.Node, error) {
 	}
 	var nodes []*selector.Node
 	for _, pair := range pairs {
-		nodes = append(nodes, &selector.Node {
-			Key : pair.Key,
-			Value : pair.Value,
+		nodes = append(nodes, &selector.Node{
+			Key:   pair.Key,
+			Value: pair.Value,
 		})
 	}
 	return nodes, nil
@@ -82,7 +82,7 @@ func (c *Consul) Select(serviceName string) (string, error) {
 	}
 
 	balancer := selector.GetBalancer(c.balancerName)
-	node := balancer.Balance(serviceName,nodes)
+	node := balancer.Balance(serviceName, nodes)
 
 	if node == nil {
 		return "", fmt.Errorf("no services find in %s", serviceName)
@@ -91,7 +91,7 @@ func (c *Consul) Select(serviceName string) (string, error) {
 	return parseAddrFromNode(node)
 }
 
-func parseAddrFromNode(node *selector.Node) (string, error){
+func parseAddrFromNode(node *selector.Node) (string, error) {
 	if node.Key == "" {
 		return "", errors.New("addr is empty")
 	}
@@ -120,8 +120,8 @@ func (c *Consul) Init(opts ...plugin.Option) error {
 		nodeName := fmt.Sprintf("%s/%s", serviceName, c.opts.SvrAddr)
 
 		kvPair := &api.KVPair{
-			Key : nodeName,
-			Value : []byte(c.opts.SvrAddr),
+			Key:   nodeName,
+			Value: []byte(c.opts.SvrAddr),
 			Flags: api.LockFlagValue,
 		}
 
@@ -130,12 +130,11 @@ func (c *Consul) Init(opts ...plugin.Option) error {
 		}
 	}
 
-
 	return nil
 }
 
 // Init implements the initialization of the consul configuration when the framework is loaded
-func Init(consulSvrAddr string, opts ... plugin.Option) error {
+func Init(consulSvrAddr string, opts ...plugin.Option) error {
 	for _, o := range opts {
 		o(ConsulSvr.opts)
 	}

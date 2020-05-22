@@ -1,19 +1,20 @@
 package transport
 
 import (
+	"time"
+
 	"github.com/lubanproj/gorpc/pool/connpool"
 	"github.com/lubanproj/gorpc/selector"
-	"time"
 )
 
 // ClientTransportOptions includes all ClientTransport parameter options
 type ClientTransportOptions struct {
-	Target string
+	Target      string
 	ServiceName string
-	Network string
-	Pool connpool.Pool
-	Selector selector.Selector
-	Timeout  time.Duration
+	Network     string
+	Pool        connpool.Pool
+	Selector    selector.Selector
+	Timeout     time.Duration
 }
 
 // Use the Options mode to wrap the ClientTransportOptions

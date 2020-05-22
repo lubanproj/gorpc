@@ -2,9 +2,10 @@ package codec
 
 import (
 	"fmt"
+	"testing"
+
 	"github.com/lubanproj/gorpc/protocol"
 	"github.com/stretchr/testify/assert"
-	"testing"
 )
 
 func TestPbSerializationMarshal(t *testing.T) {

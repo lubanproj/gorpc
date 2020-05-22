@@ -2,12 +2,12 @@ package transport
 
 import (
 	"context"
-	"github.com/golang/protobuf/proto"
-	"github.com/lubanproj/gorpc/codec"
 	"io"
 	"net"
 	"time"
 
+	"github.com/golang/protobuf/proto"
+	"github.com/lubanproj/gorpc/codec"
 	"github.com/lubanproj/gorpc/codes"
 	"github.com/lubanproj/gorpc/log"
 	"github.com/lubanproj/gorpc/protocol"
@@ -49,7 +49,7 @@ var DefaultServerTransport = NewServerTransport()
 // Use the singleton pattern to create a server transport
 var NewServerTransport = func() ServerTransport {
 	return &serverTransport{
-		opts : &ServerTransportOptions{},
+		opts: &ServerTransportOptions{},
 	}
 }
 
@@ -60,12 +60,12 @@ func (s *serverTransport) ListenAndServe(ctx context.Context, opts ...ServerTran
 	}
 
 	switch s.opts.Network {
-		case "tcp","tcp4","tcp6":
-			return s.ListenAndServeTcp(ctx, opts ...)
-		case "udp","udp4", "udp6":
-			return s.ListenAndServeUdp(ctx, opts ...)
-		default:
-			return codes.NetworkNotSupportedError
+	case "tcp", "tcp4", "tcp6":
+		return s.ListenAndServeTcp(ctx, opts...)
+	case "udp", "udp4", "udp6":
+		return s.ListenAndServeUdp(ctx, opts...)
+	default:
+		return codes.NetworkNotSupportedError
 	}
 }
 
@@ -77,7 +77,7 @@ func (s *serverTransport) ListenAndServeTcp(ctx context.Context, opts ...ServerT
 	}
 
 	go func() {
-		if err = s.serve(ctx ,lis); err != nil {
+		if err = s.serve(ctx, lis); err != nil {
 			log.Errorf("transport serve error, %v", err)
 		}
 	}()
@@ -85,7 +85,7 @@ func (s *serverTransport) ListenAndServeTcp(ctx context.Context, opts ...ServerT
 	return nil
 }
 
-func (s *serverTransport) serve(ctx context.Context,lis net.Listener) error {
+func (s *serverTransport) serve(ctx context.Context, lis net.Listener) error {
 
 	var tempDelay time.Duration
 
@@ -99,11 +99,11 @@ func (s *serverTransport) serve(ctx context.Context,lis net.Listener) error {
 		// check upstream ctx is done
 		select {
 		case <-ctx.Done():
-			return ctx.Err();
+			return ctx.Err()
 		default:
 		}
 
-		conn , err := tl.AcceptTCP()
+		conn, err := tl.AcceptTCP()
 		if err != nil {
 			if ne, ok := err.(net.Error); ok && ne.Temporary() {
 				if tempDelay == 0 {
@@ -144,7 +144,6 @@ func (s *serverTransport) serve(ctx context.Context,lis net.Listener) error {
 	return nil
 }
 
-
 func (s *serverTransport) handleConn(ctx context.Context, conn *connWrapper) error {
 
 	// close the connection before return
@@ -159,7 +158,7 @@ func (s *serverTransport) handleConn(ctx context.Context, conn *connWrapper) err
 		default:
 		}
 
-		frame , err := s.read(ctx, conn)
+		frame, err := s.read(ctx, conn)
 		if err == io.EOF {
 			// read compeleted
 			return nil
@@ -169,7 +168,7 @@ func (s *serverTransport) handleConn(ctx context.Context, conn *connWrapper) err
 			return err
 		}
 
-		rsp , err := s.handle(ctx, frame)
+		rsp, err := s.handle(ctx, frame)
 		if err != nil {
 			log.Errorf("s.handle err is not nil, %v", err)
 		}
@@ -191,7 +190,6 @@ func (s *serverTransport) read(ctx context.Context, conn *connWrapper) ([]byte, 
 
 	return frame, nil
 }
-
 
 func (s *serverTransport) handle(ctx context.Context, frame []byte) ([]byte, error) {
 
@@ -230,7 +228,7 @@ func addRspHeader(payload []byte, err error) *protocol.Response {
 	response := &protocol.Response{
 		Payload: payload,
 		RetCode: codes.OK,
-		RetMsg: "success",
+		RetMsg:  "success",
 	}
 
 	if err != nil {
@@ -254,7 +252,6 @@ func (s *serverTransport) write(ctx context.Context, conn net.Conn, rsp []byte) 
 	return nil
 }
 
-
 type connWrapper struct {
 	net.Conn
 	framer Framer
@@ -262,16 +259,15 @@ type connWrapper struct {
 
 func wrapConn(rawConn net.Conn) *connWrapper {
 	return &connWrapper{
-		Conn : rawConn,
+		Conn:   rawConn,
 		framer: NewFramer(),
 	}
 }
 
-
 func (s *serverTransport) getServerStream(ctx context.Context, request *protocol.Request) (*stream.ServerStream, error) {
 	serverStream := stream.GetServerStream(ctx)
 
-	_, method , err := utils.ParseServicePath(string(request.ServicePath))
+	_, method, err := utils.ParseServicePath(string(request.ServicePath))
 	if err != nil {
 		return nil, codes.New(codes.ClientMsgErrorCode, "method is invalid")
 	}
@@ -280,5 +276,3 @@ func (s *serverTransport) getServerStream(ctx context.Context, request *protocol
 
 	return serverStream, nil
 }
-
-
