@@ -24,33 +24,33 @@ type Service interface {
 	Close()
 }
 
-type service struct{
-	svr interface{}  			// server
-	ctx context.Context  		// Each service is managed in one context
-	cancel context.CancelFunc   // controller of context
-	serviceName string   		// service name
-	handlers map[string]Handler
-	opts *ServerOptions  		// parameter options
+type service struct {
+	svr         interface{}        // server
+	ctx         context.Context    // Each service is managed in one context
+	cancel      context.CancelFunc // controller of context
+	serviceName string             // service name
+	handlers    map[string]Handler
+	opts        *ServerOptions // parameter options
 
-	closing bool    // whether the service is closing
+	closing bool // whether the service is closing
 }
 
 // ServiceDesc is a detailed description of a service
 type ServiceDesc struct {
-	Svr interface{}
+	Svr         interface{}
 	ServiceName string
-	Methods []*MethodDesc
+	Methods     []*MethodDesc
 	HandlerType interface{}
 }
 
 // MethodDesc is a detailed description of a method
 type MethodDesc struct {
 	MethodName string
-	Handler Handler
+	Handler    Handler
 }
 
 // Handler is the handler of a method
-type Handler func (interface{}, context.Context, func(interface{}) error, []interceptor.ServerInterceptor) (interface{}, error)
+type Handler func(context.Context, interface{}, func(interface{}) error, []interceptor.ServerInterceptor) (interface{}, error)
 
 func (s *service) Register(handlerName string, handler Handler) {
 	if s.handlers == nil {
@@ -63,7 +63,7 @@ func (s *service) Serve(opts *ServerOptions) {
 
 	s.opts = opts
 
-	transportOpts := []transport.ServerTransportOption {
+	transportOpts := []transport.ServerTransportOption{
 		transport.WithServerAddress(s.opts.address),
 		transport.WithServerNetwork(s.opts.network),
 		transport.WithHandler(s),
@@ -76,14 +76,14 @@ func (s *service) Serve(opts *ServerOptions) {
 
 	s.ctx, s.cancel = context.WithCancel(context.Background())
 
-	if err := serverTransport.ListenAndServe(s.ctx, transportOpts ...); err != nil {
+	if err := serverTransport.ListenAndServe(s.ctx, transportOpts...); err != nil {
 		log.Errorf("%s serve error, %v", s.opts.network, err)
 		return
 	}
 
-	fmt.Printf("%s service serving at %s ... \n",s.opts.protocol, s.opts.address)
+	fmt.Printf("%s service serving at %s ... \n", s.opts.protocol, s.opts.address)
 
-	<- s.ctx.Done()
+	<-s.ctx.Done()
 }
 
 func (s *service) Close() {
@@ -94,8 +94,7 @@ func (s *service) Close() {
 	fmt.Println("service closing ...")
 }
 
-
-func (s *service) Handle (ctx context.Context, reqbuf []byte) ([]byte, error) {
+func (s *service) Handle(ctx context.Context, reqbuf []byte) ([]byte, error) {
 
 	// parse protocol header
 	request := &protocol.Request{}
@@ -107,7 +106,7 @@ func (s *service) Handle (ctx context.Context, reqbuf []byte) ([]byte, error) {
 
 	serverSerialization := codec.GetSerialization(s.opts.serializationType)
 
-	dec := func(req interface {}) error {
+	dec := func(req interface{}) error {
 
 		if err := serverSerialization.Unmarshal(request.Payload, req); err != nil {
 			return err
@@ -121,8 +120,7 @@ func (s *service) Handle (ctx context.Context, reqbuf []byte) ([]byte, error) {
 		defer cancel()
 	}
 
-
-	_, method , err := utils.ParseServicePath(string(request.ServicePath))
+	_, method, err := utils.ParseServicePath(string(request.ServicePath))
 	if err != nil {
 		return nil, codes.New(codes.ClientMsgErrorCode, "method is invalid")
 	}
@@ -132,7 +130,7 @@ func (s *service) Handle (ctx context.Context, reqbuf []byte) ([]byte, error) {
 		return nil, errors.New("handlers is nil")
 	}
 
-	rsp, err := handler(s.svr, ctx, dec, s.opts.interceptors)
+	rsp, err := handler(ctx, s.svr, dec, s.opts.interceptors)
 	if err != nil {
 		return nil, err
 	}
@@ -144,4 +142,3 @@ func (s *service) Handle (ctx context.Context, reqbuf []byte) ([]byte, error) {
 
 	return rspbuf, nil
 }
-

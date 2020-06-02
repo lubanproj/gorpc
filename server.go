@@ -16,18 +16,18 @@ import (
 
 // gorpc Server, a Server can have one or more Services
 type Server struct {
-	opts *ServerOptions
+	opts     *ServerOptions
 	services map[string]Service
-	plugins []plugin.Plugin
+	plugins  []plugin.Plugin
 
 	closing bool // whether the server is closing
 }
 
 // NewServer creates a Server, Support to pass in ServerOption parameters
-func NewServer(opt ...ServerOption) *Server{
+func NewServer(opt ...ServerOption) *Server {
 
-	s := &Server {
-		opts : &ServerOptions{},
+	s := &Server{
+		opts:     &ServerOptions{},
 		services: make(map[string]Service),
 	}
 
@@ -64,8 +64,8 @@ func (s *Server) RegisterService(serviceName string, svr interface{}) error {
 	sd := &ServiceDesc{
 		ServiceName: serviceName,
 		// for compatibility with code generation
-		HandlerType : (*emptyInterface)(nil),
-		Svr : svr,
+		HandlerType: (*emptyInterface)(nil),
+		Svr:         svr,
 	}
 
 	methods, err := getServiceMethods(svrType, svrValue)
@@ -91,7 +91,7 @@ func getServiceMethods(serviceType reflect.Type, serviceValue reflect.Value) ([]
 			return nil, err
 		}
 
-		methodHandler := func (svr interface{},ctx context.Context, dec func(interface{}) error, ceps []interceptor.ServerInterceptor) (interface{}, error) {
+		methodHandler := func(ctx context.Context, svr interface{}, dec func(interface{}) error, ceps []interceptor.ServerInterceptor) (interface{}, error) {
 
 			reqType := method.Type.In(2)
 
@@ -103,14 +103,14 @@ func getServiceMethods(serviceType reflect.Type, serviceValue reflect.Value) ([]
 			}
 
 			if len(ceps) == 0 {
-				values := method.Func.Call([]reflect.Value{serviceValue,reflect.ValueOf(ctx),reflect.ValueOf(req)})
+				values := method.Func.Call([]reflect.Value{serviceValue, reflect.ValueOf(ctx), reflect.ValueOf(req)})
 				// determine error
 				return values[0].Interface(), nil
 			}
 
 			handler := func(ctx context.Context, reqbody interface{}) (interface{}, error) {
 
-				values := method.Func.Call([]reflect.Value{serviceValue,reflect.ValueOf(ctx),reflect.ValueOf(req)})
+				values := method.Func.Call([]reflect.Value{serviceValue, reflect.ValueOf(ctx), reflect.ValueOf(req)})
 
 				return values[0].Interface(), nil
 			}
@@ -120,11 +120,11 @@ func getServiceMethods(serviceType reflect.Type, serviceValue reflect.Value) ([]
 
 		methods = append(methods, &MethodDesc{
 			MethodName: method.Name,
-			Handler: methodHandler,
+			Handler:    methodHandler,
 		})
 	}
 
-	return methods , nil
+	return methods, nil
 }
 
 func checkMethod(method reflect.Type) error {
@@ -168,7 +168,6 @@ func checkMethod(method reflect.Type) error {
 	return nil
 }
 
-
 func (s *Server) Register(sd *ServiceDesc, svr interface{}) {
 	if sd == nil || svr == nil {
 		return
@@ -179,10 +178,10 @@ func (s *Server) Register(sd *ServiceDesc, svr interface{}) {
 		log.Fatalf("handlerType %v not match service : %v ", ht, st)
 	}
 
-	ser := &service {
-		svr : svr,
-		serviceName : sd.ServiceName,
-		handlers : make(map[string]Handler),
+	ser := &service{
+		svr:         svr,
+		serviceName: sd.ServiceName,
+		handlers:    make(map[string]Handler),
 	}
 
 	for _, method := range sd.Methods {
@@ -229,36 +228,35 @@ func (s *Server) Close() {
 	}
 }
 
-
 func (s *Server) InitPlugins() error {
 	// init plugins
 	for _, p := range s.plugins {
 
 		switch val := p.(type) {
 
-		case plugin.ResolverPlugin :
+		case plugin.ResolverPlugin:
 			var services []string
 			for serviceName, _ := range s.services {
 				services = append(services, serviceName)
 			}
 
-			pluginOpts := []plugin.Option {
+			pluginOpts := []plugin.Option{
 				plugin.WithSelectorSvrAddr(s.opts.selectorSvrAddr),
 				plugin.WithSvrAddr(s.opts.address),
 				plugin.WithServices(services),
 			}
-			if err := val.Init(pluginOpts ...); err != nil {
+			if err := val.Init(pluginOpts...); err != nil {
 				log.Errorf("resolver init error, %v", err)
 				return err
 			}
 
-		case plugin.TracingPlugin :
+		case plugin.TracingPlugin:
 
-			pluginOpts := []plugin.Option {
+			pluginOpts := []plugin.Option{
 				plugin.WithTracingSvrAddr(s.opts.tracingSvrAddr),
 			}
 
-			tracer, err := val.Init(pluginOpts ...)
+			tracer, err := val.Init(pluginOpts...)
 			if err != nil {
 				log.Errorf("tracing init error, %v", err)
 				return err
@@ -266,10 +264,9 @@ func (s *Server) InitPlugins() error {
 
 			s.opts.interceptors = append(s.opts.interceptors, jaeger.OpenTracingServerInterceptor(tracer, s.opts.tracingSpanName))
 
-		default :
+		default:
 
 		}
-
 
 	}
 
