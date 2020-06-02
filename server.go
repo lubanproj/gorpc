@@ -16,9 +16,9 @@ import (
 
 // gorpc Server, a Server can have one or more Services
 type Server struct {
-	opts     *ServerOptions
-	services map[string]Service
-	plugins  []plugin.Plugin
+	opts    *ServerOptions
+	service Service
+	plugins []plugin.Plugin
 
 	closing bool // whether the server is closing
 }
@@ -27,13 +27,14 @@ type Server struct {
 func NewServer(opt ...ServerOption) *Server {
 
 	s := &Server{
-		opts:     &ServerOptions{},
-		services: make(map[string]Service),
+		opts: &ServerOptions{},
 	}
 
 	for _, o := range opt {
 		o(s.opts)
 	}
+
+	s.service = NewService(s.opts)
 
 	for pluginName, plugin := range plugin.PluginMap {
 		if !containPlugin(pluginName, s.opts.pluginNames) {
@@ -43,6 +44,12 @@ func NewServer(opt ...ServerOption) *Server {
 	}
 
 	return s
+}
+
+func NewService(opts *ServerOptions) Service {
+	return &service{
+		opts: opts,
+	}
 }
 
 func containPlugin(pluginName string, plugins []string) bool {
@@ -188,7 +195,7 @@ func (s *Server) Register(sd *ServiceDesc, svr interface{}) {
 		ser.handlers[method.MethodName] = method.Handler
 	}
 
-	s.services[sd.ServiceName] = ser
+	s.service = ser
 }
 
 func (s *Server) Serve() {
@@ -198,9 +205,7 @@ func (s *Server) Serve() {
 		panic(err)
 	}
 
-	for _, service := range s.services {
-		go service.Serve(s.opts)
-	}
+	s.service.Serve(s.opts)
 
 	ch := make(chan os.Signal, 1)
 	signal.Notify(ch, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGSEGV)
@@ -223,9 +228,7 @@ func (s *Server) ServeHttp() {
 func (s *Server) Close() {
 	s.closing = false
 
-	for _, service := range s.services {
-		service.Close()
-	}
+	s.service.Close()
 }
 
 func (s *Server) InitPlugins() error {
@@ -236,9 +239,7 @@ func (s *Server) InitPlugins() error {
 
 		case plugin.ResolverPlugin:
 			var services []string
-			for serviceName, _ := range s.services {
-				services = append(services, serviceName)
-			}
+			services = append(services, s.service.Name())
 
 			pluginOpts := []plugin.Option{
 				plugin.WithSelectorSvrAddr(s.opts.selectorSvrAddr),

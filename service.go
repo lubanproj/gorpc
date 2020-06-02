@@ -22,6 +22,7 @@ type Service interface {
 	Register(string, Handler)
 	Serve(*ServerOptions)
 	Close()
+	Name() string
 }
 
 type service struct {
@@ -92,6 +93,10 @@ func (s *service) Close() {
 		s.cancel()
 	}
 	fmt.Println("service closing ...")
+}
+
+func (s *service) Name() string {
+	return s.serviceName
 }
 
 func (s *service) Handle(ctx context.Context, reqbuf []byte) ([]byte, error) {
