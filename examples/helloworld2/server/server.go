@@ -14,11 +14,10 @@ type greeterService struct{}
 func (g *greeterService) SayHello(ctx context.Context, req *helloworld.HelloRequest) (*helloworld.HelloReply, error) {
 	fmt.Println("recv Msg : ", req.Msg)
 	rsp := &helloworld.HelloReply{
-		Msg: "hello, " + req.Msg ,
+		Msg: req.Msg + " world",
 	}
 	return rsp, nil
 }
-
 
 func main() {
 	opts := []gorpc.ServerOption{
@@ -27,7 +26,7 @@ func main() {
 		gorpc.WithProtocol("proto"),
 		gorpc.WithTimeout(time.Millisecond * 2000),
 	}
-	s := gorpc.NewServer(opts ...)
+	s := gorpc.NewServer(opts...)
 	helloworld.RegisterService(s, &greeterService{})
 	s.Serve()
 }
