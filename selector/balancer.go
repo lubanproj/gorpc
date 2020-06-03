@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// Balancer defines a universal standard for load Balancer
 type Balancer interface {
 	Balance(string, []*Node) *Node
 }
@@ -26,10 +27,14 @@ func init() {
 	RegisterBalancer(WeightedRoundRobin, WRRBalancer)
 }
 
+// RandomBalancer is adopted as the default load balancer
 var DefaultBalancer = newRandomBalancer()
+// A unique RoundRobinBalancer instance is used globally
 var RRBalancer = newRoundRobinBalancer()
+// A unique WeightedRoundRobinBalancer instance is used globally
 var WRRBalancer = newWeightedRoundRobinBalancer()
 
+// RegisterBalancer supports business custom registered Balancer
 func RegisterBalancer(name string, balancer Balancer) {
 	if balancerMap == nil {
 		balancerMap = make(map[string]Balancer)
@@ -37,6 +42,7 @@ func RegisterBalancer(name string, balancer Balancer) {
 	balancerMap[name] = balancer
 }
 
+// GetBalancer get a Balancer by a balancer name
 func GetBalancer(name string) Balancer {
 	if balancer, ok := balancerMap[name]; ok {
 		return balancer

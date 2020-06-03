@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// Pool provides a pooling capability for connections, enabling connection reuse
 type Pool interface {
 	Get(ctx context.Context, network string, address string) (net.Conn, error)
 }
@@ -29,6 +30,7 @@ func registorPool(poolName string, pool Pool) {
 	poolMap[poolName] = pool
 }
 
+// GetPool get a Pool by a pool name
 func GetPool(poolName string) Pool {
 	if v, ok := poolMap[poolName]; ok {
 		return v
@@ -40,7 +42,7 @@ func GetPool(poolName string) Pool {
 var DefaultPool = NewConnPool()
 
 func NewConnPool(opt ...Option) *pool {
-	// 默认值
+	// default options
 	opts := &Options {
 		maxCap: 1000,
 		idleTimeout: 1 * time.Minute,
