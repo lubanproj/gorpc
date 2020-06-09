@@ -1,4 +1,4 @@
-This Project is no longer maintained !!!
+THIS PROJECT IS NO LONGER MAINTAINED !!!
 
 ## gorpc
 A simple, easy to use, high performance, pluggable micro services framework
